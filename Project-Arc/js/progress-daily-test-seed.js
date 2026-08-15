@@ -9,7 +9,7 @@
  */
 
 (function initProgressDailyTestSeed() {
-  const MARKER = 'arc-progress-daily-test-seed-v2';
+  const MARKER = 'arc-progress-daily-test-seed-v3';
   const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   const CALORIE_RATIOS = [0.78, 0.91, 0.98, 1.02, 1.13, 0.86, 1.05, 0.94, 1.18, 0.82];
   const TIMELINE_RATIOS = [1, 0.9, 0.8, 0.7, 0.5, 0.3, 0, 0.85];
@@ -43,10 +43,9 @@
   }
 
   function splitCalories(total, dayIndex) {
-    const shares = [0.28, 0.31, 0.29];
-    const breakfast = Math.round(total * shares[0]);
-    const lunch = Math.round(total * shares[1]);
-    const dinner = Math.round(total * shares[2]);
+    const breakfast = Math.round(total * 0.28);
+    const lunch = Math.round(total * 0.31);
+    const dinner = Math.round(total * 0.29);
     const snack = Math.max(0, total - breakfast - lunch - dinner);
     const base = `test-${dayIndex}`;
     return [
@@ -100,13 +99,14 @@
         const ratio = TIMELINE_RATIOS[index % TIMELINE_RATIOS.length];
         const doneCount = Math.round(eventIds.length * ratio);
         const bucket = {};
-        eventIds.forEach((id, eventIndex) => {
-          bucket[id] = {
-            done: eventIndex < doneCount,
-            mode: 'test',
-            time: null,
-          };
+
+        // Store only actually completed events so Today renders partial days correctly.
+        eventIds.slice(0, doneCount).forEach(id => {
+          bucket[id] = { done: true, mode: 'on-time', time: null };
         });
+
+        // Preserve a distinguishable tracked 0% day without marking a real event done.
+        if (doneCount === 0) bucket.__testTracked = { done: false };
         appState.timelineStatus[key] = bucket;
       }
 
