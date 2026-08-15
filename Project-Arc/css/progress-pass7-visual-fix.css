@@ -92,6 +92,73 @@
 #view-progress .progress-seven-label.on small { color: var(--sage); }
 #view-progress .progress-seven-label.over small { color: var(--rust); }
 
+/* Calorie Adherence — weekday schedule ---------------------------------- */
+#view-progress .progress-adherence-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+#view-progress .progress-adherence-day {
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 13px;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 20px color-mix(in srgb, var(--paper) 40%, transparent);
+}
+
+#view-progress .progress-adherence-day span {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--ink);
+}
+
+#view-progress .progress-adherence-day.under {
+  background: color-mix(in srgb, var(--gold) 30%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--gold) 58%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--gold) 13%, transparent);
+}
+
+#view-progress .progress-adherence-day.on {
+  background: color-mix(in srgb, var(--sage) 32%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--sage) 60%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--sage) 14%, transparent);
+}
+
+#view-progress .progress-adherence-day.over {
+  background: color-mix(in srgb, var(--rust) 29%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--rust) 58%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--rust) 13%, transparent);
+}
+
+#view-progress .progress-adherence-day.no-data {
+  background: color-mix(in srgb, var(--muted) 12%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--muted) 24%, var(--glass-border));
+  box-shadow: none;
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+html[data-theme="dark"] #view-progress .progress-adherence-day.under {
+  background: color-mix(in srgb, var(--gold) 23%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-adherence-day.on {
+  background: color-mix(in srgb, var(--sage) 25%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-adherence-day.over {
+  background: color-mix(in srgb, var(--rust) 22%, var(--paper-2));
+}
+
 /* Daily Completion ------------------------------------------------------- */
 #view-progress .progress-completion-track.svg-meter {
   height: 8px;
@@ -129,5 +196,14 @@
 
   #view-progress .progress-seven-chart {
     overflow-x: auto;
+  }
+
+  #view-progress .progress-adherence-week {
+    min-width: 448px;
+  }
+
+  #view-progress #progressCalorieBreakdown {
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
 }
