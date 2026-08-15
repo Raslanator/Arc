@@ -1,4 +1,4 @@
-/* ========================================================================== 
+/* ==========================================================================
    UTILITIES
    Reusable single-purpose CSS classes extracted from inline styles.
    These replace static presentation rules that were previously written
@@ -10,7 +10,7 @@
    - Every class must work in both light and dark mode via CSS tokens.
    ========================================================================== */
 
-/* ========================================================================== 
+/* ==========================================================================
    TYPOGRAPHY UTILITIES
    ========================================================================== */
 
@@ -46,7 +46,7 @@
   letter-spacing: 1.2px;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    LAYOUT UTILITIES
    ========================================================================== */
 
@@ -74,7 +74,7 @@
   padding-top: 12px;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    CARD UTILITIES
    ========================================================================== */
 
@@ -88,7 +88,7 @@
   padding-right: 110px;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    BUTTON / ACTION UTILITIES
    ========================================================================== */
 
@@ -127,7 +127,7 @@
   margin-top: var(--sp-1);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    MODAL UTILITIES
    ========================================================================== */
 
@@ -141,7 +141,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    GYM UTILITIES
    ========================================================================== */
 
@@ -152,7 +152,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    GROCERY SECTION HEADER
    Replaces the inline-styled <div> used as a recipe section divider
    inside the grocery grid.
@@ -171,7 +171,7 @@
   border-bottom: 1px solid var(--terracotta-dim);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    PASS 1.5 — REFACTOR REGRESSION FIXES
    Keep these overrides narrowly scoped to the affected views. The existing
    markup still carries a few static inline margins, so !important is used only
@@ -212,14 +212,13 @@
   margin-top: var(--sp-8) !important;
 }
 
-/* ========================================================================== 
-   PASS 2 — TODAY VISUAL TRANSFORMATION
-   The Daily Arc remains the full-width signature hero. On desktop, the
-   schedule becomes the primary 65% column while the brief and prayer card
-   form a quieter 35% context rail. Below 1024px, Today returns to one column.
+/* ==========================================================================
+   PASS 2 — INTERACTION IMPROVEMENTS KEPT AFTER LAYOUT ROLLBACK
+   Today layout, Arc card presentation, and Prayer Times positioning remain
+   exactly on the original single-column structure.
    ========================================================================== */
 
-/* Header joins the light-follow system without changing its existing glass. */
+/* Header joins the existing light-follow system without changing its layout. */
 header.top {
   position: relative;
   isolation: isolate;
@@ -261,44 +260,7 @@ html[data-theme="dark"] header.top::before {
   mix-blend-mode: soft-light;
 }
 
-/* Daily Arc hero: larger breathing room, no conventional card border. */
-#view-today > .arc-card {
-  background: linear-gradient(135deg, var(--paper), rgba(255, 255, 255, 0.08));
-  border-color: transparent;
-  box-shadow: none;
-  padding: var(--sp-8) clamp(var(--sp-5), 4vw, var(--sp-9)) var(--sp-5);
-  margin-bottom: var(--sp-8);
-}
-
-html[data-theme="dark"] #view-today > .arc-card {
-  background: linear-gradient(135deg, var(--paper), rgba(255, 255, 255, 0.015));
-}
-
-#view-today > .arc-card:hover {
-  box-shadow: none;
-}
-
-#view-today .arc-card-head {
-  margin-bottom: var(--sp-4);
-}
-
-#view-today .arc-svg-wrap {
-  min-height: clamp(210px, 22vw, 270px);
-  display: flex;
-  align-items: center;
-}
-
-#view-today .arc-svg {
-  flex: 1 1 auto;
-}
-
-#view-today .arc-zoom-hint {
-  margin-top: var(--sp-4);
-  opacity: 0.82;
-}
-
-/* Keep the visible markers unchanged; the JS-enhanced transparent circles
-   provide the larger click/tap target. */
+/* Invisible hit area only: the visible Arc markers keep their old size/style. */
 #view-today .arc-hit-target {
   fill: transparent;
   stroke: none;
@@ -312,113 +274,7 @@ html[data-theme="dark"] #view-today > .arc-card {
   r: 16px;
 }
 
-/* Timeline becomes the visual anchor of the lower Today dashboard. */
-#view-today > .timeline-list {
-  min-width: 0;
-  align-self: start;
-}
-
-#view-today .tl-row {
-  padding-top: var(--sp-6);
-  padding-bottom: var(--sp-6);
-}
-
-#view-today .tl-row.next-event {
-  margin-top: var(--sp-3);
-  margin-bottom: var(--sp-3);
-}
-
-/* Desktop Today dashboard — ~65 / 35. */
-@media (min-width: 1024px) {
-  #view-today.active {
-    display: grid;
-    grid-template-columns: minmax(340px, 1.85fr) minmax(280px, 1fr);
-    column-gap: var(--sp-7);
-    align-items: start;
-  }
-
-  #view-today > .view-title {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-
-  #view-today > .view-desc {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  #view-today > .arc-card {
-    grid-column: 1 / -1;
-    grid-row: 3;
-  }
-
-  #view-today > .timeline-list {
-    grid-column: 1;
-    grid-row: 4 / span 2;
-    margin-bottom: 0;
-  }
-
-  #view-today > .prep-banner {
-    grid-column: 2;
-    grid-row: 4;
-    margin-bottom: var(--sp-6);
-  }
-
-  #view-today > .prayer-card {
-    grid-column: 2;
-    grid-row: 5;
-    margin-bottom: 0;
-  }
-}
-
-/* Tablet/mobile: preserve Arc-first hierarchy while returning to one column. */
-@media (max-width: 1023px) {
-  #view-today.active {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #view-today > .view-title   { order: 1; }
-  #view-today > .view-desc    { order: 2; }
-  #view-today > .arc-card     { order: 3; }
-  #view-today > .prep-banner  { order: 4; }
-  #view-today > .prayer-card  { order: 5; }
-  #view-today > .timeline-list { order: 6; }
-}
-
-@media (max-width: 768px) {
-  #view-today > .arc-card {
-    padding: var(--sp-6) var(--sp-4) var(--sp-4);
-    margin-bottom: var(--sp-7);
-  }
-
-  #view-today .arc-svg-wrap {
-    min-height: 190px;
-  }
-
-  #view-today .arc-card-head {
-    gap: var(--sp-2);
-  }
-}
-
-@media (max-width: 480px) {
-  #view-today > .arc-card {
-    padding-left: var(--sp-3);
-    padding-right: var(--sp-3);
-  }
-
-  #view-today .arc-svg-wrap {
-    min-height: 170px;
-  }
-
-  #view-today .arc-zoom-controls {
-    width: 100%;
-    margin-left: 0;
-    justify-content: flex-end;
-  }
-}
-
-/* ========================================================================== 
+/* ==========================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
    Used when a list or grid has no content to display.
@@ -469,57 +325,3 @@ html[data-theme="dark"] #view-today > .arc-card {
 }
 
 /* Dark mode: empty state icon background inherits from --paper-2 token */
-
-/* ========================================================================== 
-   PASS 2 — STABLE DASHBOARD SHELL
-   main.js groups the existing timeline/brief/prayer nodes into this shell.
-   These late overrides intentionally supersede the earlier direct-child grid
-   experiment so tall timelines can never stretch the context rail tracks.
-   ========================================================================== */
-
-#view-today.active {
-  display: block;
-}
-
-#view-today .today-dashboard,
-#view-today .today-primary,
-#view-today .today-context {
-  min-width: 0;
-}
-
-#view-today .today-primary > .timeline-list {
-  margin-bottom: 0;
-}
-
-#view-today .today-context > .prep-banner {
-  margin-bottom: var(--sp-6);
-}
-
-#view-today .today-context > .prayer-card {
-  margin-bottom: 0;
-}
-
-@media (min-width: 1024px) {
-  #view-today .today-dashboard {
-    display: grid;
-    grid-template-columns: minmax(340px, 1.85fr) minmax(280px, 1fr);
-    gap: var(--sp-7);
-    align-items: start;
-  }
-}
-
-@media (max-width: 1023px) {
-  #view-today .today-dashboard {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #view-today .today-context {
-    order: 1;
-    margin-bottom: var(--sp-7);
-  }
-
-  #view-today .today-primary {
-    order: 2;
-  }
-}
