@@ -50,6 +50,14 @@
     if (summaryCards[0]) summaryCards[0].classList.add('cal-card-today');
     if (summaryCards[1]) summaryCards[1].classList.add('cal-card-week');
 
+    const customForm = document.getElementById('customAddForm');
+    if (customForm) {
+      // The stepper intentionally moves by 50 kcal, but typed values may be
+      // any positive integer. main.js already validates label + kcal on submit,
+      // so disable the browser's native step-mismatch popup for this form.
+      customForm.noValidate = true;
+    }
+
     const kcalInput = document.getElementById('customKcal');
     if (kcalInput) {
       kcalInput.min = '0';
