@@ -281,6 +281,87 @@ html[data-theme="dark"] header.top::before {
 }
 
 /* ==========================================================================
+   SALAH ↔ EVENT INTERACTION PARITY
+   Salah keeps its own plum identity and diamond marker at rest, but shared
+   event states must win when active: hover, NEXT, pop-from-Arc, and Done.
+   These rules load after views.css so the older prayer-specific base styling
+   cannot suppress shared Timeline/Arc interactions.
+   ========================================================================== */
+
+/* Event dots grow on hover; give Salah diamonds the same interaction while
+   preserving the diamond shape and plum color. */
+#view-today .arc-prayer-dot rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: 1;
+  transition:
+    scale 0.15s ease,
+    opacity 0.15s ease;
+}
+
+#view-today .arc-prayer-dot:hover rect {
+  opacity: 1;
+  scale: 1.4;
+}
+
+/* NEXT must use the exact shared event emphasis instead of the resting
+   purple Salah-row background overriding it. */
+#view-today .tl-row.prayer-tl-row.next-event {
+  padding: 26px 22px;
+  border-radius: var(--radius);
+  margin: 12px 0;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--terracotta-dim), var(--plum-dim));
+  box-shadow: var(--shadow-md);
+}
+
+#view-today .tl-row.prayer-tl-row.next-event .tl-time {
+  color: var(--terracotta);
+  font-size: var(--fs-md);
+}
+
+#view-today .tl-row.prayer-tl-row.next-event .tl-title {
+  color: var(--terracotta);
+  font-size: 26px;
+}
+
+/* Clicking a Salah dot now produces the same row pop treatment as clicking a
+   normal event dot; the resting Salah background no longer masks it. */
+#view-today .tl-row.prayer-tl-row.pop-lit {
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  border-color: transparent;
+  background: var(--terracotta-dim);
+  box-shadow: none;
+}
+
+#view-today .tl-row.prayer-tl-row.pop-lit .tl-time {
+  color: var(--terracotta);
+}
+
+/* Done is a shared Timeline state. Make Salah use the same base treatment;
+   the Salah tag remains as the only semantic visual identifier. */
+#view-today .tl-row.prayer-tl-row.done:not(.next-event):not(.pop-lit) {
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  background: var(--sage-dim);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+#view-today .tl-row.prayer-tl-row.done:not(.next-event):not(.pop-lit) .tl-title {
+  color: var(--sage);
+}
+
+#view-today .tl-row.prayer-tl-row.done:not(.next-event):not(.pop-lit) .tl-time {
+  color: var(--terracotta);
+}
+
+/* ==========================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
    Used when a list or grid has no content to display.
