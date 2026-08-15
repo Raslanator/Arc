@@ -118,13 +118,14 @@
   /* ================================================================
      TODAY — DAILY BRIEF CAROUSEL
      The source render still provides the contextual meal/workout/calorie
-     items. This presentation layer keeps one visible at a time, adds manual
-     navigation, preserves auto-rotation, and fits the active text to the
-     available stage. The day label is permanent and never rotates.
+     items. The day label stays in a separate left box, while the information
+     box rotates automatically and can be navigated from translucent edge
+     controls. Active content uses the largest font that fits the stage.
      ================================================================ */
 
   let todayBriefIndex = 0;
   let todayBriefTimer = null;
+  let todayBriefTransitionToken = 0;
 
   function prepareTodayBriefPanel(brief) {
     let stage = brief.querySelector('.daily-brief-stage');
@@ -140,11 +141,20 @@
     const shell = document.createElement('div');
     shell.className = 'daily-brief-shell';
 
+    const dayLabel = document.createElement('div');
+    dayLabel.className = 'daily-brief-day';
+    const dayStrong = document.createElement('strong');
+    dayStrong.textContent = `Today / ${plan.dayName}`;
+    dayLabel.appendChild(dayStrong);
+
+    const content = document.createElement('div');
+    content.className = 'daily-brief-content';
+
     const prevBtn = document.createElement('button');
     prevBtn.type = 'button';
     prevBtn.className = 'daily-brief-arrow daily-brief-prev';
     prevBtn.setAttribute('aria-label', 'Previous daily brief');
-    prevBtn.textContent = '←';
+    prevBtn.textContent = '<';
 
     stage = document.createElement('div');
     stage.className = 'daily-brief-stage';
@@ -159,15 +169,10 @@
     nextBtn.type = 'button';
     nextBtn.className = 'daily-brief-arrow daily-brief-next';
     nextBtn.setAttribute('aria-label', 'Next daily brief');
-    nextBtn.textContent = '→';
+    nextBtn.textContent = '>';
 
-    const dayLabel = document.createElement('div');
-    dayLabel.className = 'daily-brief-day';
-    const dayStrong = document.createElement('strong');
-    dayStrong.textContent = `Today / ${plan.dayName}`;
-    dayLabel.appendChild(dayStrong);
-
-    shell.append(prevBtn, stage, nextBtn, dayLabel);
+    content.append(stage, prevBtn, nextBtn);
+    shell.append(dayLabel, content);
     brief.replaceChildren(shell);
 
     const hasMultiple = items.length > 1;
@@ -186,10 +191,18 @@
     return stage;
   }
 
-  function fitTodayBriefText(brief) {
+  function fitTodayBriefText(brief, targetItem) {
     const stage = brief.querySelector('.daily-brief-stage');
-    const item = stage && stage.querySelector('.daily-brief-item:not([hidden])');
+    const item = targetItem || (stage && stage.querySelector('.daily-brief-item:not([hidden])'));
     if (!stage || !item || !stage.clientWidth || !stage.clientHeight) return;
+
+    const style = getComputedStyle(stage);
+    const availableHeight = stage.clientHeight
+      - parseFloat(style.paddingTop || 0)
+      - parseFloat(style.paddingBottom || 0);
+    const availableWidth = stage.clientWidth
+      - parseFloat(style.paddingLeft || 0)
+      - parseFloat(style.paddingRight || 0);
 
     const minSize = 14;
     const maxSize = 30;
@@ -199,15 +212,12 @@
 
     item.style.fontSize = minSize + 'px';
 
-    // Binary-search the largest font that fits both the stage width and height.
-    // This lets short brief items become visually dominant while longer meal
-    // descriptions shrink just enough to stay fully inside the same panel.
     for (let i = 0; i < 7; i++) {
       const mid = (low + high) / 2;
       item.style.fontSize = mid + 'px';
       const fits =
-        item.scrollWidth <= stage.clientWidth + 1 &&
-        item.scrollHeight <= stage.clientHeight + 1;
+        item.scrollWidth <= availableWidth + 1 &&
+        item.scrollHeight <= availableHeight + 1;
 
       if (fits) {
         best = mid;
@@ -220,6 +230,14 @@
     item.style.fontSize = best.toFixed(1) + 'px';
   }
 
+  function settleTodayBriefItems(items, activeIndex) {
+    items.forEach((item, i) => {
+      item.getAnimations().forEach(animation => animation.cancel());
+      item.hidden = i !== activeIndex;
+      item.setAttribute('aria-hidden', i === activeIndex ? 'false' : 'true');
+    });
+  }
+
   function showTodayBriefItem(advance, direction = 1) {
     const brief = document.getElementById('todaySummary');
     if (!brief) return;
@@ -230,18 +248,59 @@
     const items = Array.from(stage.querySelectorAll('.daily-brief-item'));
     if (!items.length) return;
 
-    if (advance && items.length > 1) {
-      todayBriefIndex = (todayBriefIndex + direction + items.length) % items.length;
-    } else if (todayBriefIndex >= items.length) {
-      todayBriefIndex = 0;
+    if (todayBriefIndex >= items.length) todayBriefIndex = 0;
+
+    if (!advance || items.length === 1) {
+      settleTodayBriefItems(items, todayBriefIndex);
+      requestAnimationFrame(() => fitTodayBriefText(brief, items[todayBriefIndex]));
+      return;
     }
 
-    items.forEach((item, i) => {
-      item.hidden = i !== todayBriefIndex;
-      item.setAttribute('aria-hidden', i === todayBriefIndex ? 'false' : 'true');
-    });
+    // Snap any interrupted transition to the currently selected item before
+    // starting a new one, keeping rapid manual clicks predictable.
+    settleTodayBriefItems(items, todayBriefIndex);
 
-    requestAnimationFrame(() => fitTodayBriefText(brief));
+    const currentIndex = todayBriefIndex;
+    const nextIndex = (currentIndex + direction + items.length) % items.length;
+    const current = items[currentIndex];
+    const next = items[nextIndex];
+
+    next.hidden = false;
+    next.setAttribute('aria-hidden', 'false');
+    current.setAttribute('aria-hidden', 'true');
+    fitTodayBriefText(brief, next);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    todayBriefIndex = nextIndex;
+
+    if (reduceMotion || typeof next.animate !== 'function') {
+      settleTodayBriefItems(items, todayBriefIndex);
+      return;
+    }
+
+    const travel = direction > 0 ? 28 : -28;
+    const timing = {
+      duration: 360,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'forwards',
+    };
+    const token = ++todayBriefTransitionToken;
+
+    const outgoing = current.animate([
+      { opacity: 1, transform: 'translateX(0)' },
+      { opacity: 0, transform: `translateX(${-travel}px)` },
+    ], timing);
+
+    const incoming = next.animate([
+      { opacity: 0, transform: `translateX(${travel}px)` },
+      { opacity: 1, transform: 'translateX(0)' },
+    ], timing);
+
+    Promise.allSettled([outgoing.finished, incoming.finished]).then(() => {
+      if (token !== todayBriefTransitionToken) return;
+      settleTodayBriefItems(items, todayBriefIndex);
+      requestAnimationFrame(() => fitTodayBriefText(brief, items[todayBriefIndex]));
+    });
   }
 
   function restartTodayBriefRotation() {
