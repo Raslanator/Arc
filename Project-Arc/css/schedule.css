@@ -127,6 +127,73 @@
   transform: none;
 }
 
+/* ========================================================================== 
+   PASS 2B — CONTEXTUAL DAILY BRIEF
+   The richer brief has five stable cards. Keep the indicator as the same
+   subtle in-box dash language, simply expanded from three positions to five.
+   ========================================================================== */
+
+#view-today .daily-brief-item .brief-time-accent {
+  color: inherit;
+  font-weight: 700;
+}
+
+#view-today .daily-brief-content::after {
+  width: 69px;
+  height: 2px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(1)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(var(--terracotta), var(--terracotta)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(2)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(3)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(4)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(5)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 60px 0 / 9px 2px no-repeat;
+}
+
 @media (max-width: 768px) {
   #view-today .schedule-toolbar {
     align-items: flex-start;
@@ -163,5 +230,11 @@
 
   #view-today .schedule-reset-btn {
     padding-inline: 5px;
+  }
+
+  #view-today .daily-brief-content::after {
+    width: 61px;
+    background-size: 8px 2px, 8px 2px, 8px 2px, 8px 2px, 8px 2px;
+    background-position: 0 0, 13px 0, 26px 0, 39px 0, 52px 0;
   }
 }
