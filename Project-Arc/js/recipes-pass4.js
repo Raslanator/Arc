@@ -136,3 +136,29 @@
     if (event.key === 'Escape') closeRecipeMenus();
   });
 })();
+
+// Pass 9 media scaffold is loaded dynamically so the established index load
+// order stays unchanged. Daily Brief alternation loads immediately after it so
+// the old side-photo placeholder is converted into an in-stage transition.
+(function loadPass9MediaScaffold() {
+  function loadDailyBriefAlternation() {
+    if (document.querySelector('script[data-daily-brief-media-pass9]')) return;
+    const detailScript = document.createElement('script');
+    detailScript.src = 'js/daily-brief-media-pass9.js';
+    detailScript.dataset.dailyBriefMediaPass9 = 'true';
+    document.head.appendChild(detailScript);
+  }
+
+  const existing = document.querySelector('script[data-arc-media-pass9]');
+  if (existing) {
+    if (window.ArcMedia) loadDailyBriefAlternation();
+    else existing.addEventListener('load', loadDailyBriefAlternation, { once: true });
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'js/media-pass9.js';
+  script.dataset.arcMediaPass9 = 'true';
+  script.addEventListener('load', loadDailyBriefAlternation, { once: true });
+  document.head.appendChild(script);
+})();
