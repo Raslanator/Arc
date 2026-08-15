@@ -43,20 +43,6 @@
     return 'No data';
   }
 
-  function stackRecovery() {
-    const value = document.querySelector('#progressDailyGrid .progress-daily-metric.recovery .progress-daily-metric-value');
-    if (!value) return;
-    const text = value.textContent || '';
-    const parts = text.split('·').map(part => part.trim()).filter(Boolean);
-    if (parts.length !== 2) return;
-
-    value.replaceChildren(
-      document.createTextNode(parts[0]),
-      document.createElement('br'),
-      document.createTextNode(parts[1])
-    );
-  }
-
   function renderSevenDaySvg() {
     const chart = document.getElementById('progress7Chart');
     if (!chart || !window.ArcProgress || typeof window.ArcProgress.getCalorieWindow !== 'function') return;
@@ -130,7 +116,6 @@
   }
 
   function applyVisualFixes() {
-    stackRecovery();
     renderSevenDaySvg();
     renderCompletionMeters();
   }
