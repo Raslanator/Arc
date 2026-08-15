@@ -1,0 +1,150 @@
+/* ========================================================================== 
+   PASS 7 — LAST 7 DAYS CHART REFINEMENT
+   Clear semantic columns: below = gold, on-target = sage, above = rust.
+   ========================================================================== */
+
+#view-progress .progress-seven-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+#view-progress .progress-seven-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#view-progress .progress-seven-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--paper) 72%, transparent);
+}
+
+#view-progress .progress-seven-legend .under i { background: var(--gold); }
+#view-progress .progress-seven-legend .on i { background: var(--sage); }
+#view-progress .progress-seven-legend .over i { background: var(--rust); }
+
+#view-progress .progress-seven-plot.refined {
+  min-height: 250px;
+  padding-top: 4px;
+  gap: 10px;
+}
+
+#view-progress .progress-target-line.refined {
+  z-index: 4;
+  border-top: 2px dashed color-mix(in srgb, var(--ink) 38%, transparent);
+}
+
+#view-progress .progress-target-line.refined em {
+  position: absolute;
+  right: 2px;
+  top: -18px;
+  padding: 2px 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 8.5px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+#view-progress .progress-seven-day {
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  gap: 4px;
+}
+
+#view-progress .progress-seven-bar-zone.refined {
+  min-height: 182px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--paper-2) 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 88%, transparent);
+}
+
+#view-progress .progress-seven-bar.refined {
+  left: 8px;
+  right: 8px;
+  opacity: 1;
+  border-radius: 8px 8px 6px 6px;
+  box-shadow: 0 8px 18px color-mix(in srgb, currentColor 14%, transparent);
+  transition: height 180ms ease, filter 140ms ease;
+}
+
+#view-progress .progress-seven-day.under .progress-seven-bar.refined {
+  background: var(--gold);
+  color: var(--gold);
+}
+
+#view-progress .progress-seven-day.on .progress-seven-bar.refined {
+  background: var(--sage);
+  color: var(--sage);
+}
+
+#view-progress .progress-seven-day.over .progress-seven-bar.refined {
+  background: var(--rust);
+  color: var(--rust);
+}
+
+#view-progress .progress-seven-day.no-data .progress-seven-bar-zone.refined {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+#view-progress .progress-seven-day strong {
+  margin-top: 3px;
+  font-size: 11.5px;
+}
+
+#view-progress .progress-seven-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px !important;
+  font-weight: 700;
+  color: var(--ink) !important;
+}
+
+#view-progress .progress-seven-delta {
+  min-height: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8.8px !important;
+  font-weight: 700;
+  color: var(--muted) !important;
+}
+
+#view-progress .progress-seven-day.under .progress-seven-delta { color: var(--gold) !important; }
+#view-progress .progress-seven-day.on .progress-seven-delta { color: var(--sage) !important; }
+#view-progress .progress-seven-day.over .progress-seven-delta { color: var(--rust) !important; }
+
+#view-progress #progress7Meta {
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+@media (hover: hover) {
+  #view-progress .progress-seven-day:hover .progress-seven-bar.refined {
+    filter: saturate(1.08) brightness(1.03);
+  }
+}
+
+@media (max-width: 760px) {
+  #view-progress .progress-seven-plot.refined {
+    grid-template-columns: repeat(7, minmax(64px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-progress .progress-seven-bar.refined {
+    transition: none;
+  }
+}
