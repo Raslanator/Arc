@@ -469,3 +469,57 @@ html[data-theme="dark"] #view-today > .arc-card {
 }
 
 /* Dark mode: empty state icon background inherits from --paper-2 token */
+
+/* ========================================================================== 
+   PASS 2 — STABLE DASHBOARD SHELL
+   main.js groups the existing timeline/brief/prayer nodes into this shell.
+   These late overrides intentionally supersede the earlier direct-child grid
+   experiment so tall timelines can never stretch the context rail tracks.
+   ========================================================================== */
+
+#view-today.active {
+  display: block;
+}
+
+#view-today .today-dashboard,
+#view-today .today-primary,
+#view-today .today-context {
+  min-width: 0;
+}
+
+#view-today .today-primary > .timeline-list {
+  margin-bottom: 0;
+}
+
+#view-today .today-context > .prep-banner {
+  margin-bottom: var(--sp-6);
+}
+
+#view-today .today-context > .prayer-card {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  #view-today .today-dashboard {
+    display: grid;
+    grid-template-columns: minmax(340px, 1.85fr) minmax(280px, 1fr);
+    gap: var(--sp-7);
+    align-items: start;
+  }
+}
+
+@media (max-width: 1023px) {
+  #view-today .today-dashboard {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #view-today .today-context {
+    order: 1;
+    margin-bottom: var(--sp-7);
+  }
+
+  #view-today .today-primary {
+    order: 2;
+  }
+}
