@@ -136,3 +136,15 @@
     if (event.key === 'Escape') closeRecipeMenus();
   });
 })();
+
+// Pass 9 media scaffold is loaded dynamically so the established index load
+// order stays unchanged. The module waits until DOMContentLoaded, then wraps
+// the final Recipe / Meal Plan / Grocery / Gym renderers and decorates the
+// already-rendered DOM once.
+(function loadPass9MediaScaffold() {
+  if (document.querySelector('script[data-arc-media-pass9]')) return;
+  const script = document.createElement('script');
+  script.src = 'js/media-pass9.js';
+  script.dataset.arcMediaPass9 = 'true';
+  document.head.appendChild(script);
+})();
