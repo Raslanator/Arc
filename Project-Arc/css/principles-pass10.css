@@ -1,0 +1,367 @@
+/* ========================================================================== 
+   PASS 10 — PRINCIPLE IMPLEMENTATION
+   Applies the agreed Arc design system without changing application behavior.
+
+   Core rules implemented here:
+   - Arc = primary visual identity / Today hero
+   - Three-stage funnel: ATTRACT (Arc) -> INTRIGUE (Next) -> DELIVER (details)
+   - Deliberate 65/35 asymmetry on Today at desktop
+   - Terracotta is the only always-on accent
+   - Display typography is reserved for key data
+   - Same-level components follow one grid / spacing rhythm
+   - Progressive disclosure instead of badge / control overload
+   - Calm structured empty states
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   GLOBAL HIERARCHY / GRID LOCK
+   -------------------------------------------------------------------------- */
+
+header.top {
+  margin-bottom: var(--sp-6);
+}
+
+nav.tabs {
+  margin-bottom: var(--sp-9);
+}
+
+h2.view-title {
+  margin-top: var(--sp-3);
+}
+
+/* Terracotta is the stable identity color. Plum is reserved for prayer data. */
+.brand .clock {
+  background: none;
+  color: var(--terracotta);
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Consistent visual-level padding. */
+.cal-summary > .cal-card,
+.goals-grid > .goal-card,
+.progress-chart-grid > .progress-panel,
+.progress-detail-grid > .progress-panel {
+  padding: var(--sp-6);
+}
+
+/* --------------------------------------------------------------------------
+   TODAY — THREE-STAGE VISUAL FUNNEL
+   -------------------------------------------------------------------------- */
+
+#view-today .pass10-today-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 65fr) minmax(320px, 35fr);
+  gap: var(--sp-7);
+  align-items: start;
+}
+
+#view-today .pass10-today-primary {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+#view-today .pass10-today-secondary {
+  min-width: 0;
+}
+
+#view-today #todaySummary {
+  margin-bottom: var(--sp-7);
+}
+
+/* ATTRACT — let the Arc read as the content hero, not another glass card. */
+@media (min-width: 1024px) {
+  #view-today .arc-card {
+    padding: var(--sp-9) var(--sp-6) var(--sp-7);
+    margin-bottom: 0;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  #view-today .arc-card::before {
+    content: none;
+  }
+
+  #view-today .arc-card:hover {
+    box-shadow: none;
+  }
+
+  #view-today .prayer-card {
+    margin-bottom: 0;
+  }
+
+  #view-today .timeline-list {
+    margin: 0;
+  }
+}
+
+/* First-render emphasis only; interaction motion remains unchanged. */
+#view-today .arc-card.pass10-arc-enter .arc-svg {
+  animation: pass10ArcReveal var(--dur-slow) var(--ease) both;
+}
+
+@keyframes pass10ArcReveal {
+  from { opacity: 0; transform: translateY(var(--sp-3)) scale(0.992); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* INTRIGUE — the NEXT row is the bridge from visual to action. */
+#view-today .tl-row {
+  padding-top: 26px;
+  padding-bottom: 26px;
+}
+
+#view-today .tl-row.next-event {
+  padding-top: var(--sp-7);
+  padding-bottom: var(--sp-7);
+}
+
+#view-today .tl-row.next-event .tl-title {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+}
+
+#view-today .tl-row.next-event .tl-time {
+  font-size: var(--fs-md);
+  font-weight: 800;
+}
+
+/* DELIVER — supporting information remains calm and subordinate. */
+#view-today .prayer-card-title {
+  color: var(--plum);
+}
+
+#view-today .prep-item b,
+#view-today .schedule-toolbar-title {
+  color: var(--terracotta);
+}
+
+/* --------------------------------------------------------------------------
+   CALORIES — DISPLAY-SCALE DATA, NOT DECORATION
+   -------------------------------------------------------------------------- */
+
+#view-calories .cal-card-today {
+  background: var(--paper);
+}
+
+#view-calories .cal-card-today::after {
+  content: none;
+}
+
+#view-calories .cal-card-today h5 {
+  color: var(--terracotta);
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  font-size: var(--fs-xs);
+}
+
+#view-calories #todayConsumed {
+  font-size: var(--fs-display);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  color: var(--ink);
+}
+
+#view-calories #weekConsumed {
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+#view-calories .cal-card-week {
+  background: var(--paper);
+}
+
+/* --------------------------------------------------------------------------
+   RECIPES — CURATED LIBRARY / PROGRESSIVE DISCLOSURE
+   -------------------------------------------------------------------------- */
+
+#view-recipes #recipeGrid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-5);
+}
+
+#view-recipes .recipe-card-pass4 {
+  padding: var(--sp-5);
+}
+
+#view-recipes .recipe-card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+#view-recipes .recipe-card-badges {
+  gap: var(--sp-2);
+}
+
+#view-recipes .pass10-recipe-secondary-meta {
+  margin-top: var(--sp-3);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(-4px);
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    opacity var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    max-height var(--dur) var(--ease);
+}
+
+#view-recipes .recipe-card-pass4:hover .pass10-recipe-secondary-meta,
+#view-recipes .recipe-card-pass4:focus-within .pass10-recipe-secondary-meta,
+#view-recipes .recipe-card-pass4:focus .pass10-recipe-secondary-meta {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 48px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #view-recipes .recipe-card-menu {
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  #view-recipes .recipe-card-pass4:hover .recipe-card-menu,
+  #view-recipes .recipe-card-pass4:focus-within .recipe-card-menu,
+  #view-recipes .recipe-card-pass4:focus .recipe-card-menu {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   GROCERY / GYM / SETTINGS — QUIET GROUPING
+   -------------------------------------------------------------------------- */
+
+#view-grocery .grocery-section-header {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--terracotta);
+  margin: var(--sp-6) 0 var(--sp-2);
+}
+
+#view-gym .pass6-exercise-row,
+#view-gym .exercise-row {
+  padding-top: 18px;
+  padding-bottom: 18px;
+  border-color: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+#view-goals .pass6-danger-section {
+  background: color-mix(in srgb, var(--paper) 88%, var(--rust-dim));
+}
+
+/* --------------------------------------------------------------------------
+   STRUCTURED EMPTY STATES
+   -------------------------------------------------------------------------- */
+
+.pass10-empty-state {
+  width: 100%;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-7) var(--sp-6);
+  color: var(--muted);
+  text-align: center;
+}
+
+.pass10-empty-state svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.72;
+}
+
+.pass10-empty-state p {
+  margin: 0;
+  max-width: 42ch;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+
+#recipeGrid > .pass10-empty-state,
+#groceryGrid > .pass10-empty-state {
+  grid-column: 1 / -1;
+}
+
+/* --------------------------------------------------------------------------
+   LEGACY INLINE-STYLE REPLACEMENT CLASSES
+   Runtime normalizer assigns these classes to static legacy markup.
+   -------------------------------------------------------------------------- */
+
+.pass10-toolbar-compact { margin-bottom: 10px; }
+.pass10-toolbar-tight { margin-bottom: 6px; }
+.pass10-heading-reset { margin: 0; }
+.pass10-section-kicker {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  font-size: var(--fs-xs);
+  color: var(--terracotta);
+  margin: var(--sp-1) 0 10px;
+}
+.pass10-section-gap { margin-top: 22px; }
+.pass10-breakfast-base { margin-top: 22px; background: var(--surface-2); }
+.pass10-breakfast-title { color: var(--amber); }
+.pass10-breakfast-note { font-size: var(--fs-xs); margin-top: var(--sp-2); color: var(--muted); }
+.pass10-desc-tight { margin-bottom: 0; }
+.pass10-grid-spaced { margin-top: 18px; }
+.pass10-grocery-progress { font-size: 12.5px; color: var(--muted); }
+.pass10-relative { position: relative; }
+.pass10-actions-start { justify-content: flex-start; }
+.pass10-actions-start-gap { justify-content: flex-start; margin-top: var(--sp-3); }
+.pass10-appearance-copy { margin-bottom: var(--sp-3); }
+.pass10-danger-section { margin-top: 22px; border-color: var(--rust); }
+.pass10-danger-title { color: var(--rust); }
+.pass10-danger-button { color: var(--rust); border-color: var(--rust); }
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE — preserve current mobile work; only collapse the desktop funnel.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  #view-today .pass10-today-grid {
+    display: block;
+  }
+
+  #view-today .pass10-today-primary {
+    display: contents;
+  }
+
+  #view-today .arc-card,
+  #view-today .prayer-card {
+    margin-bottom: var(--sp-6);
+  }
+
+  #view-today .pass10-today-secondary {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-today .arc-card.pass10-arc-enter .arc-svg {
+    animation: none;
+  }
+}
