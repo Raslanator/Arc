@@ -1,0 +1,269 @@
+/* ========================================================================== 
+   PASS 7 — VALUE-ACCURATE PROGRESS VISUALS
+   Variable-height 7-day calorie columns, integrated Weekly Consistency,
+   and CSP-safe completion meters.
+   ========================================================================== */
+
+/* Daily History height lock ---------------------------------------------- */
+#view-progress .progress-daily-date-block:has(.progress-daily-today-marker[hidden])::after {
+  content: '';
+  display: block;
+  height: calc(var(--fs-xs) * 1.45);
+  margin-top: 6px;
+}
+
+/* Last 7 Days ------------------------------------------------------------- */
+#view-progress .progress-seven-svg-wrap {
+  min-height: 230px;
+}
+
+#view-progress .progress-seven-svg {
+  display: block;
+  width: 100%;
+  height: 184px;
+  overflow: visible;
+}
+
+#view-progress .progress-seven-svg-target {
+  stroke: color-mix(in srgb, var(--ink) 48%, transparent);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 6;
+  vector-effect: non-scaling-stroke;
+}
+
+#view-progress .progress-seven-svg-bar {
+  stroke-width: 1.35;
+  vector-effect: non-scaling-stroke;
+}
+
+#view-progress .progress-seven-svg-bar.under {
+  fill: color-mix(in srgb, var(--gold) 48%, transparent);
+  stroke: var(--gold);
+}
+
+#view-progress .progress-seven-svg-bar.on {
+  fill: color-mix(in srgb, var(--sage) 50%, transparent);
+  stroke: var(--sage);
+}
+
+#view-progress .progress-seven-svg-bar.over {
+  fill: color-mix(in srgb, var(--rust) 46%, transparent);
+  stroke: var(--rust);
+}
+
+#view-progress .progress-seven-svg-bar.no-data {
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--muted) 40%, transparent);
+  stroke-dasharray: 5 5;
+}
+
+#view-progress .progress-seven-label-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+  text-align: center;
+}
+
+#view-progress .progress-seven-label {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+#view-progress .progress-seven-label strong {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+#view-progress .progress-seven-label > span {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+#view-progress .progress-seven-label small {
+  min-height: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8.8px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.25px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#view-progress .progress-seven-label.under small { color: var(--gold); }
+#view-progress .progress-seven-label.on small { color: var(--sage); }
+#view-progress .progress-seven-label.over small { color: var(--rust); }
+
+/* Weekly Consistency ------------------------------------------------------ */
+#view-progress .progress-consistency-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+#view-progress .progress-consistency-day {
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 13px;
+  background: var(--paper-2);
+}
+
+#view-progress .progress-consistency-day span {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--ink);
+}
+
+#view-progress .progress-consistency-day.strong {
+  background: color-mix(in srgb, var(--sage) 32%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--sage) 60%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--sage) 14%, transparent);
+}
+
+#view-progress .progress-consistency-day.mixed {
+  background: color-mix(in srgb, var(--gold) 30%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--gold) 58%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--gold) 13%, transparent);
+}
+
+#view-progress .progress-consistency-day.low {
+  background: color-mix(in srgb, var(--rust) 29%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--rust) 58%, var(--glass-border));
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--rust) 13%, transparent);
+}
+
+#view-progress .progress-consistency-day.no-data {
+  background: color-mix(in srgb, var(--muted) 12%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--muted) 24%, var(--glass-border));
+  box-shadow: none;
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+#view-progress .progress-consistency-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 13px;
+  color: var(--muted);
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+#view-progress .progress-consistency-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#view-progress .progress-consistency-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+#view-progress .progress-consistency-legend .strong i { background: var(--sage); }
+#view-progress .progress-consistency-legend .mixed i { background: var(--gold); }
+#view-progress .progress-consistency-legend .low i { background: var(--rust); }
+#view-progress .progress-consistency-legend .no-data i { opacity: 0.45; }
+
+#view-progress .progress-consistency-interpretation {
+  margin: 15px 0 0;
+  padding: 13px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--paper-2);
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+#view-progress .progress-consistency-interpretation strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+html[data-theme="dark"] #view-progress .progress-consistency-day.strong {
+  background: color-mix(in srgb, var(--sage) 25%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-consistency-day.mixed {
+  background: color-mix(in srgb, var(--gold) 23%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-consistency-day.low {
+  background: color-mix(in srgb, var(--rust) 22%, var(--paper-2));
+}
+
+/* Daily Completion ------------------------------------------------------- */
+#view-progress .progress-completion-track.svg-meter {
+  height: 8px;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+#view-progress .progress-completion-svg {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: visible;
+}
+
+#view-progress .progress-completion-svg-track {
+  fill: var(--paper-2);
+  stroke: var(--glass-border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+#view-progress .progress-completion-svg-fill.timeline {
+  fill: var(--terracotta);
+}
+
+#view-progress .progress-completion-svg-fill.salah {
+  fill: var(--plum);
+}
+
+@media (max-width: 760px) {
+  #view-progress .progress-seven-svg-wrap,
+  #view-progress .progress-consistency-week {
+    min-width: 448px;
+  }
+
+  #view-progress .progress-seven-chart,
+  #view-progress #progressCalorieBreakdown {
+    overflow-x: auto;
+  }
+
+  #view-progress #progressCalorieBreakdown {
+    padding-bottom: 2px;
+  }
+
+  #view-progress .progress-consistency-interpretation,
+  #view-progress .progress-consistency-legend {
+    min-width: 448px;
+  }
+}
