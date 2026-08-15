@@ -8,6 +8,77 @@
 
 (function init() {
 
+  /* ================================================================
+     PASS 2 — TODAY INTERACTION LAYER
+     Keeps visual-only Arc improvements out of the underlying data model.
+     ================================================================ */
+
+  // Keep the arc's path visually present while zooming/panning. The original
+  // clamp still handles hard SVG bounds; this tighter vertical band prevents
+  // zooming around a pointer from pushing the flattened arc out of view.
+  const baseClampArcPan = clampArcPan;
+  clampArcPan = function pass2ClampArcPan() {
+    baseClampArcPan();
+    if (arcZoom <= 1.001) return;
+
+    const viewH = ARC_H / arcZoom;
+    const curveFactor = computeCurveFactor(arcZoom);
+    const arcTop = ARC_BOTTOM - (ARC_BOTTOM - ARC_TOP) * curveFactor;
+    const arcCenter = (arcTop + ARC_BOTTOM) / 2;
+
+    // Keep the path center inside the middle 44% of the viewport while still
+    // allowing a useful amount of intentional vertical panning for labels.
+    const minPanY = Math.max(0, arcCenter - viewH * 0.72);
+    const maxPanY = Math.min(ARC_H - viewH, arcCenter - viewH * 0.28);
+    arcPanY = Math.max(minPanY, Math.min(maxPanY, arcPanY));
+  };
+
+  // Add invisible 32px SVG hit targets after the visible markers. Because the
+  // original visible elements remain first in each group, updateArcShape()
+  // continues to manipulate the same visible dot/diamond as before.
+  const baseUpdateArcShape = updateArcShape;
+  updateArcShape = function pass2UpdateArcShape(scale) {
+    baseUpdateArcShape(scale);
+
+    const svg = document.getElementById('arcSvg');
+    if (!svg) return;
+
+    svg.querySelectorAll('.arc-scale-dot').forEach(group => {
+      let hit = group.querySelector('.arc-hit-target');
+      if (!hit) {
+        hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('class', 'arc-hit-target');
+        hit.setAttribute('r', '16');
+        hit.setAttribute('aria-hidden', 'true');
+        group.appendChild(hit);
+      }
+      hit.setAttribute('cx', group.dataset.cx || '0');
+      hit.setAttribute('cy', group.dataset.cy || '0');
+    });
+  };
+
+  // Extend the existing light-follow language to the top clock/header panel.
+  const topHeader = document.querySelector('header.top');
+  if (topHeader) {
+    let headerSpotlightRAF = null;
+    let headerPointerEvent = null;
+
+    topHeader.addEventListener('pointermove', e => {
+      headerPointerEvent = e;
+      if (headerSpotlightRAF !== null) return;
+      headerSpotlightRAF = requestAnimationFrame(() => {
+        headerSpotlightRAF = null;
+        if (!headerPointerEvent) return;
+        const rect = topHeader.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = ((headerPointerEvent.clientX - rect.left) / rect.width * 100).toFixed(2);
+        const y = ((headerPointerEvent.clientY - rect.top) / rect.height * 100).toFixed(2);
+        topHeader.style.setProperty('--mx', x + '%');
+        topHeader.style.setProperty('--my', y + '%');
+      });
+    }, { passive: true });
+  }
+
   /* ---- Bootstrap ---- */
   loadState();
   render();
