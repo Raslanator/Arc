@@ -1,0 +1,130 @@
+/* ========================================================================== 
+   PASS 9 — RECIPE PHOTOGRAPHY
+   Neutral, consistent recipe media treatment. The card stays clear glass;
+   imagery carries the visual weight while missing photos use a quiet fallback.
+   ========================================================================== */
+
+#view-recipes .recipe-card-pass4 {
+  min-height: 0;
+  padding: 14px 14px 20px;
+}
+
+#view-recipes .recipe-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--paper-2);
+}
+
+#view-recipes .recipe-card-media img,
+.recipe-modal-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#view-recipes .recipe-card-media img {
+  transition: transform 420ms var(--ease), filter 220ms ease;
+}
+
+#view-recipes .recipe-card-pass4:hover .recipe-card-media.has-image img {
+  transform: scale(1.025);
+}
+
+#view-recipes .recipe-card-media.is-placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--paper-2);
+}
+
+#view-recipes .recipe-card-media-placeholder {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.05px;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.72;
+}
+
+#view-recipes .recipe-card-title,
+#view-recipes .recipe-card-status,
+#view-recipes .recipe-card-badges {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+#view-recipes .recipe-card-title {
+  margin-bottom: 16px;
+}
+
+#view-recipes .recipe-card-menu {
+  top: 24px;
+  right: 24px;
+}
+
+#view-recipes .recipe-menu-toggle {
+  background: var(--glass-strong);
+  border-color: var(--glass-border);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  opacity: 0.9;
+}
+
+.recipe-modal-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 390px;
+  margin: 0 0 20px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: var(--paper-2);
+}
+
+.recipe-modal-media.is-placeholder {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  #view-recipes .recipe-card-pass4 {
+    padding: 11px 11px 18px;
+  }
+
+  #view-recipes .recipe-card-media {
+    margin-bottom: 15px;
+    border-radius: 12px;
+  }
+
+  #view-recipes .recipe-card-menu {
+    top: 19px;
+    right: 19px;
+  }
+
+  #view-recipes .recipe-card-title,
+  #view-recipes .recipe-card-status,
+  #view-recipes .recipe-card-badges {
+    margin-left: 6px;
+    margin-right: 6px;
+  }
+
+  .recipe-modal-media {
+    max-height: none;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-recipes .recipe-card-media img {
+    transition: none;
+  }
+
+  #view-recipes .recipe-card-pass4:hover .recipe-card-media.has-image img {
+    transform: none;
+  }
+}
