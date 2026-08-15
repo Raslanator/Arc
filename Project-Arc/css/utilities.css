@@ -32,6 +32,20 @@
   font-weight: 700;
 }
 
+/* Pass 1 typography normalization.
+   utilities.css loads after component/view styles, so these shared rules
+   complete the interrupted normalization without changing component layout. */
+.meal-line,
+.log-entry {
+  font-weight: 400;
+}
+
+.prep-item b,
+.goal-card h5,
+.prayer-card-title {
+  letter-spacing: 1.2px;
+}
+
 /* ==========================================================================
    LAYOUT UTILITIES
    ========================================================================== */
