@@ -46,6 +46,7 @@
   <link rel="stylesheet" href="css/recipes-pass4.css">
   <link rel="stylesheet" href="css/meal-plan-pass5.css">
   <link rel="stylesheet" href="css/gym-settings-pass6.css">
+  <link rel="stylesheet" href="css/progress-pass7.css">
 </head>
 <body>
 
@@ -66,11 +67,12 @@
        NAVIGATION
        ================================================================ -->
   <nav class="tabs">
-    <button data-view="today"   class="active">Today</button>
+    <button data-view="today" class="active">Today</button>
     <button data-view="calories">Calories</button>
     <button data-view="plan">Meal Plan</button>
     <button data-view="recipes">Recipes</button>
     <button data-view="grocery">Grocery</button>
+    <button data-view="progress">Progress</button>
     <button data-view="gym">Gym Plan</button>
     <button data-view="goals">Settings</button>
     <span class="nav-indicator" id="navIndicator"></span>
@@ -95,9 +97,9 @@
         <span class="now-readout"><span class="live-dot"></span>Right now &mdash; <b id="nowReadout">--:--</b></span>
         <span class="now-readout" id="nowStatusReadout"></span>
         <div class="arc-zoom-controls">
-          <button type="button" id="arcZoomOutBtn"   title="Zoom out">&minus;</button>
+          <button type="button" id="arcZoomOutBtn" title="Zoom out">&minus;</button>
           <button type="button" id="arcZoomResetBtn" title="Reset zoom">Reset</button>
-          <button type="button" id="arcZoomInBtn"    title="Zoom in">&plus;</button>
+          <button type="button" id="arcZoomInBtn" title="Zoom in">&plus;</button>
         </div>
       </div>
       <div class="arc-svg-wrap" id="arcSvgWrap">
@@ -147,7 +149,7 @@
     <div class="day-block">
       <h4>Log Something Else</h4>
       <form id="customAddForm" class="custom-add-form">
-        <input type="text"   id="customLabel" placeholder="What did you eat?" required maxlength="60"/>
+        <input type="text" id="customLabel" placeholder="What did you eat?" required maxlength="60"/>
         <div class="stepper-field stepper-field-inline">
           <button type="button" class="stepper-btn dec" data-target="customKcal" aria-label="Decrease">&minus;</button>
           <input type="number" id="customKcal" placeholder="kcal" min="1" required/>
@@ -230,6 +232,64 @@
       <button class="reset-btn" id="grocReset">Clear checks for this week</button>
     </div>
     <div class="grocery-grid" id="groceryGrid"></div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: PROGRESS
+       ================================================================ -->
+  <section class="view" id="view-progress">
+    <h2 class="view-title">Progress</h2>
+    <p class="view-desc">A read-only view of your calorie trend, daily completion, and recovery tracking. Missing days stay unscored rather than being treated as failures.</p>
+
+    <div class="progress-summary-grid" id="progressSummaryGrid"></div>
+
+    <div class="progress-chart-grid">
+      <div class="progress-panel">
+        <div class="progress-panel-head">
+          <div>
+            <h4>Last 7 Days</h4>
+            <p id="progress7Meta">Building from your calorie history</p>
+          </div>
+          <span class="progress-target-key" id="progressTargetKey">Daily target</span>
+        </div>
+        <div class="progress-seven-chart" id="progress7Chart"></div>
+      </div>
+
+      <div class="progress-panel">
+        <div class="progress-panel-head">
+          <div>
+            <h4>30-Day Calorie Trend</h4>
+            <p id="progress30Meta">Building from your calorie history</p>
+          </div>
+        </div>
+        <div class="progress-line-chart" id="progress30Chart"></div>
+        <p id="progress30Trend"></p>
+      </div>
+    </div>
+
+    <div class="progress-detail-grid">
+      <div class="progress-panel">
+        <h4>Calorie Adherence</h4>
+        <p class="progress-panel-sub">Last 7 days · logged days only</p>
+        <div id="progressCalorieBreakdown"></div>
+      </div>
+
+      <div class="progress-panel">
+        <h4>Daily Completion</h4>
+        <p class="progress-panel-sub">Last 7 days · tracked days only</p>
+        <div id="progressCompletion"></div>
+      </div>
+
+      <div class="progress-panel">
+        <div class="progress-panel-head">
+          <div>
+            <h4>Recovery This Week</h4>
+            <p id="progressRecoveryMeta">Current tracker week</p>
+          </div>
+        </div>
+        <div class="progress-recovery-grid" id="progressRecovery"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ================================================================
@@ -350,7 +410,7 @@
 
 <!-- ================================================================
      JAVASCRIPT
-     Load order: data → utils → state → ui → prayer → arc → nav → modals → render → schedule → schedule lifecycle → recipe pass → meal-plan pass → meal-plan refinement → gym/settings pass → main
+     Load order: data → utils → state → ui → prayer → arc → nav → modals → render → schedule → schedule lifecycle → recipe pass → meal-plan pass → meal-plan refinement → gym/settings pass → progress pass → main
      ================================================================ -->
 
 <!-- Static data -->
@@ -383,6 +443,7 @@
 <script src="js/meal-plan-pass5.js"></script>
 <script src="js/meal-plan-pass5-refine.js"></script>
 <script src="js/gym-settings-pass6.js"></script>
+<script src="js/progress-pass7.js"></script>
 
 <!-- Entry point -->
 <script src="js/main.js"></script>
