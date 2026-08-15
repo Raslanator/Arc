@@ -4,6 +4,81 @@
  */
 
 (function bridgeScheduleLifecycle() {
+  /* ================================================================
+     PASS 3 — CALORIE HISTORY + VIEW PREP
+     Calorie entries are historical data. Never prune old date buckets on load
+     or day rollover; Progress will consume the same preserved source later.
+     ================================================================ */
+
+  pruneOldCalorieLogs = function preserveCalorieHistory() {
+    if (!appState.calories || typeof appState.calories !== 'object') {
+      appState.calories = {};
+    }
+  };
+
+  function calorieDayTotal(dateKey_) {
+    return ((appState.calories && appState.calories[dateKey_]) || [])
+      .reduce((sum, entry) => sum + (Number(entry.kcal) || 0), 0);
+  }
+
+  window.ArcCalories = {
+    getDayTotal: calorieDayTotal,
+    getHistory() {
+      return Object.keys(appState.calories || {})
+        .sort((a, b) => b.localeCompare(a))
+        .map(dateKey_ => ({
+          dateKey: dateKey_,
+          total: calorieDayTotal(dateKey_),
+          entries: (appState.calories[dateKey_] || []).map(entry => ({ ...entry })),
+        }));
+    },
+    getRangeSummary(dateKeys) {
+      const keys = Array.isArray(dateKeys) ? dateKeys : [];
+      const total = keys.reduce((sum, key) => sum + calorieDayTotal(key), 0);
+      return {
+        total,
+        days: keys.map(key => ({ dateKey: key, total: calorieDayTotal(key) })),
+      };
+    },
+  };
+
+  function prepareCaloriesPass3Dom() {
+    const view = document.getElementById('view-calories');
+    if (!view) return;
+
+    const summaryCards = view.querySelectorAll('.cal-summary .cal-card');
+    if (summaryCards[0]) summaryCards[0].classList.add('cal-card-today');
+    if (summaryCards[1]) summaryCards[1].classList.add('cal-card-week');
+
+    const kcalInput = document.getElementById('customKcal');
+    if (kcalInput) {
+      kcalInput.min = '0';
+      kcalInput.step = '50';
+      kcalInput.inputMode = 'numeric';
+      kcalInput.setAttribute('aria-label', 'Calories');
+    }
+
+    // Yesterday's data remains preserved in appState; only the redundant UI
+    // block is removed. Historical views will return in the Progress phase.
+    const recentDays = document.getElementById('recentDaysList');
+    const yesterdayBlock = recentDays && recentDays.closest('.day-block');
+    if (yesterdayBlock) yesterdayBlock.remove();
+
+    const quickBlock = document.getElementById('quickAddRow')?.closest('.day-block');
+    const customBlock = document.getElementById('customAddForm')?.closest('.day-block');
+    if (quickBlock && customBlock && !view.querySelector('.cal-entry-grid')) {
+      const entryGrid = document.createElement('div');
+      entryGrid.className = 'cal-entry-grid';
+      quickBlock.parentNode.insertBefore(entryGrid, quickBlock);
+      entryGrid.append(quickBlock, customBlock);
+    }
+
+    const todayLogBlock = document.getElementById('todayLogList')?.closest('.day-block');
+    if (todayLogBlock) todayLogBlock.classList.add('cal-today-log');
+  }
+
+  prepareCaloriesPass3Dom();
+
   // Preserve an intentionally empty schedule across reloads. The core schedule
   // loader seeds defaults only when the field is absent; an empty saved array
   // means the user deliberately deleted every event.
@@ -213,7 +288,6 @@
     `;
   }
 
-  const scheduleRenderTodaySummary = renderTodaySummary;
   renderTodaySummary = function renderTodaySummaryPreservingCarousel() {
     const el = document.getElementById('todaySummary');
     if (!el) return;
