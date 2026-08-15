@@ -116,36 +116,146 @@
   initNav();
 
   /* ================================================================
-     TODAY — ROTATING DAILY BRIEF
-     Keep the original brief container and position. renderTodaySummary()
-     continues to build its contextual meal/workout/calorie items; this layer
-     simply presents one item at a time instead of three static rows.
+     TODAY — DAILY BRIEF CAROUSEL
+     The source render still provides the contextual meal/workout/calorie
+     items. This presentation layer keeps one visible at a time, adds manual
+     navigation, preserves auto-rotation, and fits the active text to the
+     available stage. The day label is permanent and never rotates.
      ================================================================ */
 
   let todayBriefIndex = 0;
+  let todayBriefTimer = null;
 
-  function showTodayBriefItem(advance) {
+  function prepareTodayBriefPanel(brief) {
+    let stage = brief.querySelector('.daily-brief-stage');
+    if (stage) return stage;
+
+    const items = Array.from(brief.children).filter(el => el.classList.contains('prep-item'));
+    if (!items.length) return null;
+
+    const plan = getTodayPlan();
+    const firstLabel = items[0].querySelector('b');
+    if (firstLabel) firstLabel.textContent = plan.hasPlan ? 'Meals' : 'Today';
+
+    const shell = document.createElement('div');
+    shell.className = 'daily-brief-shell';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'daily-brief-arrow daily-brief-prev';
+    prevBtn.setAttribute('aria-label', 'Previous daily brief');
+    prevBtn.textContent = '←';
+
+    stage = document.createElement('div');
+    stage.className = 'daily-brief-stage';
+    stage.setAttribute('aria-live', 'polite');
+
+    items.forEach(item => {
+      item.classList.add('daily-brief-item');
+      stage.appendChild(item);
+    });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'daily-brief-arrow daily-brief-next';
+    nextBtn.setAttribute('aria-label', 'Next daily brief');
+    nextBtn.textContent = '→';
+
+    const dayLabel = document.createElement('div');
+    dayLabel.className = 'daily-brief-day';
+    const dayStrong = document.createElement('strong');
+    dayStrong.textContent = `Today / ${plan.dayName}`;
+    dayLabel.appendChild(dayStrong);
+
+    shell.append(prevBtn, stage, nextBtn, dayLabel);
+    brief.replaceChildren(shell);
+
+    const hasMultiple = items.length > 1;
+    prevBtn.hidden = !hasMultiple;
+    nextBtn.hidden = !hasMultiple;
+
+    prevBtn.addEventListener('click', () => {
+      showTodayBriefItem(true, -1);
+      restartTodayBriefRotation();
+    });
+    nextBtn.addEventListener('click', () => {
+      showTodayBriefItem(true, 1);
+      restartTodayBriefRotation();
+    });
+
+    return stage;
+  }
+
+  function fitTodayBriefText(brief) {
+    const stage = brief.querySelector('.daily-brief-stage');
+    const item = stage && stage.querySelector('.daily-brief-item:not([hidden])');
+    if (!stage || !item || !stage.clientWidth || !stage.clientHeight) return;
+
+    const minSize = 14;
+    const maxSize = 30;
+    let low = minSize;
+    let high = maxSize;
+    let best = minSize;
+
+    item.style.fontSize = minSize + 'px';
+
+    // Binary-search the largest font that fits both the stage width and height.
+    // This lets short brief items become visually dominant while longer meal
+    // descriptions shrink just enough to stay fully inside the same panel.
+    for (let i = 0; i < 7; i++) {
+      const mid = (low + high) / 2;
+      item.style.fontSize = mid + 'px';
+      const fits =
+        item.scrollWidth <= stage.clientWidth + 1 &&
+        item.scrollHeight <= stage.clientHeight + 1;
+
+      if (fits) {
+        best = mid;
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+
+    item.style.fontSize = best.toFixed(1) + 'px';
+  }
+
+  function showTodayBriefItem(advance, direction = 1) {
     const brief = document.getElementById('todaySummary');
     if (!brief) return;
 
-    const items = Array.from(brief.querySelectorAll('.prep-item'));
+    const stage = prepareTodayBriefPanel(brief);
+    if (!stage) return;
+
+    const items = Array.from(stage.querySelectorAll('.daily-brief-item'));
     if (!items.length) return;
 
     if (advance && items.length > 1) {
-      todayBriefIndex = (todayBriefIndex + 1) % items.length;
+      todayBriefIndex = (todayBriefIndex + direction + items.length) % items.length;
     } else if (todayBriefIndex >= items.length) {
       todayBriefIndex = 0;
     }
 
-    brief.setAttribute('aria-live', 'polite');
     items.forEach((item, i) => {
       item.hidden = i !== todayBriefIndex;
       item.setAttribute('aria-hidden', i === todayBriefIndex ? 'false' : 'true');
     });
+
+    requestAnimationFrame(() => fitTodayBriefText(brief));
+  }
+
+  function restartTodayBriefRotation() {
+    if (todayBriefTimer !== null) clearInterval(todayBriefTimer);
+    todayBriefTimer = setInterval(() => showTodayBriefItem(true, 1), 6500);
   }
 
   showTodayBriefItem(false);
-  setInterval(() => showTodayBriefItem(true), 6500);
+  restartTodayBriefRotation();
+
+  window.addEventListener('resize', () => {
+    const brief = document.getElementById('todaySummary');
+    if (brief) requestAnimationFrame(() => fitTodayBriefText(brief));
+  }, { passive: true });
 
   /* ================================================================
      GOALS FORM
@@ -196,7 +306,7 @@
     const ok = confirm(
       'Reset the entire app to its original, first-load state? ' +
       'This clears all meal swaps, gym edits, calorie logs, grocery checks, ' +
-      'and settings \u2014 and cannot be undone.'
+      'and settings — and cannot be undone.'
     );
     if (!ok) return;
     Storage.clearAll();
