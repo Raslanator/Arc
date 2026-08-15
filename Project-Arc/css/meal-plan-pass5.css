@@ -27,6 +27,22 @@
   margin-bottom: 0;
 }
 
+/* Each glass row is an isolated stacking context. Elevate the entire active
+   row while its overflow menu is open so later Batch Cook rows cannot paint
+   over the dropdown. */
+#view-plan .pass5-batch-card:has(.batch-overflow-trigger[aria-expanded="true"]) {
+  z-index: 80;
+}
+
+/* Give the week heading a clear, consistent break after Batch Cook. */
+#view-plan #dayBlocks {
+  margin-top: 30px;
+}
+
+#view-plan #dayBlocks .week-block-title {
+  margin-top: 0;
+}
+
 #view-plan .pass5-batch-copy {
   min-width: 0;
   flex: 1;
@@ -251,6 +267,12 @@
 
 #view-plan .pass5-total-line {
   padding-top: 2px;
+}
+
+/* Today — keep the day itself, remove the redundant overline label. */
+#view-today .daily-brief-day::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* Grocery progress -------------------------------------------------------- */
