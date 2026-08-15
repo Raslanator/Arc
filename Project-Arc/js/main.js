@@ -9,6 +9,39 @@
 (function init() {
 
   /* ================================================================
+     PASS 2 — TODAY LAYOUT SHELL
+     Group existing Today nodes for a stable desktop 65/35 dashboard without
+     changing their IDs or any render/state contracts.
+     ================================================================ */
+
+  const todayView = document.getElementById('view-today');
+  if (todayView && !todayView.querySelector('.today-dashboard')) {
+    const arcCard = todayView.querySelector('.arc-card');
+    const timeline = document.getElementById('timelineList');
+    const brief = document.getElementById('todaySummary');
+    const prayer = todayView.querySelector('.prayer-card');
+
+    if (arcCard && timeline && brief && prayer) {
+      const dashboard = document.createElement('div');
+      dashboard.className = 'today-dashboard';
+
+      const primary = document.createElement('div');
+      primary.className = 'today-primary';
+
+      const context = document.createElement('aside');
+      context.className = 'today-context';
+      context.setAttribute('aria-label', 'Today context');
+
+      primary.appendChild(timeline);
+      context.appendChild(brief);
+      context.appendChild(prayer);
+      dashboard.appendChild(primary);
+      dashboard.appendChild(context);
+      arcCard.insertAdjacentElement('afterend', dashboard);
+    }
+  }
+
+  /* ================================================================
      PASS 2 — TODAY INTERACTION LAYER
      Keeps visual-only Arc improvements out of the underlying data model.
      ================================================================ */
