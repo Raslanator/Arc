@@ -18,6 +18,59 @@
     }
   };
 
+  /* ================================================================
+     TIMELINE EDIT MODE
+     Keep the normal Timeline visually clean. Schedule-management controls are
+     only exposed after the single master Edit button is pressed.
+     ================================================================ */
+
+  let scheduleEditMode = false;
+
+  function applyScheduleEditMode(list) {
+    if (!list) return;
+
+    // Remove the small event-count / editable detail beside the heading.
+    const meta = list.querySelector('.schedule-toolbar-meta');
+    if (meta) meta.remove();
+
+    const actions = list.querySelector('.schedule-toolbar-actions');
+    if (!actions) return;
+
+    let modeBtn = actions.querySelector('#scheduleModeBtn');
+    if (!modeBtn) {
+      modeBtn = document.createElement('button');
+      modeBtn.type = 'button';
+      modeBtn.id = 'scheduleModeBtn';
+      actions.appendChild(modeBtn);
+      modeBtn.addEventListener('click', () => {
+        scheduleEditMode = !scheduleEditMode;
+        applyScheduleEditMode(list);
+      });
+    }
+
+    modeBtn.className = scheduleEditMode
+      ? 'btn btn-primary btn-sm schedule-mode-toggle'
+      : 'btn btn-ghost btn-sm schedule-mode-toggle';
+    modeBtn.textContent = scheduleEditMode ? 'Done' : 'Edit';
+    modeBtn.setAttribute('aria-pressed', scheduleEditMode ? 'true' : 'false');
+    modeBtn.setAttribute('aria-label', scheduleEditMode ? 'Finish editing Daily Timeline' : 'Edit Daily Timeline');
+
+    const addBtn = list.querySelector('#scheduleAddBtn');
+    const resetBtn = list.querySelector('#scheduleResetBtn');
+    if (addBtn) addBtn.hidden = !scheduleEditMode;
+    if (resetBtn) resetBtn.hidden = !scheduleEditMode;
+
+    list.querySelectorAll('.schedule-edit-btn').forEach(btn => {
+      btn.hidden = !scheduleEditMode;
+    });
+  }
+
+  const scheduleRenderTimeline = renderTimeline;
+  renderTimeline = function renderTimelineWithMasterEditMode() {
+    scheduleRenderTimeline();
+    applyScheduleEditMode(document.getElementById('timelineList'));
+  };
+
   const scheduleRenderTodaySummary = renderTodaySummary;
   renderTodaySummary = function renderTodaySummaryPreservingCarousel() {
     const el = document.getElementById('todaySummary');
