@@ -1,0 +1,125 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   Single source of truth for all design values.
+   Both light and dark theme variables are defined here.
+   ========================================================================== */
+
+:root {
+  /* ---- Neutral text colors ---- */
+  --ink: #1D1D1F;
+  --muted: #6E6E73;
+  --line: rgba(0, 0, 0, 0.08);
+
+  /* ---- Accent palette (Apple system colors) ---- */
+  --sage: #30D158;               /* systemGreen — success / done */
+  --sage-dim: rgba(48, 209, 88, 0.14);
+  --terracotta: #FF6B4A;         /* Primary accent — warm coral */
+  --terracotta-dim: rgba(255, 107, 74, 0.14);
+  --gold: #FFB800;               /* systemYellow — calories */
+  --gold-dim: rgba(255, 184, 0, 0.16);
+  --rust: #FF453A;               /* systemRed — warnings / over budget */
+  --rust-dim: rgba(255, 69, 58, 0.14);
+  --plum: #BF5AF2;               /* systemPurple — prayer times */
+  --plum-dim: rgba(191, 90, 242, 0.14);
+  --blue: #0A84FF;               /* systemBlue — focus rings */
+
+  /* ---- Semantic aliases (used in components) ---- */
+  --amber: var(--gold);
+  --amber-dim: var(--gold-dim);
+  --teal: var(--sage);
+  --teal-dim: var(--sage-dim);
+
+  /* ---- Glass surfaces ---- */
+  --paper: rgba(255, 255, 255, 0.55);
+  --paper-2: rgba(255, 255, 255, 0.38);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+
+  /* Semantic aliases for surface colors */
+  --surface: var(--paper);
+  --surface-2: var(--paper-2);
+  --text: var(--ink);
+  --cream: transparent;
+
+  /* ---- Blur levels ---- */
+  --blur: 22px;
+  --blur-sm: 14px;
+  --blur-lg: 34px;
+
+  /* ---- Border radii ---- */
+  --radius: 22px;
+  --radius-sm: 14px;
+  --radius-lg: 28px;
+  --radius-xl: 34px;
+
+  /* ---- Shadows ---- */
+  --shadow: 0 8px 30px rgba(31, 38, 90, 0.10), inset 0 1px 0 var(--glass-highlight);
+  --shadow-md: 0 18px 46px rgba(31, 38, 90, 0.16), inset 0 1px 0 var(--glass-highlight);
+  --shadow-lg: 0 34px 90px rgba(31, 38, 90, 0.30), inset 0 1px 0 var(--glass-highlight);
+
+  /* ---- Spacing scale ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+  --sp-10: 72px;
+
+  /* ---- Type scale ---- */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14.5px;
+  --fs-md: 15.5px;
+  --fs-lg: 18px;
+  --fs-xl: 21px;
+  --fs-2xl: clamp(1.7rem, 1.3rem + 1.6vw, 2.15rem);
+  --fs-3xl: clamp(2.1rem, 1.3rem + 3.4vw, 3rem);
+
+  /* ---- Display typography ---- */
+  --fs-display: clamp(2.8rem, 2rem + 3vw, 4.5rem);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 0.2s;
+  --dur: 0.3s;
+  --dur-slow: 0.38s;
+}
+
+/* ==========================================================================
+   DARK THEME OVERRIDES
+   Applied when <html data-theme="dark"> is set.
+   ========================================================================== */
+
+html[data-theme="dark"] {
+  --ink: #F5F5F7;
+  --muted: #98989D;
+  --line: rgba(255, 255, 255, 0.10);
+
+  --sage: #32D74B;
+  --sage-dim: rgba(50, 215, 75, 0.18);
+  --terracotta: #FF8A65;
+  --terracotta-dim: rgba(255, 138, 101, 0.18);
+  --gold: #FFD60A;
+  --gold-dim: rgba(255, 214, 10, 0.18);
+  --rust: #FF6961;
+  --rust-dim: rgba(255, 105, 97, 0.18);
+  --plum: #DA8FFF;
+  --plum-dim: rgba(218, 143, 255, 0.20);
+  --blue: #409CFF;
+
+  --paper: rgba(30, 30, 36, 0.55);
+  --paper-2: rgba(30, 30, 36, 0.40);
+  --glass-strong: rgba(24, 24, 30, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.10);
+
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 var(--glass-highlight);
+  --shadow-md: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 var(--glass-highlight);
+  --shadow-lg: 0 36px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--glass-highlight);
+}

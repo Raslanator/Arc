@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Content Security Policy
+    - default-src 'self'          : all resources default to same-origin
+    - script-src 'self'           : only scripts from this origin
+    - style-src 'self' fonts.googleapis.com : allow Google Fonts CSS
+    - font-src fonts.gstatic.com  : allow Google Fonts files
+    - connect-src api.aladhan.com : allow the prayer-times API fetch
+    - img-src 'self' data:        : allow same-origin images and inline SVG data URIs
+    - object-src 'none'           : block plugins (Flash, etc.)
+    - base-uri 'self'             : prevent base-tag hijacking
+    - form-action 'self'          : forms may only submit to same origin
+
+    NOTE: 'unsafe-inline' is intentionally absent. All JS is in external files.
+    When a backend is added, add upgrade-insecure-requests and review connect-src.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    connect-src https://api.aladhan.com;
+    img-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
+  <title>05:00 — Meal &amp; Training Planner</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Styles (order matters: tokens → base → layout → components → views) -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/utilities.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================================================================
+       HEADER
+       ================================================================ -->
+  <header class="top">
+    <div class="brand">
+      <span class="clock" id="headerClock">05:00</span>
+      <span class="sub">Live clock<b id="headerWakeSleep">Wake 5:00 AM &middot; Sleep 10:00 PM</b></span>
+    </div>
+    <div class="target-pill">Deficit target: <b id="headerTarget">2200 kcal</b>/day</div>
+  </header>
+
+  <!-- ================================================================
+       NAVIGATION
+       ================================================================ -->
+  <nav class="tabs">
+    <button data-view="today"   class="active">Today</button>
+    <button data-view="calories">Calories</button>
+    <button data-view="plan">Meal Plan</button>
+    <button data-view="recipes">Recipes</button>
+    <button data-view="grocery">Grocery</button>
+    <button data-view="gym">Gym Plan</button>
+    <button data-view="goals">Settings</button>
+    <span class="nav-indicator" id="navIndicator"></span>
+  </nav>
+
+  <!-- ================================================================
+       VIEW: TODAY
+       ================================================================ -->
+  <section class="view active" id="view-today">
+    <h2 class="view-title">The Daily Arc</h2>
+    <p class="view-desc" id="arcDesc">Wake at 5:00, lights out at 22:00 &mdash; every checkpoint in between, mapped across the day.</p>
+
+    <div class="prep-banner" id="todaySummary"></div>
+
+    <div class="prayer-card">
+      <h5 class="prayer-card-title">Prayer Times &mdash; Egypt</h5>
+      <div id="prayerTimesCard"><div class="prayer-loading">Loading prayer times&hellip;</div></div>
+    </div>
+
+    <div class="arc-card">
+      <div class="arc-card-head">
+        <span class="now-readout"><span class="live-dot"></span>Right now &mdash; <b id="nowReadout">--:--</b></span>
+        <span class="now-readout" id="nowStatusReadout"></span>
+        <div class="arc-zoom-controls">
+          <button type="button" id="arcZoomOutBtn"   title="Zoom out">&minus;</button>
+          <button type="button" id="arcZoomResetBtn" title="Reset zoom">Reset</button>
+          <button type="button" id="arcZoomInBtn"    title="Zoom in">&plus;</button>
+        </div>
+      </div>
+      <div class="arc-svg-wrap" id="arcSvgWrap">
+        <svg class="arc-svg" viewBox="0 0 1100 210" id="arcSvg"></svg>
+      </div>
+      <p class="arc-zoom-hint">Scroll, pinch, or use the buttons to zoom &mdash; drag to pan.</p>
+    </div>
+
+    <div class="timeline-list" id="timelineList"></div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: CALORIES
+       ================================================================ -->
+  <section class="view" id="view-calories">
+    <h2 class="view-title">Calorie Calculator</h2>
+    <p class="view-desc">Log what you eat and track it against your 2200 kcal/day target &mdash; today, and for the week.</p>
+
+    <div class="cal-summary">
+      <div class="cal-card">
+        <h5>Today <span class="cal-date" id="todayDateLabel"></span></h5>
+        <div class="cal-bar"><div class="cal-bar-fill" id="todayFill"></div></div>
+        <div class="cal-nums">
+          <span><b id="todayConsumed">0</b> / <span id="todayTarget">2200</span> kcal</span>
+          <span class="cal-left" id="todayLeft">2200 left</span>
+        </div>
+      </div>
+      <div class="cal-card">
+        <h5>This Week <span class="cal-date" id="weekRangeLabel"></span></h5>
+        <div class="cal-bar"><div class="cal-bar-fill teal" id="weekFill"></div></div>
+        <div class="cal-nums">
+          <span><b id="weekConsumed">0</b> / <span id="weekTarget">15400</span> kcal</span>
+          <span class="cal-left" id="weekLeft">15400 left</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-block">
+      <h4>Quick Add</h4>
+      <div class="quickadd-select">
+        <select id="qaWeek"></select>
+        <select id="qaDay"></select>
+      </div>
+      <div class="quickadd-row" id="quickAddRow"></div>
+    </div>
+
+    <div class="day-block">
+      <h4>Log Something Else</h4>
+      <form id="customAddForm" class="custom-add-form">
+        <input type="text"   id="customLabel" placeholder="What did you eat?" required maxlength="60"/>
+        <div class="stepper-field stepper-field-inline">
+          <button type="button" class="stepper-btn dec" data-target="customKcal" aria-label="Decrease">&minus;</button>
+          <input type="number" id="customKcal" placeholder="kcal" min="1" required/>
+          <button type="button" class="stepper-btn inc" data-target="customKcal" aria-label="Increase">&plus;</button>
+        </div>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+
+    <div class="day-block">
+      <div class="grocery-toolbar" style="margin-bottom:10px;">
+        <h4 style="margin:0;">Today's Log</h4>
+        <button class="reset-btn" id="clearTodayBtn">Clear today</button>
+      </div>
+      <div id="todayLogList"></div>
+    </div>
+
+    <div class="day-block">
+      <h4>Yesterday's Log</h4>
+      <div id="recentDaysList"></div>
+    </div>
+
+    <div class="day-block recent-changes-block">
+      <h4>Recent Changes</h4>
+      <div id="calChangeLog" class="change-log-scroll"></div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: MEAL PLAN
+       ================================================================ -->
+  <section class="view" id="view-plan">
+    <h2 class="view-title">Meal Rotation</h2>
+    <p class="view-desc">Swap any lunch or dinner for another recipe from the library &mdash; totals, snack targets, and the grocery list update automatically.</p>
+    <div class="week-select" id="weekSelect"></div>
+    <h5 style="font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:1.3px; font-size:12px; color:var(--terracotta); margin:4px 0 10px;">This Week's Batch Cook List</h5>
+    <div id="prepBanner"></div>
+    <div id="dayBlocks"></div>
+
+    <div class="day-block" style="margin-top:22px; background:var(--surface-2);">
+      <h4 style="color:var(--amber);">The 600-kcal Breakfast Base &mdash; every morning</h4>
+      <p class="meal-line"><b>Option A (Sweet):</b> 1.5 portions Overnight Oats &mdash; oats, 0% Greek yogurt, protein powder, peanut butter, banana.</p>
+      <p class="meal-line"><b>Option B (Savory):</b> 3 whole eggs cooked in 1 tsp olive oil + 2 slices whole-wheat toast + 1 whole avocado.</p>
+      <p class="meal-line" style="font-size:12px; margin-top:8px; color:var(--muted);">Staples not included in weekly grocery lists &mdash; keep oats, yogurt, protein powder, peanut butter, bananas, eggs, bread, and avocados stocked in bulk.</p>
+    </div>
+
+    <div class="day-block recent-changes-block">
+      <h4>Recent Changes</h4>
+      <div id="planChangeLog" class="change-log-scroll"></div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: RECIPES
+       ================================================================ -->
+  <section class="view" id="view-recipes">
+    <div class="section-head-row">
+      <div>
+        <h2 class="view-title">Recipe Library</h2>
+        <p class="view-desc" style="margin-bottom:0;">Tap a card for ingredients and method. Any recipe here can be swapped into the meal plan.</p>
+      </div>
+      <button class="btn btn-primary" id="addRecipeBtn">+ Add Recipe</button>
+    </div>
+    <div class="week-select" id="recipeFilter">
+      <button type="button" data-f="active">Active</button>
+      <button type="button" data-f="archived">Archived</button>
+    </div>
+    <div class="grid" id="recipeGrid" style="margin-top:18px;"></div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: GROCERY
+       ================================================================ -->
+  <section class="view" id="view-grocery">
+    <h2 class="view-title">Grocery Lists</h2>
+    <p class="view-desc">Check items off as you shop &mdash; your progress is saved.</p>
+    <div class="week-select" id="grocWeekSelect"></div>
+    <div class="grocery-toolbar">
+      <span style="font-size:12.5px; color:var(--muted);" id="grocProgress"></span>
+      <button class="reset-btn" id="grocReset">Clear checks for this week</button>
+    </div>
+    <div class="grocery-grid" id="groceryGrid"></div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: GYM
+       ================================================================ -->
+  <section class="view" id="view-gym">
+    <h2 class="view-title">Training Split</h2>
+    <p class="view-desc">Fat loss while holding onto muscle &mdash; controlled deficit, targeted resistance work, structured cardio, strict recovery.</p>
+    <div class="gym-day-select" id="gymDaySelect"></div>
+    <div class="day-block" id="gymDayDetail" style="position:relative;"></div>
+    <div class="protocol-grid" id="protocolGrid"></div>
+
+    <div class="day-block" style="margin-top:22px;">
+      <div class="grocery-toolbar" style="margin-bottom:6px;">
+        <h4 style="margin:0;">This Week's Recovery &amp; Cardio <span class="cal-date" id="trackerWeekLabel"></span></h4>
+        <button class="reset-btn" id="trackerResetBtn">Reset week</button>
+      </div>
+      <div id="cardioSwimList"></div>
+
+      <div class="counter-row-wrap">
+        <div class="counter-card">
+          <div class="counter-info">
+            <b>Sauna</b>
+            <span>Target: 2&ndash;4x / week</span>
+          </div>
+          <div class="counter-controls">
+            <button class="counter-btn" data-key="sauna" data-dir="-1">&minus;</button>
+            <span class="counter-value" id="saunaCount">0</span>
+            <button class="counter-btn" data-key="sauna" data-dir="1">+</button>
+          </div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-info">
+            <b>Steam Room</b>
+            <span>Target: 1&ndash;2x / week</span>
+          </div>
+          <div class="counter-controls">
+            <button class="counter-btn" data-key="steam" data-dir="-1">&minus;</button>
+            <span class="counter-value" id="steamCount">0</span>
+            <button class="counter-btn" data-key="steam" data-dir="1">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       VIEW: SETTINGS / GOALS
+       ================================================================ -->
+  <section class="view" id="view-goals">
+    <h2 class="view-title">Settings</h2>
+    <p class="view-desc">Change your daily target or your wake/sleep times here &mdash; the Today arc, snack targets, and calorie tracker all update automatically.</p>
+
+    <form id="goalsForm">
+      <div class="goals-grid">
+        <div class="goal-card">
+          <h5>Daily Calorie Target</h5>
+          <div class="field">
+            <label for="goalDailyTarget">Kcal / day</label>
+            <div class="stepper-field">
+              <button type="button" class="stepper-btn dec" data-target="goalDailyTarget" aria-label="Decrease">&minus;</button>
+              <input type="number" id="goalDailyTarget" min="1000" max="6000" step="10" required/>
+              <button type="button" class="stepper-btn inc" data-target="goalDailyTarget" aria-label="Increase">&plus;</button>
+            </div>
+            <span class="hint">Drives snack targets on the Meal Plan and the bars on the Calories tab.</span>
+          </div>
+        </div>
+        <div class="goal-card">
+          <h5>Wake Time</h5>
+          <div class="field">
+            <label for="goalWake">Wake up</label>
+            <input type="time" id="goalWake" required/>
+            <span class="hint">Shifts the whole Daily Arc &mdash; every checkpoint moves with it.</span>
+          </div>
+        </div>
+        <div class="goal-card">
+          <h5>Sleep Time</h5>
+          <div class="field">
+            <label for="goalSleep">Lights out</label>
+            <input type="time" id="goalSleep" required/>
+            <span class="hint">Stretches or compresses the gaps between checkpoints to fit.</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions" style="justify-content:flex-start;">
+        <button type="submit" class="btn btn-primary">Save Goals</button>
+        <button type="button" class="btn btn-ghost" id="goalsResetBtn">Reset to defaults</button>
+      </div>
+      <div class="save-banner" id="goalsSavedBanner">Saved &mdash; your Today arc, meal plan, and calorie targets are now updated.</div>
+    </form>
+
+    <div class="day-block" style="margin-top:22px;">
+      <h4>Appearance</h4>
+      <p class="meal-line" style="margin-bottom:12px;">Switch between light and dark mode. Your choice is saved on this device.</p>
+      <div class="week-select" id="themeToggle">
+        <button type="button" data-theme="light">Light</button>
+        <button type="button" data-theme="dark">Dark</button>
+      </div>
+    </div>
+
+    <div class="day-block" style="margin-top:22px; border-color:var(--rust);">
+      <h4 style="color:var(--rust);">Reset App</h4>
+      <p class="meal-line">Wipes everything back to the original, first-load state &mdash; meal swaps, gym edits, calorie logs, grocery checks, and settings. This cannot be undone.</p>
+      <div class="form-actions" style="justify-content:flex-start; margin-top:12px;">
+        <button type="button" class="btn btn-ghost" id="resetAppBtn" style="color:var(--rust); border-color:var(--rust);">Reset App</button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /.wrap -->
+
+<!-- ================================================================
+     SHARED MODAL
+     ================================================================ -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     Load order: data → utils → state → ui → prayer → arc → nav → modals → render → main
+     ================================================================ -->
+
+<!-- Static data -->
+<script src="js/data/timeline.js"></script>
+<script src="js/data/recipes.js"></script>
+<script src="js/data/weeks.js"></script>
+<script src="js/data/gym.js"></script>
+
+<!-- Core utilities (no DOM, no state) -->
+<script src="js/utils.js"></script>
+
+<!-- Icon system -->
+<script src="js/icons.js"></script>
+
+<!-- State management -->
+<script src="js/state.js"></script>
+
+<!-- UI behaviours (spotlight, stepper, time picker) -->
+<script src="js/ui.js"></script>
+
+<!-- Feature modules -->
+<script src="js/prayer.js"></script>
+<script src="js/arc.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/render.js"></script>
+
+<!-- Entry point -->
+<script src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,484 @@
+/* ==========================================================================
+   VIEWS
+   Styles specific to individual view sections: Today/Arc, Timeline,
+   Prayer Times, Calorie Calculator, and the arc pop animation system.
+   ========================================================================== */
+
+/* ==========================================================================
+   TODAY — ARC CARD
+   ========================================================================== */
+
+.arc-card {
+  border-radius: var(--radius-xl);
+  padding: var(--sp-6) var(--sp-6) var(--sp-3);
+  margin-bottom: var(--sp-7);
+  transition: box-shadow var(--dur) var(--ease);
+}
+.arc-card:hover { box-shadow: var(--shadow-md); }
+
+.arc-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.arc-svg { width: 100%; height: auto; display: block; }
+
+.arc-svg-wrap {
+  overflow: hidden;
+  border-radius: var(--radius);
+  touch-action: none;
+  cursor: grab;
+}
+.arc-svg-wrap.grabbing { cursor: grabbing; }
+
+.arc-zoom-controls { display: flex; gap: 6px; margin-left: auto; }
+
+.arc-zoom-controls button {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--paper-2);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: blur(var(--blur-sm));
+}
+.arc-zoom-controls button:hover  { border-color: var(--terracotta); color: var(--terracotta); transform: translateY(-1px); }
+.arc-zoom-controls button:active { transform: scale(0.92); }
+.arc-zoom-controls #arcZoomResetBtn {
+  width: auto;
+  padding: 0 12px;
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.arc-zoom-hint {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+/* ---- Arc SVG dot & label styles ---- */
+.arc-dot { cursor: pointer; }
+.arc-dot circle { transition: r 0.15s ease, fill 0.15s ease; }
+.arc-dot:hover circle { r: 7; }
+
+.arc-label { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--muted); }
+.arc-label.now { fill: var(--terracotta); font-weight: 700; }
+.arc-label-leader { stroke: var(--line); stroke-width: 1; }
+
+.arc-prayer-dot { cursor: pointer; }
+.arc-prayer-dot rect { stroke: var(--paper); stroke-width: 1.5; transition: opacity 0.15s ease; }
+.arc-prayer-dot:hover rect { opacity: 0.8; }
+.arc-prayer-label { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: var(--plum); font-weight: 700; }
+
+/* ---- Now marker ---- */
+.now-readout { font-family: 'Inter', sans-serif; font-size: var(--fs-xs); color: var(--muted); }
+.now-readout b { color: var(--terracotta); font-size: 14px; }
+
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  margin-right: 6px;
+  animation: pulse-halo-sm 1.8s ease-in-out infinite;
+}
+
+.now-ring  { fill: none; stroke: var(--terracotta); stroke-width: 1.5; opacity: 0.55; }
+.now-guide { stroke: var(--terracotta); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.35; }
+.now-halo  { fill: var(--terracotta); opacity: 0.22; animation: pulse-halo 2.2s ease-in-out infinite; }
+.now-dot   { fill: var(--terracotta); stroke: var(--paper); stroke-width: 2; }
+.now-chip-bg   { fill: var(--terracotta); }
+.now-chip-text { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: #fff; }
+
+@keyframes pulse-halo {
+  0%   { r: 6;  opacity: 0.35; }
+  70%  { r: 14; opacity: 0; }
+  100% { r: 14; opacity: 0; }
+}
+
+@keyframes pulse-halo-sm {
+  0%   { box-shadow: 0 0 0 0   rgba(255, 107, 74, 0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(255, 107, 74, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(255, 107, 74, 0); }
+}
+
+/* ==========================================================================
+   TODAY — ARC POP ANIMATION SYSTEM
+   The emphasis overlay is rendered in a dedicated top-level portal layer
+   appended to document.body, sized and positioned over the target row via
+   getBoundingClientRect. This prevents clipping by any ancestor's overflow,
+   border-radius, or stacking context.
+   ========================================================================== */
+
+#arcPopPortal {
+  position: fixed;
+  inset: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.arc-pop-overlay {
+  position: fixed;
+  border-radius: calc(var(--pop-radius, 22px) + 6px);
+  background: var(--terracotta-dim);
+  box-shadow: none;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.arc-pop-overlay.pop-in  { animation: arcPopIn  0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.arc-pop-overlay.pop-fade { animation: arcPopFade 0.34s ease-out forwards; }
+
+@keyframes arcPopIn {
+  0%   { transform: scale(0.96); opacity: 0; }
+  55%  { transform: scale(1.04); opacity: 0.9; }
+  100% { transform: scale(1);    opacity: 0.75; }
+}
+
+@keyframes arcPopFade {
+  0%   { transform: scale(1)    translateY(0);    opacity: 0.75; }
+  100% { transform: scale(0.98) translateY(-4px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-pop-overlay.pop-in,
+  .arc-pop-overlay.pop-fade { animation-duration: 0.001ms; }
+}
+
+/* ---- Timeline row highlight states ---- */
+.tl-row.pop-lit {
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  border-color: transparent;
+  background: var(--terracotta-dim);
+  box-shadow: none;
+  transition:
+    background-color 0.3s ease,
+    padding 0.3s ease,
+    margin 0.3s ease,
+    border-radius 0.3s ease;
+}
+
+.tl-row:not(.pop-lit) {
+  transition:
+    background-color 0.22s ease,
+    padding 0.22s ease 0.22s,
+    margin 0.22s ease 0.22s,
+    border-radius 0.22s ease 0.22s;
+}
+
+/* ==========================================================================
+   TODAY — TIMELINE LIST
+   ========================================================================== */
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: var(--radius-xl);
+  padding: 6px var(--sp-6);
+  box-shadow: var(--shadow);
+}
+
+.tl-row {
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+  transition:
+    padding var(--dur) ease,
+    background-color var(--dur) ease;
+}
+.tl-row:last-child { border-bottom: none; }
+
+.tl-row.done {
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  background: var(--sage-dim);
+  border-color: transparent;
+  box-shadow: none;
+}
+.tl-row.done .tl-title { color: var(--sage); }
+
+.tl-time {
+  font-family: 'Inter', sans-serif;
+  color: var(--terracotta);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding-top: 2px;
+}
+
+.tl-title {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  letter-spacing: -0.2px;
+  margin: 0 0 6px;
+  text-transform: none;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.tl-body {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  margin: 0 0 9px;
+}
+
+.tl-why {
+  font-size: var(--fs-xs);
+  color: var(--sage);
+  border-left: 2px solid var(--sage);
+  padding-left: 11px;
+  line-height: 1.65;
+}
+
+.tl-row .done-btn { justify-self: end; min-width: 92px; text-align: center; }
+
+/* ---- Next event highlight ---- */
+.tl-row.next-event {
+  padding: 26px 22px;
+  border-radius: var(--radius);
+  margin: 12px 0;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--terracotta-dim), var(--plum-dim));
+  box-shadow: var(--shadow-md);
+}
+.tl-row.next-event .tl-time  { font-size: var(--fs-md); }
+.tl-row.next-event .tl-title { font-size: 26px; color: var(--terracotta); }
+.tl-row.next-event .tl-body  { font-size: var(--fs-md); color: var(--ink); }
+
+.next-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--terracotta);
+  padding: 4px 10px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+/* ==========================================================================
+   TODAY — PRAYER TIMES
+   ========================================================================== */
+
+.prayer-card {
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: var(--sp-6);
+}
+
+.prayer-card-title {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: var(--fs-xs);
+  color: var(--plum);
+  margin: 0 0 var(--sp-4);
+  font-weight: 700;
+}
+
+.prayer-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.prayer-item {
+  flex: 1 1 100px;
+  text-align: center;
+  padding: 13px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  border: 1px solid var(--glass-border);
+  transition:
+    background-color var(--dur) ease,
+    color var(--dur) ease,
+    transform var(--dur-fast) var(--ease);
+}
+.prayer-item:hover { transform: translateY(-2px); }
+.prayer-item.next {
+  background: linear-gradient(135deg, var(--plum), #9F4DE0);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(191, 90, 242, 0.35);
+}
+.prayer-item.next .prayer-name { color: rgba(255, 255, 255, 0.85); }
+.prayer-item.next .prayer-time { color: #fff; }
+
+.prayer-name {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-bottom: 7px;
+  font-weight: 600;
+}
+
+.prayer-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.prayer-countdown {
+  margin-top: 16px;
+  font-size: var(--fs-xs);
+  color: var(--plum);
+  border-left: 2px solid var(--plum);
+  padding-left: 11px;
+}
+
+.prayer-loading { font-size: var(--fs-sm); color: var(--muted); }
+
+.prayer-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  color: var(--plum);
+  background: var(--plum-dim);
+  padding: 3px 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* Prayer rows in the timeline */
+.tl-row.prayer-tl-row {
+  background: var(--plum-dim);
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  border-color: transparent;
+  box-shadow: none;
+}
+.tl-row.prayer-tl-row .tl-time { color: var(--plum); }
+.tl-row.prayer-tl-row.done { background: var(--sage-dim); }
+.tl-row.prayer-tl-row.done .tl-title { color: var(--sage); }
+
+/* ==========================================================================
+   CALORIE CALCULATOR
+   ========================================================================== */
+
+.cal-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: var(--sp-7);
+}
+
+.cal-card {
+  border-radius: var(--radius);
+  padding: 24px;
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+.cal-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.cal-card h5 {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: var(--fs-xs);
+  letter-spacing: 1.3px;
+  font-weight: 700;
+  color: var(--terracotta);
+  margin: 0 0 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cal-date {
+  font-family: 'Inter', sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.cal-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  overflow: hidden;
+  margin-bottom: 15px;
+  border: 1px solid var(--glass-border);
+}
+
+.cal-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--terracotta), var(--gold));
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.cal-bar-fill.teal { background: linear-gradient(90deg, var(--sage), #34C759); }
+.cal-bar-fill.over { background: linear-gradient(90deg, var(--rust), #FF7A70); }
+
+.cal-nums {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.cal-nums b { color: var(--ink); font-size: 17px; }
+
+.cal-left { color: var(--terracotta); font-weight: 700; }
+.cal-left.over { color: var(--rust); }
+
+/* ==========================================================================
+   RESPONSIVE — VIEW ADJUSTMENTS
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .tl-row {
+    grid-template-columns: 64px 1fr;
+    row-gap: 10px;
+  }
+  .tl-row .done-btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .tl-row.next-event .tl-title { font-size: 21px; }
+}

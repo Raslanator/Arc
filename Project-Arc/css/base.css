@@ -1,0 +1,312 @@
+/* ==========================================================================
+   BASE STYLES
+   Reset, body background mesh, global selection, user-select, focus ring,
+   reduced-motion, and the shared glass surface system.
+   ========================================================================== */
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---- Body & background mesh ---- */
+body {
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: var(--fs-base);
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #EDEFF7;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+  isolation: isolate;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(38vw 38vw at 8% 6%,   #7DD3FC 0%, transparent 62%),
+    radial-gradient(42vw 42vw at 92% 4%,  #C4B5FD 0%, transparent 60%),
+    radial-gradient(46vw 46vw at 100% 92%, #FDA4AF 0%, transparent 58%),
+    radial-gradient(40vw 40vw at 4% 96%,  #FDE68A 0%, transparent 58%),
+    radial-gradient(60vw 60vw at 50% 45%, #A7F3D0 0%, transparent 65%),
+    linear-gradient(180deg, #EEF2FB 0%, #E7ECF9 100%);
+  filter: saturate(1.15);
+}
+
+html[data-theme="dark"] body {
+  background: #0B0B10;
+}
+
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(38vw 38vw at 8% 6%,   #0B3E66 0%, transparent 62%),
+    radial-gradient(42vw 42vw at 92% 4%,  #3B2A66 0%, transparent 60%),
+    radial-gradient(46vw 46vw at 100% 92%, #5C1F35 0%, transparent 58%),
+    radial-gradient(40vw 40vw at 4% 96%,  #4A3A12 0%, transparent 58%),
+    radial-gradient(60vw 60vw at 50% 45%, #123A2E 0%, transparent 65%),
+    linear-gradient(180deg, #0B0B10 0%, #0A0A0E 100%);
+  filter: saturate(1.3) brightness(0.9);
+}
+
+/* ---- Global selection color ---- */
+::selection {
+  background: var(--terracotta);
+  color: #fff;
+}
+
+/* ---- User-select: disabled globally, re-enabled for inputs ---- */
+html, body, * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Arc SVG and arc cards keep user-select disabled */
+#arcSvgWrap,
+#arcSvgWrap *,
+.arc-card,
+.arc-card * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  user-select: none !important;
+}
+
+/* ---- Focus ring ---- */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   GLASS SURFACE SYSTEM
+   Shared backdrop-blur + border + shadow applied to every panel/card.
+   The light-follow (hover illumination) pseudo-element is also defined here
+   so it stays co-located with the surface definition it belongs to.
+   ========================================================================== */
+
+/* Selectors that receive the glass surface treatment */
+.arc-card,
+.timeline-list,
+.card,
+.day-block,
+.prayer-card,
+.prep-banner,
+.cal-card,
+.goal-card,
+.protocol-card,
+.batch-card,
+.picker-card,
+.counter-card,
+.grocery-item,
+.modal,
+.tl-row.done,
+.tl-row.next-event,
+.tl-row.prayer-tl-row {
+  background: var(--paper);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+
+/* Elements that participate in the light-follow system */
+.arc-card,
+.timeline-list,
+.card,
+.day-block,
+.prayer-card,
+.prep-banner,
+.cal-card,
+.goal-card,
+.protocol-card,
+.batch-card,
+.picker-card,
+.counter-card,
+.grocery-item,
+.modal,
+.btn,
+.counter-btn,
+.qa-btn,
+.week-select button,
+.arc-zoom-controls button,
+.custom-add-form button,
+.target-pill,
+.stepper-btn,
+.time-trigger {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Light-follow pseudo-element — cards & panels */
+.arc-card::before,
+.timeline-list::before,
+.card::before,
+.day-block::before,
+.prayer-card::before,
+.prep-banner::before,
+.cal-card::before,
+.goal-card::before,
+.protocol-card::before,
+.batch-card::before,
+.picker-card::before,
+.counter-card::before,
+.grocery-item::before,
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 20%),
+    rgba(255, 255, 255, 0.78),
+    transparent 66%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: overlay;
+}
+
+/* Light-follow pseudo-element — buttons */
+.btn::before,
+.counter-btn::before,
+.qa-btn::before,
+.week-select button::before,
+.arc-zoom-controls button::before,
+.custom-add-form button::before,
+.target-pill::before,
+.stepper-btn::before,
+.time-trigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    140px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.72),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: overlay;
+}
+
+/* Dark theme: softer light-follow glow */
+html[data-theme="dark"] .arc-card::before,
+html[data-theme="dark"] .timeline-list::before,
+html[data-theme="dark"] .card::before,
+html[data-theme="dark"] .day-block::before,
+html[data-theme="dark"] .prayer-card::before,
+html[data-theme="dark"] .prep-banner::before,
+html[data-theme="dark"] .cal-card::before,
+html[data-theme="dark"] .goal-card::before,
+html[data-theme="dark"] .protocol-card::before,
+html[data-theme="dark"] .batch-card::before,
+html[data-theme="dark"] .picker-card::before,
+html[data-theme="dark"] .counter-card::before,
+html[data-theme="dark"] .grocery-item::before,
+html[data-theme="dark"] .modal::before,
+html[data-theme="dark"] .btn::before,
+html[data-theme="dark"] .counter-btn::before,
+html[data-theme="dark"] .qa-btn::before,
+html[data-theme="dark"] .week-select button::before,
+html[data-theme="dark"] .arc-zoom-controls button::before,
+html[data-theme="dark"] .custom-add-form button::before,
+html[data-theme="dark"] .target-pill::before,
+html[data-theme="dark"] .stepper-btn::before,
+html[data-theme="dark"] .time-trigger::before {
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 20%),
+    rgba(255, 255, 255, 0.16),
+    transparent 68%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Activate light-follow on hover */
+.arc-card:hover::before,
+.timeline-list:hover::before,
+.card:hover::before,
+.day-block:hover::before,
+.prayer-card:hover::before,
+.prep-banner:hover::before,
+.cal-card:hover::before,
+.goal-card:hover::before,
+.protocol-card:hover::before,
+.batch-card:hover::before,
+.picker-card:hover::before,
+.counter-card:hover::before,
+.grocery-item:hover::before,
+.modal:hover::before,
+.btn:hover::before,
+.counter-btn:hover::before,
+.qa-btn:hover::before,
+.week-select button:hover::before,
+.arc-zoom-controls button:hover::before,
+.custom-add-form button:hover::before,
+.target-pill:hover::before,
+.stepper-btn:hover::before,
+.time-trigger:hover::before {
+  opacity: 1;
+}
+
+/* Nav tab buttons opt out of the light-follow pseudo-element */
+nav.tabs button::before {
+  content: none !important;
+}
+
+/* Ensure children of glass panels sit above the pseudo-element */
+.arc-card > *,
+.timeline-list > *,
+.card > *,
+.day-block > *,
+.prayer-card > *,
+.prep-banner > *,
+.cal-card > *,
+.goal-card > *,
+.protocol-card > *,
+.batch-card > *,
+.picker-card > *,
+.counter-card > *,
+.grocery-item > *,
+.modal > * {
+  position: relative;
+  z-index: 1;
+}

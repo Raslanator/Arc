@@ -1,0 +1,210 @@
+/* ==========================================================================
+   UTILITIES
+   Reusable single-purpose CSS classes extracted from inline styles.
+   These replace static presentation rules that were previously written
+   as style="" attributes in render.js and modals.js.
+
+   Rules:
+   - Only static, non-computed values belong here.
+   - Dynamic values (e.g. display toggled by JS, computed widths) remain inline.
+   - Every class must work in both light and dark mode via CSS tokens.
+   ========================================================================== */
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================================== */
+
+/** Inline calorie/total value highlighted in terracotta */
+.text-accent {
+  color: var(--terracotta);
+  font-weight: 600;
+}
+
+/** Muted sub-label (e.g. gym day sub-title) */
+.text-muted-label {
+  color: var(--muted);
+  text-transform: none;
+  font-weight: 400;
+}
+
+/** Bold total label in log entries */
+.text-bold {
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   LAYOUT UTILITIES
+   ========================================================================== */
+
+/** Inline badge with left margin for use inside a flex row */
+.badge-inline {
+  margin-left: var(--sp-2);
+  vertical-align: middle;
+}
+
+/** Compact week/section title rendered inside a JS-generated block */
+.week-block-title {
+  font-size: var(--fs-md);
+  margin-bottom: var(--sp-4);
+}
+
+/** Zero-margin paragraph (used in total-line inside meal rows) */
+.meal-total-line {
+  margin: 0;
+}
+
+/** Log entry divider row (yesterday total separator) */
+.log-total-row {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+  padding-top: 12px;
+}
+
+/* ==========================================================================
+   CARD UTILITIES
+   ========================================================================== */
+
+/** Recipe card — needs position:relative for absolutely-positioned actions */
+.card-relative {
+  position: relative;
+}
+
+/** Recipe card h3 — right padding to avoid overlap with action buttons */
+.card-title-padded {
+  padding-right: 110px;
+}
+
+/* ==========================================================================
+   BUTTON / ACTION UTILITIES
+   ========================================================================== */
+
+/** Absolutely-positioned edit button inside gym day detail card */
+.btn-card-action {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+}
+
+/** Destructive ghost button (delete recipe) */
+.btn-destructive {
+  color: var(--rust);
+  border-color: var(--rust);
+}
+
+/** Inline button group wrapper (flex row of buttons) */
+.btn-group {
+  display: flex;
+  gap: var(--sp-3);
+}
+
+/** Form actions row — left-aligned variant */
+.form-actions-start {
+  justify-content: flex-start;
+}
+
+/** Form actions row — space-between variant (edit mode) */
+.form-actions-between {
+  justify-content: space-between;
+}
+
+/** Small self-aligned button (add exercise row) */
+.btn-self-start {
+  align-self: flex-start;
+  margin-top: var(--sp-1);
+}
+
+/* ==========================================================================
+   MODAL UTILITIES
+   ========================================================================== */
+
+/** view-desc inside a modal — removes default bottom margin */
+.modal-desc {
+  margin-top: 0;
+}
+
+/** Collapsible time field inside done/prayer modals */
+.modal-time-field {
+  margin-top: var(--sp-4);
+}
+
+/* ==========================================================================
+   GYM UTILITIES
+   ========================================================================== */
+
+/** Cardio/swim note pill — teal variant of snack-target */
+.cardio-note {
+  background: var(--teal-dim);
+  color: var(--teal);
+  margin-top: var(--sp-4);
+}
+
+/* ==========================================================================
+   GROCERY SECTION HEADER
+   Replaces the inline-styled <div> used as a recipe section divider
+   inside the grocery grid.
+   ========================================================================== */
+
+.grocery-section-header {
+  grid-column: 1 / -1;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: var(--fs-xs);
+  color: var(--terracotta);
+  margin: var(--sp-4) 0 var(--sp-1);
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--terracotta-dim);
+}
+
+/* ==========================================================================
+   EMPTY STATE
+   Reusable centered empty-state treatment.
+   Used when a list or grid has no content to display.
+   ========================================================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-9) var(--sp-6);
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--paper-2);
+  border: 1px solid var(--glass-border);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.empty-state__icon svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0.7;
+}
+
+.empty-state__message {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 28ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.empty-state__action {
+  margin-top: var(--sp-1);
+}
+
+/* Dark mode: empty state icon background inherits from --paper-2 token */
