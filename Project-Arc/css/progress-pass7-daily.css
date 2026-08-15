@@ -1,6 +1,6 @@
 /* ========================================================================== 
    PASS 7 REFINEMENT — DAILY HISTORY
-   First Progress surface: date navigation + per-day interpretation.
+   First Progress surface: date navigation + compact per-day metrics.
    Neutral glass only; status colors remain small semantic accents.
    ========================================================================== */
 
@@ -23,6 +23,10 @@
   margin-bottom: 18px;
 }
 
+#view-progress .progress-daily-date-block {
+  min-width: 0;
+}
+
 #view-progress .progress-daily-kicker {
   display: block;
   margin-bottom: 6px;
@@ -34,21 +38,39 @@
   color: var(--terracotta);
 }
 
-#view-progress .progress-daily-head h3 {
+#view-progress .progress-daily-date-line {
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
   font-family: 'Inter', sans-serif;
-  font-size: clamp(21px, 2.4vw, 29px);
   line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.7px;
   color: var(--ink);
 }
 
-#view-progress .progress-daily-head > div:first-child > p {
+#view-progress .progress-daily-day-name {
+  font-size: clamp(21px, 2.4vw, 29px);
+  font-weight: 800;
+  letter-spacing: -0.7px;
+}
+
+#view-progress .progress-daily-date-text {
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+#view-progress .progress-daily-today-marker {
   margin: 6px 0 0;
   font-size: var(--fs-xs);
   line-height: 1.45;
+  font-weight: 600;
   color: var(--muted);
+}
+
+#view-progress .progress-daily-today-marker[hidden] {
+  display: none;
 }
 
 #view-progress .progress-daily-controls {
@@ -143,7 +165,7 @@ html[data-theme="dark"] #view-progress .progress-date-picker-wrap input[type="da
 #view-progress .progress-daily-metric {
   position: relative;
   min-width: 0;
-  min-height: 174px;
+  min-height: 126px;
   padding: 17px 17px 16px;
   border: 1px solid var(--glass-border);
   border-radius: 13px;
@@ -198,48 +220,38 @@ html[data-theme="dark"] #view-progress .progress-date-picker-wrap input[type="da
 }
 
 #view-progress .progress-daily-metric-detail {
+  margin-top: 2px;
   font-size: 10.5px;
   line-height: 1.4;
   color: var(--muted);
 }
 
-#view-progress .progress-daily-meaning {
-  margin: auto 0 0;
-  padding-top: 10px;
-  border-top: 1px solid color-mix(in srgb, var(--glass-border) 72%, transparent);
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--ink-soft, var(--muted));
+/* Tiny date-change motion: directional, quick, and deliberately restrained. */
+#view-progress .progress-daily-panel.is-changing[data-motion="older"] .progress-daily-date-line,
+#view-progress .progress-daily-panel.is-changing[data-motion="older"] .progress-daily-grid {
+  animation: progress-day-shift-older 130ms ease-out both;
 }
 
-#view-progress .progress-daily-integration {
-  margin-top: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: var(--paper-2);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 12px;
+#view-progress .progress-daily-panel.is-changing[data-motion="newer"] .progress-daily-date-line,
+#view-progress .progress-daily-panel.is-changing[data-motion="newer"] .progress-daily-grid {
+  animation: progress-day-shift-newer 130ms ease-out both;
 }
 
-#view-progress .progress-daily-integration > span {
-  padding-top: 2px;
-  font-family: 'Inter', sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.9px;
-  text-transform: uppercase;
-  color: var(--terracotta);
-  white-space: nowrap;
+@keyframes progress-day-shift-older {
+  from { opacity: 0.82; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-#view-progress .progress-daily-integration > p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--ink);
+@keyframes progress-day-shift-newer {
+  from { opacity: 0.82; transform: translateX(4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-progress .progress-daily-panel.is-changing .progress-daily-date-line,
+  #view-progress .progress-daily-panel.is-changing .progress-daily-grid {
+    animation: none !important;
+  }
 }
 
 @media (max-width: 900px) {
@@ -260,6 +272,10 @@ html[data-theme="dark"] #view-progress .progress-date-picker-wrap input[type="da
 @media (max-width: 560px) {
   #view-progress .progress-daily-panel {
     padding: 18px 16px;
+  }
+
+  #view-progress .progress-daily-date-line {
+    gap: 7px;
   }
 
   #view-progress .progress-daily-controls {
@@ -286,11 +302,6 @@ html[data-theme="dark"] #view-progress .progress-date-picker-wrap input[type="da
   }
 
   #view-progress .progress-daily-metric {
-    min-height: 150px;
-  }
-
-  #view-progress .progress-daily-integration {
-    grid-template-columns: 1fr;
-    gap: 6px;
+    min-height: 112px;
   }
 }
