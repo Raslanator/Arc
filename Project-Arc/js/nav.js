@@ -56,10 +56,6 @@ function activateTab(view) {
   appState.activeTab = view;
   saveState();
   updateNavIndicator();
-
-  if (window.Pass8Navigation && typeof window.Pass8Navigation.sync === 'function') {
-    window.Pass8Navigation.sync(view);
-  }
 }
 
 /* ==========================================================================
@@ -313,12 +309,23 @@ function initNav() {
     if (isMobile()) return;
     const nav = document.querySelector('nav.tabs');
     const button = nav && nav.querySelector(`button[data-view="${view}"]`);
-    if (!nav || !button) return;
-    const navRect = nav.getBoundingClientRect();
-    const buttonRect = button.getBoundingClientRect();
-    if (buttonRect.left < navRect.left || buttonRect.right > navRect.right) {
-      button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+    if (!nav || !button || nav.scrollWidth <= nav.clientWidth) return;
+
+    const buttonLeft = button.offsetLeft;
+    const buttonRight = buttonLeft + button.offsetWidth;
+    const visibleLeft = nav.scrollLeft;
+    const visibleRight = visibleLeft + nav.clientWidth;
+    if (buttonLeft >= visibleLeft && buttonRight <= visibleRight) return;
+
+    const targetLeft = Math.max(
+      0,
+      Math.min(
+        nav.scrollWidth - nav.clientWidth,
+        buttonLeft - (nav.clientWidth - button.offsetWidth) / 2
+      )
+    );
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    nav.scrollTo({ left: targetLeft, behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   ensureStylesheet();
