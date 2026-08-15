@@ -137,10 +137,13 @@
     panel.id = 'progressDailyPanel';
     panel.innerHTML = `
       <div class="progress-daily-head">
-        <div>
+        <div class="progress-daily-date-block">
           <span class="progress-daily-kicker">Daily history · 30 days</span>
-          <h3 id="progressDailyDateLabel">Today</h3>
-          <p id="progressDailyDateMeta">Select any date in the retained history window.</p>
+          <h3 class="progress-daily-date-line" id="progressDailyDateLabel">
+            <span class="progress-daily-day-name">Saturday</span>
+            <span class="progress-daily-date-text">August 15 2026</span>
+          </h3>
+          <p class="progress-daily-today-marker" id="progressDailyDateMeta">Today</p>
         </div>
         <div class="progress-daily-controls" aria-label="Daily history navigation">
           <button type="button" class="progress-day-nav" id="progressDayOlder" aria-label="Previous day" title="Previous day">&#8592;</button>
@@ -153,7 +156,6 @@
         </div>
       </div>
       <div class="progress-daily-grid" id="progressDailyGrid"></div>
-      <div class="progress-daily-integration" id="progressDailyIntegration"></div>
     `;
 
     summary.parentNode.insertBefore(panel, summary);
@@ -161,13 +163,22 @@
     document.getElementById('progressDayOlder').addEventListener('click', () => shiftSelectedDay(-1));
     document.getElementById('progressDayNewer').addEventListener('click', () => shiftSelectedDay(1));
     document.getElementById('progressDayToday').addEventListener('click', () => {
-      selectedDateKey = newestKey();
-      renderDailyHistory();
+      const current = clampSelectedDate();
+      const next = newestKey();
+      if (current === next) return;
+      selectedDateKey = next;
+      renderDailyHistory(1);
     });
     document.getElementById('progressDatePicker').addEventListener('change', event => {
       const keys = historyKeys();
-      if (keys.includes(event.target.value)) selectedDateKey = event.target.value;
-      renderDailyHistory();
+      if (!keys.includes(event.target.value)) {
+        renderDailyHistory();
+        return;
+      }
+      const currentIndex = keys.indexOf(clampSelectedDate());
+      const nextIndex = keys.indexOf(event.target.value);
+      selectedDateKey = event.target.value;
+      renderDailyHistory(nextIndex === currentIndex ? 0 : (nextIndex > currentIndex ? 1 : -1));
     });
   }
 
@@ -176,19 +187,22 @@
     const current = clampSelectedDate();
     const index = keys.indexOf(current);
     const nextIndex = Math.max(0, Math.min(keys.length - 1, index + direction));
+    if (nextIndex === index) return;
     selectedDateKey = keys[nextIndex];
-    renderDailyHistory();
+    renderDailyHistory(direction);
   }
 
-  function formatFullDate(key) {
+  function formatDateParts(key) {
     const date = dateFromKey(key);
-    if (!date) return key;
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    if (!date) return { dayName: key, dateText: '' };
+    return {
+      dayName: date.toLocaleDateString('en-US', { weekday: 'long' }),
+      dateText: date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }).replace(',', ''),
+    };
   }
 
   function calorieInfo(key) {
@@ -202,7 +216,6 @@
       return {
         value: '—',
         detail: 'No calorie entries',
-        meaning: 'No calorie data was logged for this day.',
         status: 'no-data',
         total,
         target,
@@ -212,19 +225,12 @@
 
     const ratio = target > 0 ? total / target : 0;
     let status = 'on';
-    let meaning = `Within the 90–105% target range (${target.toLocaleString()} kcal).`;
-    if (ratio < TARGET_LOW_RATIO) {
-      status = 'under';
-      meaning = `${(target - total).toLocaleString()} kcal below the daily target.`;
-    } else if (ratio > TARGET_HIGH_RATIO) {
-      status = 'over';
-      meaning = `${(total - target).toLocaleString()} kcal above the daily target.`;
-    }
+    if (ratio < TARGET_LOW_RATIO) status = 'under';
+    else if (ratio > TARGET_HIGH_RATIO) status = 'over';
 
     return {
       value: `${total.toLocaleString()} kcal`,
       detail: `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'} · target ${target.toLocaleString()}`,
-      meaning,
       status,
       total,
       target,
@@ -243,7 +249,6 @@
       return {
         value: '—',
         detail: 'No Timeline tracking',
-        meaning: 'No Daily Timeline completion was recorded for this date.',
         percent: null,
         done: 0,
         total: eventIds.length,
@@ -252,16 +257,9 @@
 
     const done = eventIds.filter(id => bucket[id] && bucket[id].done !== false).length;
     const pct = Math.round((done / eventIds.length) * 100);
-    let meaning = `${done} of ${eventIds.length} current Timeline events were marked done.`;
-    if (pct >= 90) meaning = `High Timeline consistency: ${done} of ${eventIds.length} events completed.`;
-    else if (pct >= 70) meaning = `Most Timeline events were completed: ${done} of ${eventIds.length}.`;
-    else if (pct > 0) meaning = `Partial Timeline completion: ${done} of ${eventIds.length} events.`;
-    else meaning = `Tracking exists, but none of the current Timeline events were marked done.`;
-
     return {
       value: `${pct}%`,
       detail: `${done} / ${eventIds.length} events`,
-      meaning,
       percent: pct,
       done,
       total: eventIds.length,
@@ -274,7 +272,6 @@
       return {
         value: '—',
         detail: 'No Salah tracking',
-        meaning: 'No Salah completion was recorded for this date.',
         percent: null,
         done: 0,
       };
@@ -282,17 +279,9 @@
 
     const done = PRAYERS.filter(name => !!bucket[name]).length;
     const pct = Math.round((done / PRAYERS.length) * 100);
-    const missing = PRAYERS.filter(name => !bucket[name]);
-    const meaning = done === PRAYERS.length
-      ? 'All five daily prayers were marked complete.'
-      : done === 0
-        ? 'Tracking exists, but no prayers were marked complete.'
-        : `${done} of 5 prayers marked complete${missing.length ? ` · not marked: ${missing.join(', ')}` : ''}.`;
-
     return {
       value: `${done} / 5`,
       detail: `${pct}% completion`,
-      meaning,
       percent: pct,
       done,
     };
@@ -310,11 +299,7 @@
   function recoveryInfo(key) {
     const position = mondayAndDayIndex(key);
     if (!position) {
-      return {
-        value: '—',
-        detail: 'No recovery data',
-        meaning: 'No recovery tracker data is available for this date.',
-      };
+      return { value: '—', detail: 'No recovery data', cardio: false, swim: false };
     }
 
     const week = appState.gymTracker && appState.gymTracker[position.mondayKey];
@@ -328,80 +313,56 @@
       return {
         value: '—',
         detail: plan ? `${plan.label} · ${plan.name}` : 'No recovery checks',
-        meaning: week
-          ? 'No cardio or swim completion was marked for this date.'
-          : 'No recovery tracker data was recorded for this week.',
         cardio,
         swim,
         week,
       };
     }
 
-    const completed = [cardio ? 'Cardio' : null, swim ? 'Swim' : null].filter(Boolean);
-    const pending = [!cardio ? 'cardio' : null, !swim ? 'swim' : null].filter(Boolean);
-    let meaning = `${completed.join(' and ')} recorded for this date.`;
-    if (pending.length) meaning += ` ${pending.join(' and ')} not marked.`;
-
     return {
       value: `${cardio ? 'Cardio ✓' : 'Cardio —'} · ${swim ? 'Swim ✓' : 'Swim —'}`,
       detail: plan ? `${plan.label} · ${plan.name}` : 'Recovery tracker',
-      meaning,
       cardio,
       swim,
       week,
     };
   }
 
-  function dailyMetricCard(label, value, detail, meaning, className) {
+  function dailyMetricCard(label, value, detail, className) {
     return `
       <div class="progress-daily-metric ${className || ''}">
         <span class="progress-daily-metric-label">${escapeHtml(label)}</span>
         <strong class="progress-daily-metric-value">${escapeHtml(value)}</strong>
         <span class="progress-daily-metric-detail">${escapeHtml(detail)}</span>
-        <p class="progress-daily-meaning">${escapeHtml(meaning)}</p>
       </div>`;
   }
 
-  function combinedInterpretation(calories, schedule, salah, recovery) {
-    const parts = [];
-
-    if (calories.status === 'on') parts.push('Calories were within the target range.');
-    else if (calories.status === 'under') parts.push('Calories were below the target range.');
-    else if (calories.status === 'over') parts.push('Calories were above the target range.');
-    else parts.push('Calories were not logged.');
-
-    if (schedule.percent !== null) parts.push(`Timeline completion was ${schedule.percent}%.`);
-    else parts.push('Timeline completion was not tracked.');
-
-    if (salah.percent !== null) parts.push(`Salah completion was ${salah.done}/5.`);
-    else parts.push('Salah completion was not tracked.');
-
-    if (recovery.cardio || recovery.swim) {
-      const completed = [recovery.cardio ? 'cardio' : null, recovery.swim ? 'swim' : null].filter(Boolean);
-      parts.push(`${completed.join(' and ')} recorded.`);
-    } else {
-      parts.push('No cardio or swim completion was recorded.');
-    }
-
-    return parts.join(' ');
+  function animateDailyChange(direction) {
+    if (!direction) return;
+    const panel = document.getElementById('progressDailyPanel');
+    if (!panel) return;
+    panel.dataset.motion = direction < 0 ? 'older' : 'newer';
+    panel.classList.remove('is-changing');
+    void panel.offsetWidth;
+    panel.classList.add('is-changing');
   }
 
-  function renderDailyHistory() {
+  function renderDailyHistory(motionDirection) {
     ensureDailyPanel();
     const grid = document.getElementById('progressDailyGrid');
-    const integration = document.getElementById('progressDailyIntegration');
     const picker = document.getElementById('progressDatePicker');
     const older = document.getElementById('progressDayOlder');
     const newer = document.getElementById('progressDayNewer');
     const todayBtn = document.getElementById('progressDayToday');
     const label = document.getElementById('progressDailyDateLabel');
     const meta = document.getElementById('progressDailyDateMeta');
-    if (!grid || !integration || !picker || !older || !newer || !todayBtn || !label || !meta) return;
+    if (!grid || !picker || !older || !newer || !todayBtn || !label || !meta) return;
 
     const keys = historyKeys();
     const key = clampSelectedDate();
     const index = keys.indexOf(key);
     const isToday = key === keys[keys.length - 1];
+    const dateParts = formatDateParts(key);
 
     picker.min = keys[0];
     picker.max = keys[keys.length - 1];
@@ -410,8 +371,12 @@
     newer.disabled = index >= keys.length - 1;
     todayBtn.disabled = isToday;
 
-    label.textContent = isToday ? `Today · ${formatFullDate(key)}` : formatFullDate(key);
-    meta.textContent = `${index + 1} of ${keys.length} retained days · oldest available ${formatFullDate(keys[0])}`;
+    label.innerHTML = `
+      <span class="progress-daily-day-name">${escapeHtml(dateParts.dayName)}</span>
+      <span class="progress-daily-date-text">${escapeHtml(dateParts.dateText)}</span>
+    `;
+    meta.textContent = 'Today';
+    meta.hidden = !isToday;
 
     const calories = calorieInfo(key);
     const schedule = scheduleInfo(key);
@@ -419,16 +384,13 @@
     const recovery = recoveryInfo(key);
 
     grid.innerHTML = [
-      dailyMetricCard('Calories', calories.value, calories.detail, calories.meaning, `cal-${calories.status}`),
-      dailyMetricCard('Daily Timeline', schedule.value, schedule.detail, schedule.meaning, 'timeline'),
-      dailyMetricCard('Salah', salah.value, salah.detail, salah.meaning, 'salah'),
-      dailyMetricCard('Recovery', recovery.value, recovery.detail, recovery.meaning, 'recovery'),
+      dailyMetricCard('Calories', calories.value, calories.detail, `cal-${calories.status}`),
+      dailyMetricCard('Daily Timeline', schedule.value, schedule.detail, 'timeline'),
+      dailyMetricCard('Salah', salah.value, salah.detail, 'salah'),
+      dailyMetricCard('Recovery', recovery.value, recovery.detail, 'recovery'),
     ].join('');
 
-    integration.innerHTML = `
-      <span>Daily interpretation</span>
-      <p>${escapeHtml(combinedInterpretation(calories, schedule, salah, recovery))}</p>
-    `;
+    animateDailyChange(motionDirection);
   }
 
   ensureDailyPanel();
