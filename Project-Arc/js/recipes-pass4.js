@@ -136,13 +136,3 @@
     if (event.key === 'Escape') closeRecipeMenus();
   });
 })();
-
-// Pass 9 is intentionally loaded from the established recipe module so the
-// frozen index load order does not need to change just to add photography.
-(function loadRecipesPass9() {
-  if (document.querySelector('script[data-pass9-recipe-images]')) return;
-  const script = document.createElement('script');
-  script.src = 'js/recipes-pass9.js';
-  script.dataset.pass9RecipeImages = 'true';
-  document.head.appendChild(script);
-})();
