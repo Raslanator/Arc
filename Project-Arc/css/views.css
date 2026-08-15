@@ -83,8 +83,22 @@
 .arc-label-leader { stroke: var(--line); stroke-width: 1; }
 
 .arc-prayer-dot { cursor: pointer; }
-.arc-prayer-dot rect { stroke: var(--paper); stroke-width: 1.5; transition: opacity 0.15s ease; }
-.arc-prayer-dot:hover rect { opacity: 0.8; }
+.arc-prayer-dot rect {
+  stroke: var(--paper);
+  stroke-width: 1.5;
+  transition:
+    opacity 0.15s ease,
+    stroke-width 0.15s ease,
+    stroke 0.15s ease;
+}
+/* Match the normal event-dot hover emphasis without applying a transform to
+   the rotated SVG rect. A thicker same-color stroke visually enlarges the
+   diamond while keeping its exact position and rotation stable. */
+.arc-prayer-dot:hover rect {
+  opacity: 1;
+  stroke: var(--plum);
+  stroke-width: 4.5;
+}
 .arc-prayer-label { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: var(--plum); font-weight: 700; }
 
 /* ---- Now marker ---- */
@@ -392,6 +406,40 @@
 .tl-row.prayer-tl-row .tl-time { color: var(--plum); }
 .tl-row.prayer-tl-row.done { background: var(--sage-dim); }
 .tl-row.prayer-tl-row.done .tl-title { color: var(--sage); }
+
+/* Salah rows keep their plum identity at rest, but shared event interaction
+   states take precedence exactly as they do for normal timeline rows. */
+.tl-row.prayer-tl-row.pop-lit {
+  border-radius: var(--radius);
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 6px 0;
+  border-color: transparent;
+  background: var(--terracotta-dim);
+  box-shadow: none;
+}
+.tl-row.prayer-tl-row.pop-lit .tl-time {
+  color: var(--terracotta);
+}
+
+.tl-row.prayer-tl-row.next-event {
+  padding: 26px 22px;
+  border-radius: var(--radius);
+  margin: 12px 0;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--terracotta-dim), var(--plum-dim));
+  box-shadow: var(--shadow-md);
+}
+.tl-row.prayer-tl-row.next-event .tl-time {
+  color: var(--terracotta);
+}
+.tl-row.prayer-tl-row.next-event .tl-title {
+  color: var(--terracotta);
+}
+
+.tl-row.prayer-tl-row.done:not(.next-event):not(.pop-lit) .tl-time {
+  color: var(--terracotta);
+}
 
 /* ==========================================================================
    CALORIE CALCULATOR

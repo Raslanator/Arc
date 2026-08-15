@@ -1,0 +1,432 @@
+/**
+ * schedule.css
+ * Pass 2B — editable Today schedule controls.
+ * Scoped to #view-today so the existing Timeline position and layout remain.
+ */
+
+#view-today .schedule-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+#view-today .schedule-toolbar-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+#view-today .schedule-toolbar-title {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+#view-today .schedule-toolbar-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+#view-today .schedule-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#view-today .schedule-reset-btn,
+#view-today .schedule-edit-btn {
+  font-family: 'Inter', sans-serif;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 700;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease);
+}
+
+#view-today .schedule-reset-btn {
+  padding: 7px 9px;
+  border-radius: 9px;
+  font-size: 11px;
+}
+
+#view-today .schedule-reset-btn:hover {
+  color: var(--terracotta);
+  background: var(--terracotta-dim);
+}
+
+#view-today .schedule-edit-btn {
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  opacity: 0.58;
+}
+
+#view-today .tl-row:hover .schedule-edit-btn,
+#view-today .schedule-edit-btn:focus-visible {
+  opacity: 1;
+  color: var(--terracotta);
+  background: var(--terracotta-dim);
+}
+
+#view-today .schedule-edit-btn:active,
+#view-today .schedule-reset-btn:active {
+  transform: scale(0.95);
+}
+
+#view-today .schedule-event-copy {
+  min-width: 0;
+}
+
+#view-today .schedule-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  justify-self: end;
+}
+
+#view-today .schedule-row-actions .done-btn {
+  justify-self: auto;
+}
+
+.schedule-order-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+}
+
+.schedule-order-controls > span {
+  margin-right: auto;
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.schedule-order-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+}
+
+/* ========================================================================== 
+   PASS 2B — CONTEXTUAL DAILY BRIEF
+   The richer brief has five stable cards. Keep the indicator as the same
+   subtle in-box dash language, simply expanded from three positions to five.
+   ========================================================================== */
+
+#view-today .daily-brief-item .brief-time-accent {
+  color: inherit;
+  font-weight: 700;
+}
+
+#view-today .daily-brief-content::after {
+  width: 69px;
+  height: 2px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(1)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(var(--terracotta), var(--terracotta)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(2)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(3)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(4)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 60px 0 / 9px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(5)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 15px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 30px 0 / 9px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 45px 0 / 9px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 60px 0 / 9px 2px no-repeat;
+}
+
+/* ========================================================================== 
+   PASS 3 — CALORIES
+   Stronger Today-first hierarchy, compact logging workspace, and corrected
+   custom-kcal stepper styling. Historical data is preserved in appState.
+   ========================================================================== */
+
+#view-calories .cal-summary {
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr);
+  align-items: stretch;
+  gap: 16px;
+}
+
+#view-calories .cal-card-today {
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  background:
+    linear-gradient(135deg, var(--terracotta-dim), transparent 66%),
+    var(--paper);
+}
+
+#view-calories .cal-card-today::after {
+  content: "";
+  position: absolute;
+  inset: auto -56px -68px auto;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  filter: blur(4px);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+#view-calories .cal-card-today h5,
+#view-calories .cal-card-today .cal-bar,
+#view-calories .cal-card-today .cal-nums {
+  position: relative;
+  z-index: 1;
+}
+
+#view-calories .cal-card-today .cal-bar {
+  height: 12px;
+  margin: 6px 0 18px;
+}
+
+#view-calories .cal-card-today .cal-nums {
+  align-items: flex-end;
+}
+
+#view-calories .cal-card-today .cal-nums > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+#view-calories .cal-card-today .cal-nums b {
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+#view-calories .cal-card-today .cal-left {
+  font-size: var(--fs-md);
+}
+
+#view-calories .cal-card-week {
+  padding: 24px;
+  background: color-mix(in srgb, var(--paper) 86%, var(--sage-dim));
+}
+
+#view-calories .cal-card-week .cal-nums {
+  font-size: var(--fs-xs);
+}
+
+#view-calories .cal-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+#view-calories .cal-entry-grid > .day-block {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+#view-calories .cal-entry-grid .quickadd-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#view-calories .cal-entry-grid .qa-btn {
+  min-width: 0;
+}
+
+#view-calories .custom-add-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 158px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+#view-calories .custom-add-form input[type="text"] {
+  min-width: 0;
+}
+
+#view-calories .custom-add-form .stepper-field-inline {
+  width: 158px;
+}
+
+/* components.css historically styles every custom-form button as the orange
+   submit pill. Explicitly restore the nested stepper controls here. */
+#view-calories .custom-add-form .stepper-btn {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  filter: none;
+  font-size: 16px;
+  letter-spacing: 0;
+  transform: none;
+}
+
+#view-calories .custom-add-form .stepper-btn.dec {
+  border-right: 1px solid var(--glass-border);
+}
+
+#view-calories .custom-add-form .stepper-btn.inc {
+  border-left: 1px solid var(--glass-border);
+}
+
+#view-calories .custom-add-form .stepper-btn:hover {
+  background: var(--terracotta-dim);
+  color: var(--terracotta);
+  filter: none;
+  transform: none;
+}
+
+#view-calories .custom-add-form .stepper-btn:active {
+  transform: scale(0.86);
+}
+
+#view-calories .custom-add-form > button[type="submit"] {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding-inline: 24px;
+}
+
+#view-calories .cal-today-log {
+  border-color: color-mix(in srgb, var(--terracotta) 34%, var(--glass-border));
+}
+
+#view-calories .cal-today-log h4 {
+  font-size: 20px;
+}
+
+#view-calories .cal-today-log .log-entry {
+  padding-block: 15px;
+}
+
+@media (max-width: 860px) {
+  #view-calories .cal-summary,
+  #view-calories .cal-entry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #view-calories .cal-card-today .cal-nums b {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  #view-calories .cal-entry-grid .quickadd-row,
+  #view-calories .custom-add-form {
+    grid-template-columns: 1fr;
+  }
+
+  #view-calories .custom-add-form .stepper-field-inline {
+    width: 100%;
+  }
+
+  #view-calories .custom-add-form > button[type="submit"] {
+    width: 100%;
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  #view-today .schedule-toolbar {
+    align-items: flex-start;
+  }
+
+  #view-today .schedule-toolbar-copy {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #view-today .schedule-toolbar-meta {
+    font-size: 10px;
+  }
+
+  #view-today .schedule-row-actions {
+    grid-column: 2;
+    justify-self: start;
+    flex-wrap: wrap;
+  }
+
+  #view-today .schedule-row-actions .done-btn {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  #view-today .schedule-toolbar {
+    gap: 8px;
+  }
+
+  #view-today .schedule-toolbar-actions {
+    gap: 4px;
+  }
+
+  #view-today .schedule-reset-btn {
+    padding-inline: 5px;
+  }
+
+  #view-today .daily-brief-content::after {
+    width: 61px;
+    background-size: 8px 2px, 8px 2px, 8px 2px, 8px 2px, 8px 2px;
+    background-position: 0 0, 13px 0, 26px 0, 39px 0, 52px 0;
+  }
+}

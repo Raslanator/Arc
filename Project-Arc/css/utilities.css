@@ -1,4 +1,4 @@
-/* ==========================================================================
+/* ============================================================================
    UTILITIES
    Reusable single-purpose CSS classes extracted from inline styles.
    These replace static presentation rules that were previously written
@@ -10,7 +10,7 @@
    - Every class must work in both light and dark mode via CSS tokens.
    ========================================================================== */
 
-/* ==========================================================================
+/* ============================================================================
    TYPOGRAPHY UTILITIES
    ========================================================================== */
 
@@ -32,7 +32,21 @@
   font-weight: 700;
 }
 
-/* ==========================================================================
+/* Pass 1 typography normalization.
+   utilities.css loads after component/view styles, so these shared rules
+   complete the interrupted normalization without changing component layout. */
+.meal-line,
+.log-entry {
+  font-weight: 400;
+}
+
+.prep-item b,
+.goal-card h5,
+.prayer-card-title {
+  letter-spacing: 1.2px;
+}
+
+/* ============================================================================
    LAYOUT UTILITIES
    ========================================================================== */
 
@@ -60,7 +74,7 @@
   padding-top: 12px;
 }
 
-/* ==========================================================================
+/* ============================================================================
    CARD UTILITIES
    ========================================================================== */
 
@@ -74,7 +88,7 @@
   padding-right: 110px;
 }
 
-/* ==========================================================================
+/* ============================================================================
    BUTTON / ACTION UTILITIES
    ========================================================================== */
 
@@ -113,7 +127,7 @@
   margin-top: var(--sp-1);
 }
 
-/* ==========================================================================
+/* ============================================================================
    MODAL UTILITIES
    ========================================================================== */
 
@@ -127,7 +141,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ==========================================================================
+/* ============================================================================
    GYM UTILITIES
    ========================================================================== */
 
@@ -138,7 +152,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ==========================================================================
+/* ============================================================================
    GROCERY SECTION HEADER
    Replaces the inline-styled <div> used as a recipe section divider
    inside the grocery grid.
@@ -157,7 +171,387 @@
   border-bottom: 1px solid var(--terracotta-dim);
 }
 
-/* ==========================================================================
+/* ============================================================================
+   PASS 1.5 — REFACTOR REGRESSION FIXES
+   Keep these overrides narrowly scoped to the affected views. The existing
+   markup still carries a few static inline margins, so !important is used only
+   where required to restore the intended section separation without changing
+   application behavior.
+   ========================================================================== */
+
+/* Grocery items: keep checkbox and wrapped ingredient text aligned in a
+   predictable left-to-right row at every grid width. */
+#view-grocery .grocery-item {
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+  line-height: 1.5;
+}
+
+#view-grocery .grocery-item input {
+  margin: 2px 0 0;
+}
+
+#view-grocery .grocery-item span {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  writing-mode: horizontal-tb;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Give the recovery tracker a clear break from the four protocol cards. */
+#view-gym #protocolGrid + .day-block {
+  margin-top: var(--sp-8) !important;
+}
+
+/* Separate Appearance from the Save Goals / Reset controls as its own group. */
+#view-goals #goalsForm + .day-block {
+  margin-top: var(--sp-8) !important;
+}
+
+/* ============================================================================
+   PASS 2 — INTERACTION IMPROVEMENTS KEPT AFTER LAYOUT ROLLBACK
+   Today layout, Arc card presentation, and Prayer Times positioning remain
+   exactly on the original single-column structure.
+   ========================================================================== */
+/* Header joins the existing light-follow system without changing its layout. */
+header.top {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+header.top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    460px circle at var(--mx, 50%) var(--my, 30%),
+    rgba(255, 255, 255, 0.78),
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: overlay;
+}
+
+header.top:hover::before {
+  opacity: 1;
+}
+
+header.top > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] header.top::before {
+  background: radial-gradient(
+    460px circle at var(--mx, 50%) var(--my, 30%),
+    rgba(255, 255, 255, 0.16),
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Invisible hit area only: the visible Arc markers keep their old size/style. */
+#view-today .arc-hit-target {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+  cursor: pointer;
+  transition: none !important;
+}
+
+#view-today .arc-dot:hover .arc-hit-target,
+#view-today .arc-prayer-dot:hover .arc-hit-target {
+  r: 16px;
+}
+
+/* Arc event markers only — hide numeric time labels and their leader lines. */
+#view-today .arc-label,
+#view-today .arc-label-leader {
+  display: none !important;
+}
+
+/* ============================================================================
+   TODAY — DAILY BRIEF CAROUSEL
+   Two separate glass boxes: permanent day context on the left and rotating
+   information on the right. Navigation lives in invisible edge hit-zones.
+   ========================================================================== */
+
+#view-today #todaySummary {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+#view-today #todaySummary::before {
+  content: none !important;
+}
+
+#view-today .daily-brief-shell {
+  display: grid;
+  grid-template-columns: minmax(172px, 0.22fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  min-height: 112px;
+}
+
+#view-today .daily-brief-day,
+#view-today .daily-brief-content {
+  background: var(--paper);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+}
+
+/* Current-day card: stronger hierarchy, subtle accent wash, and a compact
+   overline so Today / Wednesday reads like context rather than body copy. */
+#view-today .daily-brief-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
+  padding: 18px 22px 18px 25px;
+  overflow: hidden;
+  text-align: left;
+  background:
+    linear-gradient(135deg, var(--terracotta-dim), transparent 72%),
+    var(--paper);
+}
+
+#view-today .daily-brief-day::before {
+  content: "CURRENT DAY";
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+
+#view-today .daily-brief-day::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 4px;
+  border-radius: 0 999px 999px 0;
+  background: var(--terracotta);
+  opacity: 0.82;
+}
+
+#view-today .daily-brief-day strong {
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.25px;
+  color: var(--ink);
+  white-space: normal;
+}
+
+#view-today .daily-brief-content {
+  position: relative;
+  min-width: 0;
+  min-height: 112px;
+  overflow: hidden;
+}
+
+#view-today .daily-brief-stage {
+  display: grid;
+  align-items: center;
+  min-width: 0;
+  min-height: 112px;
+  padding: 16px 42px;
+  overflow: hidden;
+}
+
+/* Fixed typography intentionally overrides the JS fit value. All detail slides
+   now keep the same size, preventing the visual "bulging" between items. */
+#view-today .daily-brief-item {
+  grid-area: 1 / 1;
+  width: 100%;
+  margin: 0;
+  color: #111318;
+  font-size: 15px !important;
+  line-height: 1.48;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  will-change: transform, opacity;
+}
+
+#view-today .daily-brief-item b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--terracotta);
+  font-size: 15px !important;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+html[data-theme="dark"] #view-today .daily-brief-item {
+  color: var(--ink);
+}
+
+/* The controls occupy the clickable boundary but are visually absent until
+   the pointer actually reaches that edge. Only the bare < / > glyph appears. */
+#view-today .daily-brief-arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  transition:
+    opacity 0.18s ease,
+    color 0.18s ease;
+}
+
+#view-today .daily-brief-prev { left: 0; }
+#view-today .daily-brief-next { right: 0; }
+
+#view-today .daily-brief-arrow:hover,
+#view-today .daily-brief-arrow:focus-visible {
+  opacity: 0.34;
+  color: var(--ink);
+  background: transparent;
+}
+
+#view-today .daily-brief-arrow:active {
+  opacity: 0.55;
+}
+
+/* Slim in-box position indicator. It reads the same aria-hidden state the
+   carousel already maintains, so manual and automatic navigation stay synced
+   without a second JS state system. */
+#view-today .daily-brief-content::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  z-index: 3;
+  width: 42px;
+  height: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border-radius: 999px;
+  opacity: 0.9;
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(1)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(var(--terracotta), var(--terracotta)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(2)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(3)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:not(:has(.daily-brief-item:nth-child(2)))::after {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  #view-today .daily-brief-shell {
+    grid-template-columns: 124px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 104px;
+  }
+
+  #view-today .daily-brief-day {
+    padding: 14px 12px 14px 18px;
+    gap: 5px;
+  }
+
+  #view-today .daily-brief-day::before {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  #view-today .daily-brief-day::after {
+    top: 13px;
+    bottom: 13px;
+    width: 3px;
+  }
+
+  #view-today .daily-brief-day strong {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  #view-today .daily-brief-content,
+  #view-today .daily-brief-stage {
+    min-height: 104px;
+  }
+
+  #view-today .daily-brief-stage {
+    padding: 14px 34px;
+  }
+
+  #view-today .daily-brief-item {
+    font-size: 13px !important;
+    line-height: 1.42;
+  }
+
+  #view-today .daily-brief-item b {
+    font-size: 13px !important;
+    margin-bottom: 6px;
+  }
+
+  #view-today .daily-brief-arrow {
+    width: 38px;
+    font-size: 22px;
+  }
+
+  #view-today .daily-brief-content::after {
+    bottom: 7px;
+    height: 1.5px;
+  }
+}
+
+/* ============================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
    Used when a list or grid has no content to display.

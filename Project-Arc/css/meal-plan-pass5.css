@@ -1,0 +1,390 @@
+/* ========================================================================== 
+   PASS 5 — MEAL PLAN + GROCERY
+   Scoped visual refinement for meal removal, batch cook, and grocery progress.
+   ========================================================================== */
+
+#view-plan .pass5-batch-heading {
+  margin-bottom: 12px !important;
+  color: var(--terracotta) !important;
+}
+
+/* Keep Batch Cook in the original list orientation: one full-width row after
+   another inside the existing neutral glass prep surface. */
+#view-plan #prepBanner {
+  display: block;
+}
+
+#view-plan .pass5-batch-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 19px 21px;
+  align-items: center;
+  background: var(--paper);
+}
+
+#view-plan .pass5-batch-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Each glass row is an isolated stacking context. Elevate the entire active
+   row while its overflow menu is open so later Batch Cook rows cannot paint
+   over the dropdown. */
+#view-plan .pass5-batch-card:has(.batch-overflow-trigger[aria-expanded="true"]) {
+  z-index: 80;
+}
+
+/* Give the week heading a clear, consistent break after Batch Cook. */
+#view-plan #dayBlocks {
+  margin-top: 30px;
+}
+
+#view-plan #dayBlocks .week-block-title {
+  margin-top: 0;
+}
+
+#view-plan .pass5-batch-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+#view-plan .pass5-batch-card .bc-name {
+  line-height: 1.35;
+}
+
+#view-plan .pass5-batch-card .badge-inline {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+#view-plan .pass5-batch-card .bc-days {
+  margin-top: 8px;
+}
+
+#view-plan .batch-usage-note {
+  margin-top: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Batch Cook overflow menu ------------------------------------------------ */
+
+#view-plan .batch-overflow-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+#view-plan .batch-overflow-trigger {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 6px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease);
+}
+
+#view-plan .batch-overflow-trigger:hover,
+#view-plan .batch-overflow-trigger[aria-expanded="true"] {
+  color: var(--ink);
+  border-color: var(--glass-border);
+  background: var(--paper-2);
+}
+
+#view-plan .batch-overflow-trigger:active {
+  transform: scale(0.94);
+}
+
+#view-plan .batch-overflow-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 30;
+  width: 150px;
+  padding: 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  box-shadow: var(--shadow-md);
+}
+
+#view-plan .batch-overflow-menu[hidden] {
+  display: none;
+}
+
+#view-plan .batch-menu-item {
+  width: 100%;
+  display: block;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+
+#view-plan .batch-menu-item:hover {
+  background: var(--paper-2);
+}
+
+#view-plan .batch-menu-remove {
+  color: var(--rust);
+}
+
+#view-plan .batch-menu-remove:hover {
+  background: var(--rust-dim);
+}
+
+/* Keep the underlying old remove button neutral after it is moved inside the
+   overflow menu by the Pass 5 refinement layer. */
+#view-plan .batch-remove-btn.batch-menu-item {
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  white-space: normal;
+}
+
+/* Empty plan state stays neutral/clear rather than introducing a tinted box. */
+#view-plan .pass5-plan-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 20px 22px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+#view-plan .pass5-plan-empty strong {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  color: var(--ink);
+}
+
+#view-plan .pass5-plan-empty span {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* Day cards keep the same neutral glass surface and use consistent spacing. */
+#view-plan .pass5-day-block {
+  padding: 24px 26px;
+  margin-bottom: 16px;
+  background: var(--paper);
+}
+
+#view-plan .pass5-meal-row {
+  gap: 14px;
+}
+
+#view-plan .pass5-meal-copy {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+#view-plan .meal-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#view-plan .meal-row-empty {
+  opacity: 0.78;
+  border-bottom-style: dashed;
+}
+
+#view-plan .meal-row-empty .meal-name {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Add remains an accent action, but the control itself stays neutral glass. */
+#view-plan .meal-add-btn {
+  color: var(--terracotta);
+  border-color: var(--glass-border);
+  background: var(--paper-2);
+}
+
+#view-plan .meal-remove-btn {
+  font-family: 'Inter', sans-serif;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition:
+    color var(--dur-fast) ease,
+    background var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease);
+}
+
+#view-plan .meal-remove-btn:hover {
+  color: var(--rust);
+  background: var(--rust-dim);
+}
+
+#view-plan .meal-remove-btn:active {
+  transform: scale(0.95);
+}
+
+#view-plan .breakfast-row {
+  opacity: 0.92;
+}
+
+#view-plan .pass5-total-line {
+  padding-top: 2px;
+}
+
+/* Today — keep the day itself, remove the redundant overline label. */
+#view-today .daily-brief-day::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Grocery progress -------------------------------------------------------- */
+
+#view-grocery .grocery-toolbar {
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: 0 1px 0 var(--glass-highlight) inset;
+}
+
+#view-grocery .grocery-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 210px;
+}
+
+#view-grocery #grocProgress {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-xs) !important;
+  font-weight: 700;
+  color: var(--ink) !important;
+}
+
+#view-grocery .grocery-progress-meter {
+  width: min(360px, 100%);
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--paper-2);
+  border: 1px solid var(--glass-border);
+}
+
+#view-grocery .grocery-progress-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sage), #34C759);
+  transition: width 0.28s var(--ease);
+}
+
+#view-grocery .grocery-toolbar.grocery-complete #grocProgress {
+  color: var(--sage) !important;
+}
+
+#view-grocery .grocery-toolbar.grocery-complete .grocery-progress-meter {
+  border-color: color-mix(in srgb, var(--sage) 42%, var(--glass-border));
+}
+
+#view-grocery .grocery-section-header {
+  margin-top: 8px;
+  padding: 8px 4px 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+#view-grocery .grocery-item {
+  min-height: 48px;
+}
+
+#view-grocery .grocery-empty {
+  grid-template-columns: 1fr;
+}
+
+#view-grocery .grocery-empty .empty-state {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  #view-plan .pass5-day-block {
+    padding: 19px 18px;
+  }
+
+  #view-plan .pass5-meal-row {
+    align-items: flex-start;
+  }
+
+  #view-plan .pass5-meal-copy {
+    width: 100%;
+  }
+
+  #view-plan .meal-row-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  #view-plan .pass5-batch-card {
+    align-items: center;
+  }
+
+  #view-plan .batch-overflow-menu {
+    right: -4px;
+  }
+
+  #view-grocery .grocery-toolbar {
+    align-items: stretch;
+  }
+
+  #view-grocery .grocery-toolbar .reset-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,601 @@
+/* ========================================================================== 
+   PASS 6 — GYM + SETTINGS
+   Neutral glass refinement only: no new tinted/stained card surfaces.
+   ========================================================================== */
+
+/* Gym day selector -------------------------------------------------------- */
+
+#view-gym .gym-day-select {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#view-gym .gym-day-select button {
+  min-width: 0;
+  min-height: 88px;
+  padding: 13px 14px;
+  background: var(--paper);
+  border-color: var(--glass-border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+#view-gym .gym-day-select button:hover {
+  border-color: color-mix(in srgb, var(--terracotta) 42%, var(--glass-border));
+  background: var(--paper);
+}
+
+#view-gym .gym-day-select button.active {
+  background: var(--paper);
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--terracotta) 20%, transparent), var(--shadow);
+}
+
+#view-gym .gym-day-select button.active b {
+  color: var(--ink);
+}
+
+#view-gym .pass6-day-kicker {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+#view-gym .gym-day-select button b {
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+#view-gym .pass6-day-focus {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* Current workout --------------------------------------------------------- */
+
+#view-gym .pass6-gym-detail {
+  position: relative;
+  padding: 25px 27px;
+  margin-bottom: 20px;
+  background: var(--paper);
+}
+
+#view-gym .pass6-gym-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+#view-gym .pass6-gym-heading-copy {
+  min-width: 0;
+}
+
+#view-gym .pass6-gym-overline {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.15px;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+#view-gym .pass6-gym-detail h4 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+#view-gym .pass6-gym-heading-copy p {
+  margin: 5px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+#view-gym .pass6-edit-day-btn {
+  flex: 0 0 auto;
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+#view-gym .pass6-exercise-list {
+  margin-top: 7px;
+}
+
+#view-gym .pass6-exercise-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 11px;
+  padding: 14px 0;
+}
+
+#view-gym .pass6-exercise-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--paper-2);
+}
+
+#view-gym .pass6-exercise-name {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+#view-gym .pass6-exercise-row .sets {
+  white-space: nowrap;
+}
+
+#view-gym .pass6-cardio-plan {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+  margin-top: 15px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+#view-gym .pass6-cardio-plan > span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  white-space: nowrap;
+}
+
+#view-gym .pass6-cardio-plan strong {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#view-gym .pass6-rest-state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 17px 0 10px;
+}
+
+#view-gym .pass6-rest-state strong {
+  font-size: var(--fs-sm);
+  color: var(--ink);
+}
+
+#view-gym .pass6-rest-state span {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* Protocols --------------------------------------------------------------- */
+
+#view-gym .protocol-grid {
+  gap: 14px;
+  margin-top: 0;
+}
+
+#view-gym .pass6-protocol-card {
+  padding: 20px;
+  background: var(--paper);
+  border-color: var(--glass-border);
+}
+
+#view-gym .pass6-protocol-card:hover {
+  background: var(--paper);
+}
+
+#view-gym .pass6-protocol-card h5 {
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+#view-gym .pass6-protocol-card p {
+  margin: 0;
+}
+
+#view-gym .pass6-protocol-warning {
+  background: var(--paper);
+  border-color: color-mix(in srgb, var(--rust) 52%, var(--glass-border));
+}
+
+#view-gym .pass6-protocol-warning h5 {
+  color: var(--rust);
+}
+
+/* Recovery/cardio tracker ------------------------------------------------- */
+
+#view-gym .pass6-recovery-block {
+  margin-top: 22px;
+  padding: 23px 25px;
+  background: var(--paper);
+}
+
+#view-gym .pass6-recovery-toolbar {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+#view-gym .pass6-recovery-toolbar h4 {
+  margin: 0;
+}
+
+#view-gym .pass6-tracker-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 2px 0 9px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+#view-gym .pass6-tracker-summary > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+}
+
+#view-gym .pass6-tracker-summary > span:last-child {
+  border-right: 0;
+}
+
+#view-gym .pass6-tracker-summary b {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+#view-gym .pass6-tracker-summary small {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+#view-gym .pass6-tracker-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 14px 0;
+}
+
+#view-gym .pass6-tracker-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+#view-gym .pass6-tracker-actions .tr-check {
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--paper-2);
+  transition:
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease);
+}
+
+#view-gym .pass6-tracker-actions .tr-check:hover {
+  border-color: var(--sage);
+  color: var(--ink);
+}
+
+#view-gym .pass6-tracker-actions .tr-check:has(input:checked) {
+  border-color: var(--sage);
+  color: var(--sage);
+  background: var(--paper);
+}
+
+#view-gym .pass6-tracker-actions .tr-check input {
+  margin: 0;
+}
+
+#view-gym .counter-row-wrap {
+  margin-top: 17px;
+  gap: 12px;
+}
+
+#view-gym .counter-card {
+  background: var(--paper);
+  box-shadow: none;
+}
+
+#view-gym .counter-btn {
+  background: var(--paper-2);
+}
+
+/* Gym editor -------------------------------------------------------------- */
+
+.pass6-modal-overline {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+.pass6-gym-modal-desc {
+  margin-bottom: 19px;
+}
+
+.pass6-exercises-field {
+  gap: 9px;
+}
+
+.pass6-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pass6-field-head > span {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.pass6-ex-edit-row {
+  grid-template-columns: 24px minmax(0, 1fr) 120px 28px;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pass6-ex-edit-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  align-self: center;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--paper-2);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.pass6-gym-edit-actions-between {
+  justify-content: space-between;
+}
+
+.pass6-reset-day-btn {
+  color: var(--rust);
+}
+
+/* Settings --------------------------------------------------------------- */
+
+#view-goals .pass6-settings-form {
+  margin-top: 4px;
+}
+
+#view-goals .goals-grid {
+  gap: 14px;
+}
+
+#view-goals .goal-card {
+  padding: 23px;
+  background: var(--paper);
+}
+
+#view-goals .goal-card:hover {
+  background: var(--paper);
+}
+
+#view-goals .goal-card h5 {
+  margin-bottom: 15px;
+  color: var(--ink);
+}
+
+#view-goals .goal-card .field label {
+  color: var(--terracotta);
+}
+
+#view-goals .pass6-settings-actions {
+  justify-content: flex-start;
+  margin-top: 18px;
+}
+
+#view-goals .save-banner {
+  background: var(--paper);
+  border: 1px solid color-mix(in srgb, var(--sage) 42%, var(--glass-border));
+  color: var(--sage);
+}
+
+#view-goals .pass6-settings-section {
+  margin-top: 22px;
+  padding: 22px 24px;
+  background: var(--paper);
+}
+
+#view-goals .pass6-settings-section h4 {
+  margin-bottom: 7px;
+}
+
+#view-goals .pass6-settings-section .meal-line {
+  margin: 0 0 13px;
+}
+
+#view-goals .pass6-appearance-section #themeToggle {
+  margin-bottom: 0;
+}
+
+#view-goals .pass6-appearance-section #themeToggle button {
+  background: var(--paper-2);
+}
+
+#view-goals .pass6-appearance-section #themeToggle button.active {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--terracotta) 18%, transparent);
+}
+
+#view-goals .pass6-danger-section {
+  border-color: var(--glass-border);
+}
+
+#view-goals .pass6-danger-section h4 {
+  color: var(--rust);
+}
+
+#view-goals .pass6-danger-actions {
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
+#view-goals .pass6-danger-button {
+  color: var(--rust);
+  border-color: color-mix(in srgb, var(--rust) 58%, var(--glass-border));
+  background: var(--paper-2);
+}
+
+#view-goals .pass6-danger-button:hover {
+  color: var(--rust);
+  border-color: var(--rust);
+  background: var(--paper);
+}
+
+/* Responsive -------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  #view-gym .gym-day-select {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #view-gym .pass6-gym-detail {
+    padding: 20px 19px;
+  }
+
+  #view-gym .pass6-gym-detail-head {
+    align-items: center;
+  }
+
+  #view-gym .pass6-gym-detail h4 {
+    font-size: 21px;
+  }
+
+  #view-gym .pass6-tracker-row {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  #view-gym .pass6-tracker-actions {
+    justify-content: flex-start;
+  }
+
+  #view-gym .pass6-exercise-row {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+
+  #view-gym .pass6-exercise-row .sets {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .pass6-ex-edit-row {
+    grid-template-columns: 24px minmax(0, 1fr) 28px;
+  }
+
+  .pass6-ex-edit-row .exSets {
+    grid-column: 2;
+  }
+
+  .pass6-ex-edit-row .ex-remove {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (max-width: 520px) {
+  #view-gym .gym-day-select {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  #view-gym .gym-day-select button {
+    min-height: 78px;
+    padding: 11px 12px;
+  }
+
+  #view-gym .pass6-gym-detail-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #view-gym .pass6-edit-day-btn {
+    align-self: flex-start;
+  }
+
+  #view-gym .pass6-cardio-plan {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  #view-gym .pass6-tracker-summary {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 12px;
+  }
+
+  #view-gym .pass6-tracker-summary > span:nth-child(2) {
+    border-right: 0;
+  }
+
+  #view-gym .pass6-tracker-summary > span:nth-child(-n+2) {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  #view-gym .pass6-recovery-block,
+  #view-goals .pass6-settings-section {
+    padding: 19px 18px;
+  }
+
+  .pass6-gym-edit-actions,
+  .pass6-gym-edit-actions-between,
+  #view-goals .pass6-settings-actions,
+  #view-goals .pass6-danger-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pass6-gym-edit-actions > .btn-group,
+  #view-goals .pass6-settings-actions .btn {
+    width: 100%;
+  }
+
+  .pass6-gym-edit-actions > .btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pass6-reset-day-btn,
+  #view-goals .pass6-danger-button {
+    width: 100%;
+  }
+}
