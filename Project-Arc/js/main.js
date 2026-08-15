@@ -9,41 +9,9 @@
 (function init() {
 
   /* ================================================================
-     PASS 2 — TODAY LAYOUT SHELL
-     Group existing Today nodes for a stable desktop 65/35 dashboard without
-     changing their IDs or any render/state contracts.
-     ================================================================ */
-
-  const todayView = document.getElementById('view-today');
-  if (todayView && !todayView.querySelector('.today-dashboard')) {
-    const arcCard = todayView.querySelector('.arc-card');
-    const timeline = document.getElementById('timelineList');
-    const brief = document.getElementById('todaySummary');
-    const prayer = todayView.querySelector('.prayer-card');
-
-    if (arcCard && timeline && brief && prayer) {
-      const dashboard = document.createElement('div');
-      dashboard.className = 'today-dashboard';
-
-      const primary = document.createElement('div');
-      primary.className = 'today-primary';
-
-      const context = document.createElement('aside');
-      context.className = 'today-context';
-      context.setAttribute('aria-label', 'Today context');
-
-      primary.appendChild(timeline);
-      context.appendChild(brief);
-      context.appendChild(prayer);
-      dashboard.appendChild(primary);
-      dashboard.appendChild(context);
-      arcCard.insertAdjacentElement('afterend', dashboard);
-    }
-  }
-
-  /* ================================================================
-     PASS 2 — TODAY INTERACTION LAYER
-     Keeps visual-only Arc improvements out of the underlying data model.
+     PASS 2 — INTERACTION IMPROVEMENTS KEPT AFTER LAYOUT ROLLBACK
+     No DOM reordering: Today keeps its original single-column structure and
+     Prayer Times remains in its original position/card.
      ================================================================ */
 
   // Keep the arc's path visually present while zooming/panning. The original
@@ -59,16 +27,12 @@
     const arcTop = ARC_BOTTOM - (ARC_BOTTOM - ARC_TOP) * curveFactor;
     const arcCenter = (arcTop + ARC_BOTTOM) / 2;
 
-    // Keep the path center inside the middle 44% of the viewport while still
-    // allowing a useful amount of intentional vertical panning for labels.
     const minPanY = Math.max(0, arcCenter - viewH * 0.72);
     const maxPanY = Math.min(ARC_H - viewH, arcCenter - viewH * 0.28);
     arcPanY = Math.max(minPanY, Math.min(maxPanY, arcPanY));
   };
 
-  // Add invisible 32px SVG hit targets after the visible markers. Because the
-  // original visible elements remain first in each group, updateArcShape()
-  // continues to manipulate the same visible dot/diamond as before.
+  // Add invisible 32px SVG hit targets. Visible markers keep their old size.
   const baseUpdateArcShape = updateArcShape;
   updateArcShape = function pass2UpdateArcShape(scale) {
     baseUpdateArcShape(scale);
