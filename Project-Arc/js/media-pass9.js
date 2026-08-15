@@ -1,6 +1,7 @@
 /**
  * media-pass9.js
- * Pass 9 — shared image scaffold for Recipes, Meal Plan, Grocery, and Gym.
+ * Pass 9 — shared image scaffold for Daily Brief, Recipes, Meal Plan,
+ * Grocery, and Gym.
  *
  * No real photos are registered yet. The registry and DOM slots are prepared
  * so later image work only needs normal asset files plus registry entries.
@@ -11,6 +12,7 @@
     if (window.ArcMedia) return;
 
     const registry = {
+      dailyBrief: {},
       recipes: {},
       mealPlan: {},
       grocery: {},
@@ -84,6 +86,19 @@
 
       slot.appendChild(img);
       return slot;
+    }
+
+    function enhanceDailyBrief() {
+      const brief = document.getElementById('todaySummary');
+      const shell = brief && brief.querySelector('.daily-brief-shell');
+      if (!shell || shell.querySelector(':scope > .arc-media-daily-brief-slot')) return;
+
+      shell.classList.add('arc-media-daily-brief-shell');
+      shell.append(createMediaSlot('dailyBrief', 'today', {
+        className: 'arc-media-daily-brief-slot',
+        placeholder: 'Daily brief photo',
+        eager: true,
+      }));
     }
 
     function enhanceRecipeCards() {
@@ -182,6 +197,7 @@
     }
 
     function enhanceCurrentDom() {
+      enhanceDailyBrief();
       enhanceRecipeCards();
       enhanceMealPlan();
       enhanceGrocery();
@@ -201,6 +217,14 @@
     }
 
     ensureStylesheet();
+
+    // Daily Brief is transformed into its carousel shell just after
+    // renderTodaySummary(), so wait one animation frame before adding media.
+    const baseRenderTodaySummary = renderTodaySummary;
+    renderTodaySummary = function renderTodaySummaryWithMediaSlot() {
+      baseRenderTodaySummary();
+      requestAnimationFrame(enhanceDailyBrief);
+    };
 
     const baseRenderRecipes = renderRecipes;
     renderRecipes = function renderRecipesWithMediaSlots() {
@@ -239,7 +263,7 @@
       resolve: resolveAsset,
       refresh: enhanceCurrentDom,
       root: 'assets/images',
-      version: 'pass9-scaffold-1',
+      version: 'pass9-scaffold-2',
     };
 
     // Main may already have rendered by the time this dynamically loaded pass
