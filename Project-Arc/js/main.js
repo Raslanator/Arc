@@ -85,6 +85,38 @@
   initNav();
 
   /* ================================================================
+     TODAY — ROTATING DAILY BRIEF
+     Keep the original brief container and position. renderTodaySummary()
+     continues to build its contextual meal/workout/calorie items; this layer
+     simply presents one item at a time instead of three static rows.
+     ================================================================ */
+
+  let todayBriefIndex = 0;
+
+  function showTodayBriefItem(advance) {
+    const brief = document.getElementById('todaySummary');
+    if (!brief) return;
+
+    const items = Array.from(brief.querySelectorAll('.prep-item'));
+    if (!items.length) return;
+
+    if (advance && items.length > 1) {
+      todayBriefIndex = (todayBriefIndex + 1) % items.length;
+    } else if (todayBriefIndex >= items.length) {
+      todayBriefIndex = 0;
+    }
+
+    brief.setAttribute('aria-live', 'polite');
+    items.forEach((item, i) => {
+      item.hidden = i !== todayBriefIndex;
+      item.setAttribute('aria-hidden', i === todayBriefIndex ? 'false' : 'true');
+    });
+  }
+
+  showTodayBriefItem(false);
+  setInterval(() => showTodayBriefItem(true), 6500);
+
+  /* ================================================================
      GOALS FORM
      ================================================================ */
 
@@ -99,6 +131,7 @@
     appState.settings = { calorieTarget: dailyTarget, wakeMin, sleepMin };
     saveState();
     render();
+    showTodayBriefItem(false);
     const banner = document.getElementById('goalsSavedBanner');
     banner.classList.add('show');
     setTimeout(() => banner.classList.remove('show'), 3200);
@@ -108,6 +141,7 @@
     appState.settings = { ...DEFAULT_SETTINGS };
     saveState();
     render();
+    showTodayBriefItem(false);
   });
 
   /* ================================================================
@@ -151,12 +185,14 @@
     addCalEntry(label, kcal);
     labelEl.value = ''; kcalEl.value = '';
     labelEl.focus();
+    showTodayBriefItem(false);
   });
 
   document.getElementById('clearTodayBtn').addEventListener('click', () => {
     appState.calories[todayKeyStr()] = [];
     saveState();
     render();
+    showTodayBriefItem(false);
   });
 
   /* ================================================================
@@ -174,6 +210,7 @@
     });
     saveState();
     render();
+    showTodayBriefItem(false);
   });
 
   /* ================================================================
@@ -198,6 +235,7 @@
     appState.gymTracker[currentTrackerWeekKey()] = blankTrackerWeek();
     saveState();
     render();
+    showTodayBriefItem(false);
   });
 
   document.querySelectorAll('.counter-btn').forEach(btn => {
@@ -208,6 +246,7 @@
       wk[key] = Math.max(0, (wk[key] || 0) + dir);
       saveState();
       render();
+      showTodayBriefItem(false);
     });
   });
 
@@ -234,6 +273,7 @@
       pruneOldCalorieLogs();
       saveState();
       render();
+      showTodayBriefItem(false);
       ensurePrayerTimes();
     }
   }
