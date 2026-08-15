@@ -172,6 +172,47 @@
 }
 
 /* ==========================================================================
+   PASS 1.5 — REFACTOR REGRESSION FIXES
+   Keep these overrides narrowly scoped to the affected views. The existing
+   markup still carries a few static inline margins, so !important is used only
+   where required to restore the intended section separation without changing
+   application behavior.
+   ========================================================================== */
+
+/* Grocery items: keep checkbox and wrapped ingredient text aligned in a
+   predictable left-to-right row at every grid width. */
+#view-grocery .grocery-item {
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+  line-height: 1.5;
+}
+
+#view-grocery .grocery-item input {
+  margin: 2px 0 0;
+}
+
+#view-grocery .grocery-item span {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  writing-mode: horizontal-tb;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Give the recovery tracker a clear break from the four protocol cards. */
+#view-gym #protocolGrid + .day-block {
+  margin-top: var(--sp-8) !important;
+}
+
+/* Separate Appearance from the Save Goals / Reset controls as its own group. */
+#view-goals #goalsForm + .day-block {
+  margin-top: var(--sp-8) !important;
+}
+
+/* ==========================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
    Used when a list or grid has no content to display.
