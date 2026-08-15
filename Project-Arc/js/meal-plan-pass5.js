@@ -53,9 +53,17 @@
     return ids;
   };
 
+  function clearRecipeGroceryChecks(weekIdx, recipeId) {
+    const prefix = `w${weekIdx}-${recipeId}-`;
+    Object.keys(appState.grocery || {}).forEach(key => {
+      if (key.startsWith(prefix)) delete appState.grocery[key];
+    });
+  }
+
   function cleanupUnusedGroceryChecks(weekIdx) {
     const used = new Set(weekRecipeIds(weekIdx));
     const prefix = `w${weekIdx}-`;
+    let changed = false;
 
     Object.keys(appState.grocery || {}).forEach(key => {
       if (!key.startsWith(prefix)) return;
@@ -63,8 +71,13 @@
       const match = rest.match(/^(.*)-(\d+)$/);
       if (!match) return;
       const recipeId = match[1];
-      if (!used.has(recipeId)) delete appState.grocery[key];
+      if (!used.has(recipeId)) {
+        delete appState.grocery[key];
+        changed = true;
+      }
     });
+
+    return changed;
   }
 
   /* -----------------------------------------------------------------------
@@ -153,7 +166,8 @@
       </div>
     `).join('');
 
-    const currentDay = effectiveWeeks()[weekIdx] && effectiveWeeks()[weekIdx].days[dayIdx];
+    const currentWeek = effectiveWeeks()[weekIdx];
+    const currentDay = currentWeek && currentWeek.days[dayIdx];
     const hasMeal = !!(currentDay && currentDay[slot]);
 
     openModal(`
@@ -171,6 +185,13 @@
         const newRecipe = getRecipe(card.dataset.id);
         const key = mealOverrideKey(weekIdx, dayIdx, slot);
         const prevValue = previousOverrideValue(key);
+        const usedBefore = new Set(weekRecipeIds(weekIdx));
+
+        // If this recipe was not already used this week, start its Grocery
+        // checklist fresh instead of resurrecting stale checks from old builds.
+        if (!usedBefore.has(card.dataset.id)) {
+          clearRecipeGroceryChecks(weekIdx, card.dataset.id);
+        }
 
         appState.weekOverrides[key] = card.dataset.id;
         cleanupUnusedGroceryChecks(weekIdx);
@@ -360,7 +381,8 @@
 
   const pass5BaseRenderGrocery = renderGrocery;
   renderGrocery = function renderPass5Grocery() {
-    cleanupUnusedGroceryChecks(appState.grocWeek);
+    const cleaned = cleanupUnusedGroceryChecks(appState.grocWeek);
+    if (cleaned) saveState();
     pass5BaseRenderGrocery();
     enhanceGroceryProgress();
   };
