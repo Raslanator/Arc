@@ -1,4 +1,4 @@
-/* ==========================================================================
+/* ============================================================================
    UTILITIES
    Reusable single-purpose CSS classes extracted from inline styles.
    These replace static presentation rules that were previously written
@@ -10,7 +10,7 @@
    - Every class must work in both light and dark mode via CSS tokens.
    ========================================================================== */
 
-/* ==========================================================================
+/* ============================================================================
    TYPOGRAPHY UTILITIES
    ========================================================================== */
 
@@ -46,7 +46,7 @@
   letter-spacing: 1.2px;
 }
 
-/* ==========================================================================
+/* ============================================================================
    LAYOUT UTILITIES
    ========================================================================== */
 
@@ -74,7 +74,7 @@
   padding-top: 12px;
 }
 
-/* ==========================================================================
+/* ============================================================================
    CARD UTILITIES
    ========================================================================== */
 
@@ -88,7 +88,7 @@
   padding-right: 110px;
 }
 
-/* ==========================================================================
+/* ============================================================================
    BUTTON / ACTION UTILITIES
    ========================================================================== */
 
@@ -127,7 +127,7 @@
   margin-top: var(--sp-1);
 }
 
-/* ==========================================================================
+/* ============================================================================
    MODAL UTILITIES
    ========================================================================== */
 
@@ -141,7 +141,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ==========================================================================
+/* ============================================================================
    GYM UTILITIES
    ========================================================================== */
 
@@ -152,7 +152,7 @@
   margin-top: var(--sp-4);
 }
 
-/* ==========================================================================
+/* ============================================================================
    GROCERY SECTION HEADER
    Replaces the inline-styled <div> used as a recipe section divider
    inside the grocery grid.
@@ -171,7 +171,7 @@
   border-bottom: 1px solid var(--terracotta-dim);
 }
 
-/* ==========================================================================
+/* ============================================================================
    PASS 1.5 — REFACTOR REGRESSION FIXES
    Keep these overrides narrowly scoped to the affected views. The existing
    markup still carries a few static inline margins, so !important is used only
@@ -212,12 +212,11 @@
   margin-top: var(--sp-8) !important;
 }
 
-/* ==========================================================================
+/* ============================================================================
    PASS 2 — INTERACTION IMPROVEMENTS KEPT AFTER LAYOUT ROLLBACK
    Today layout, Arc card presentation, and Prayer Times positioning remain
    exactly on the original single-column structure.
    ========================================================================== */
-
 /* Header joins the existing light-follow system without changing its layout. */
 header.top {
   position: relative;
@@ -280,7 +279,7 @@ html[data-theme="dark"] header.top::before {
   display: none !important;
 }
 
-/* ==========================================================================
+/* ============================================================================
    TODAY — DAILY BRIEF CAROUSEL
    Two separate glass boxes: permanent day context on the left and rotating
    information on the right. Navigation lives in invisible edge hit-zones.
@@ -448,6 +447,52 @@ html[data-theme="dark"] #view-today .daily-brief-item {
   opacity: 0.55;
 }
 
+/* Slim in-box position indicator. It reads the same aria-hidden state the
+   carousel already maintains, so manual and automatic navigation stay synced
+   without a second JS state system. */
+#view-today .daily-brief-content::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  z-index: 3;
+  width: 42px;
+  height: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border-radius: 999px;
+  opacity: 0.9;
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(1)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(var(--terracotta), var(--terracotta)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(2)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:has(.daily-brief-item:nth-child(3)[aria-hidden="false"])::after {
+  background:
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 0 0 / 10px 2px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--muted) 38%, transparent), color-mix(in srgb, var(--muted) 38%, transparent)) 16px 0 / 10px 2px no-repeat,
+    linear-gradient(var(--terracotta), var(--terracotta)) 32px 0 / 10px 2px no-repeat;
+}
+
+#view-today .daily-brief-content:not(:has(.daily-brief-item:nth-child(2)))::after {
+  display: none;
+}
+
 @media (max-width: 640px) {
   #view-today .daily-brief-shell {
     grid-template-columns: 124px minmax(0, 1fr);
@@ -499,9 +544,14 @@ html[data-theme="dark"] #view-today .daily-brief-item {
     width: 38px;
     font-size: 22px;
   }
+
+  #view-today .daily-brief-content::after {
+    bottom: 7px;
+    height: 1.5px;
+  }
 }
 
-/* ==========================================================================
+/* ============================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
    Used when a list or grid has no content to display.
