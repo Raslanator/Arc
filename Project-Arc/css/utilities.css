@@ -274,6 +274,12 @@ html[data-theme="dark"] header.top::before {
   r: 16px;
 }
 
+/* Arc event markers only — hide numeric time labels and their leader lines. */
+#view-today .arc-label,
+#view-today .arc-label-leader {
+  display: none !important;
+}
+
 /* ==========================================================================
    EMPTY STATE
    Reusable centered empty-state treatment.
