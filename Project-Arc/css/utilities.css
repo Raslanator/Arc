@@ -282,97 +282,49 @@ html[data-theme="dark"] header.top::before {
 
 /* ==========================================================================
    TODAY — DAILY BRIEF CAROUSEL
-   Scoped to #todaySummary so the Meal Plan prep banner is untouched.
+   Two separate glass boxes: permanent day context on the left and rotating
+   information on the right. Navigation lives in invisible edge hit-zones.
    ========================================================================== */
 
 #view-today #todaySummary {
   display: block;
   padding: 0;
-  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+#view-today #todaySummary::before {
+  content: none !important;
 }
 
 #view-today .daily-brief-shell {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px auto;
+  grid-template-columns: minmax(154px, 0.22fr) minmax(0, 1fr);
+  gap: 12px;
   align-items: stretch;
   min-height: 112px;
 }
 
-#view-today .daily-brief-stage {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  min-height: 112px;
-  padding: 16px 10px;
-  overflow: hidden;
-}
-
-#view-today .daily-brief-item {
-  width: 100%;
-  margin: 0;
-  color: var(--ink);
-  line-height: 1.24;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-#view-today .daily-brief-item b {
-  margin-bottom: 7px;
-  color: var(--terracotta);
-  font-size: 11px;
-  letter-spacing: 1.2px;
-}
-
-#view-today .daily-brief-arrow {
-  width: 44px;
-  min-width: 44px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font-family: 'Inter', sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    color var(--dur-fast) ease,
-    background-color var(--dur-fast) ease,
-    transform var(--dur-fast) var(--ease);
-}
-
-#view-today .daily-brief-prev {
-  border-right: 1px solid var(--line);
-}
-
-#view-today .daily-brief-next {
-  border-left: 1px solid var(--line);
-}
-
-#view-today .daily-brief-arrow:hover {
-  color: var(--terracotta);
-  background: var(--terracotta-dim);
-}
-
-#view-today .daily-brief-prev:hover {
-  transform: translateX(-1px);
-}
-
-#view-today .daily-brief-next:hover {
-  transform: translateX(1px);
-}
-
-#view-today .daily-brief-arrow:active {
-  transform: scale(0.92);
+#view-today .daily-brief-day,
+#view-today .daily-brief-content {
+  background: var(--paper);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
 }
 
 #view-today .daily-brief-day {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  min-width: 154px;
-  padding: 16px 22px 16px 18px;
-  border-left: 1px solid var(--line);
-  text-align: right;
+  justify-content: flex-start;
+  padding: 18px 20px;
+  text-align: left;
 }
 
 #view-today .daily-brief-day strong {
@@ -383,33 +335,106 @@ html[data-theme="dark"] header.top::before {
   white-space: nowrap;
 }
 
+#view-today .daily-brief-content {
+  position: relative;
+  min-width: 0;
+  min-height: 112px;
+  overflow: hidden;
+}
+
+#view-today .daily-brief-stage {
+  display: grid;
+  align-items: center;
+  min-width: 0;
+  min-height: 112px;
+  padding: 16px 42px;
+  overflow: hidden;
+}
+
+#view-today .daily-brief-item {
+  grid-area: 1 / 1;
+  width: 100%;
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.24;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  will-change: transform, opacity;
+}
+
+#view-today .daily-brief-item b {
+  margin-bottom: 7px;
+  color: var(--terracotta);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+}
+
+/* The controls occupy the clickable boundary but are visually absent until
+   the pointer actually reaches that edge. Only the bare < / > glyph appears. */
+#view-today .daily-brief-arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  transition:
+    opacity 0.18s ease,
+    color 0.18s ease;
+}
+
+#view-today .daily-brief-prev { left: 0; }
+#view-today .daily-brief-next { right: 0; }
+
+#view-today .daily-brief-arrow:hover,
+#view-today .daily-brief-arrow:focus-visible {
+  opacity: 0.34;
+  color: var(--ink);
+  background: transparent;
+}
+
+#view-today .daily-brief-arrow:active {
+  opacity: 0.55;
+}
+
 @media (max-width: 640px) {
   #view-today .daily-brief-shell {
-    grid-template-columns: 36px minmax(0, 1fr) 36px auto;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 104px;
+  }
+
+  #view-today .daily-brief-day {
+    padding: 14px 12px;
+  }
+
+  #view-today .daily-brief-day strong {
+    white-space: normal;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  #view-today .daily-brief-content,
+  #view-today .daily-brief-stage {
     min-height: 104px;
   }
 
   #view-today .daily-brief-stage {
-    min-height: 104px;
-    padding: 14px 6px;
+    padding: 14px 34px;
   }
 
   #view-today .daily-brief-arrow {
-    width: 36px;
-    min-width: 36px;
-    font-size: 20px;
-  }
-
-  #view-today .daily-brief-day {
-    min-width: 112px;
-    padding: 14px 12px 14px 10px;
-  }
-
-  #view-today .daily-brief-day strong {
-    max-width: 90px;
-    white-space: normal;
-    font-size: 11px;
-    line-height: 1.25;
+    width: 38px;
+    font-size: 22px;
   }
 }
 
