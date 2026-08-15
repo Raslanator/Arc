@@ -37,10 +37,10 @@
   }
 
   function statusLabel(status) {
-    if (status === 'under') return 'Below';
+    if (status === 'under') return 'Below target range';
     if (status === 'on') return 'On target';
-    if (status === 'over') return 'Above';
-    return 'No data';
+    if (status === 'over') return 'Above target range';
+    return 'No calorie data';
   }
 
   function renderSevenDaySvg() {
@@ -96,6 +96,26 @@
       </div>`;
   }
 
+  function renderAdherenceSchedule() {
+    const el = document.getElementById('progressCalorieBreakdown');
+    if (!el || !window.ArcProgress || typeof window.ArcProgress.getCalorieWindow !== 'function') return;
+
+    const records = window.ArcProgress.getCalorieWindow(7);
+    const target = Number(appState.settings && appState.settings.calorieTarget) || 2200;
+
+    el.innerHTML = `
+      <div class="progress-adherence-week" role="list" aria-label="Calorie adherence for the last seven days">
+        ${records.map(record => {
+          const status = statusFor(record, target);
+          const day = shortDay(record.key);
+          return `
+            <div class="progress-adherence-day ${status}" role="listitem" title="${escapeHtml(day)}: ${escapeHtml(statusLabel(status))}" aria-label="${escapeHtml(day)}: ${escapeHtml(statusLabel(status))}">
+              <span>${escapeHtml(day)}</span>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
   function renderCompletionMeters() {
     const blocks = Array.from(document.querySelectorAll('#progressCompletion .progress-completion-block'));
     blocks.forEach((block, index) => {
@@ -117,6 +137,7 @@
 
   function applyVisualFixes() {
     renderSevenDaySvg();
+    renderAdherenceSchedule();
     renderCompletionMeters();
   }
 
