@@ -1,0 +1,57 @@
+/* ========================================================================== 
+   PASS 7 — 7-DAY COLUMN STATUS GLASS
+   Tint the full glass column by calorie status while preserving the inner
+   height fill as the quantitative value.
+   ========================================================================== */
+
+#view-progress .progress-seven-day.under .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--gold) 24%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--gold) 48%, var(--glass-border));
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+#view-progress .progress-seven-day.on .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--sage) 26%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--sage) 50%, var(--glass-border));
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--sage) 11%, transparent);
+}
+
+#view-progress .progress-seven-day.over .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--rust) 22%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--rust) 48%, var(--glass-border));
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--rust) 10%, transparent);
+}
+
+#view-progress .progress-seven-day.no-data .progress-seven-bar-zone {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--muted) 28%, var(--glass-border));
+  border-style: dashed;
+  box-shadow: none;
+}
+
+#view-progress .progress-seven-day.under .progress-seven-bar {
+  background: var(--gold);
+  opacity: 0.9;
+}
+
+#view-progress .progress-seven-day.on .progress-seven-bar {
+  background: var(--sage);
+  opacity: 0.9;
+}
+
+#view-progress .progress-seven-day.over .progress-seven-bar {
+  background: var(--rust);
+  opacity: 0.9;
+}
+
+html[data-theme="dark"] #view-progress .progress-seven-day.under .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--gold) 20%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-seven-day.on .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--sage) 21%, var(--paper-2));
+}
+
+html[data-theme="dark"] #view-progress .progress-seven-day.over .progress-seven-bar-zone {
+  background: color-mix(in srgb, var(--rust) 19%, var(--paper-2));
+}
