@@ -305,3 +305,130 @@ html[data-theme="dark"] #view-progress .progress-date-picker-wrap input[type="da
     min-height: 112px;
   }
 }
+
+/* ========================================================================== 
+   LAST 7 DAYS — CLEARER COLORED COLUMNS
+   Gold = below range, sage = on target, rust = above range.
+   ========================================================================== */
+
+#view-progress #progress7Meta::after {
+  content: ' · colors show daily status';
+}
+
+#view-progress .progress-seven-chart::before {
+  content: 'Gold = below range   ·   Green = on target   ·   Red = above range';
+  display: block;
+  margin: 0 0 12px;
+  font-size: 9.5px;
+  line-height: 1.4;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+#view-progress .progress-seven-plot {
+  min-height: 248px;
+  gap: 10px;
+}
+
+#view-progress .progress-target-line {
+  z-index: 4;
+  border-top-width: 2px;
+  border-top-color: color-mix(in srgb, var(--ink) 42%, transparent);
+}
+
+#view-progress .progress-seven-day {
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  gap: 4px;
+}
+
+#view-progress .progress-seven-bar-zone {
+  min-height: 184px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--paper-2) 56%, transparent);
+  border-color: color-mix(in srgb, var(--glass-border) 92%, transparent);
+}
+
+#view-progress .progress-seven-bar {
+  left: 8px;
+  right: 8px;
+  opacity: 1;
+  border-radius: 8px 8px 6px 6px;
+  transition: height 180ms ease, filter 140ms ease;
+}
+
+#view-progress .progress-seven-day.under .progress-seven-bar {
+  background: var(--gold);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--gold) 24%, transparent);
+}
+
+#view-progress .progress-seven-day.on .progress-seven-bar {
+  background: var(--sage);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--sage) 24%, transparent);
+}
+
+#view-progress .progress-seven-day.over .progress-seven-bar {
+  background: var(--rust);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--rust) 24%, transparent);
+}
+
+#view-progress .progress-seven-day.no-data .progress-seven-bar-zone {
+  opacity: 0.65;
+}
+
+#view-progress .progress-seven-day > span:last-child {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+#view-progress .progress-seven-day::after {
+  min-height: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8.8px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: 0.25px;
+  text-transform: uppercase;
+}
+
+#view-progress .progress-seven-day.under::after {
+  content: 'Below';
+  color: var(--gold);
+}
+
+#view-progress .progress-seven-day.on::after {
+  content: 'On target';
+  color: var(--sage);
+}
+
+#view-progress .progress-seven-day.over::after {
+  content: 'Above';
+  color: var(--rust);
+}
+
+#view-progress .progress-seven-day.no-data::after {
+  content: 'No data';
+  color: var(--muted);
+}
+
+@media (hover: hover) {
+  #view-progress .progress-seven-day:hover .progress-seven-bar {
+    filter: saturate(1.08) brightness(1.03);
+  }
+}
+
+@media (max-width: 760px) {
+  #view-progress .progress-seven-plot {
+    grid-template-columns: repeat(7, minmax(64px, 1fr));
+  }
+
+  #view-progress .progress-seven-chart::before {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-progress .progress-seven-bar {
+    transition: none;
+  }
+}
