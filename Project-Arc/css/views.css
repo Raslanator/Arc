@@ -1,10 +1,10 @@
-/* ========================================================================== 
+/* ==========================================================================
    VIEWS
    Styles specific to individual view sections: Today/Arc, Timeline,
    Prayer Times, Calorie Calculator, and the arc pop animation system.
    ========================================================================== */
 
-/* ========================================================================== 
+/* ==========================================================================
    TODAY — ARC CARD
    ========================================================================== */
 
@@ -134,7 +134,7 @@
   100% { box-shadow: 0 0 0 0   rgba(255, 107, 74, 0); }
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    TODAY — ARC POP ANIMATION SYSTEM
    The emphasis overlay is rendered in a dedicated top-level portal layer
    appended to document.body, sized and positioned over the target row via
@@ -207,7 +207,7 @@
     border-radius 0.22s ease 0.22s;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    TODAY — TIMELINE LIST
    ========================================================================== */
 
@@ -306,7 +306,7 @@
   margin-left: 8px;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    TODAY — PRAYER TIMES
    ========================================================================== */
 
@@ -408,7 +408,7 @@
 .tl-row.prayer-tl-row.done .tl-title { color: var(--sage); }
 
 /* Salah rows keep their plum identity at rest, but shared event interaction
-   states must take precedence exactly as they do for normal timeline rows. */
+   states take precedence exactly as they do for normal timeline rows. */
 .tl-row.prayer-tl-row.pop-lit {
   border-radius: var(--radius);
   padding-left: 16px;
@@ -417,6 +417,9 @@
   border-color: transparent;
   background: var(--terracotta-dim);
   box-shadow: none;
+}
+.tl-row.prayer-tl-row.pop-lit .tl-time {
+  color: var(--terracotta);
 }
 
 .tl-row.prayer-tl-row.next-event {
@@ -429,10 +432,8 @@
 }
 .tl-row.prayer-tl-row.next-event .tl-time {
   color: var(--terracotta);
-  font-size: var(--fs-md);
 }
 .tl-row.prayer-tl-row.next-event .tl-title {
-  font-size: 26px;
   color: var(--terracotta);
 }
 
@@ -440,7 +441,7 @@
   color: var(--terracotta);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    CALORIE CALCULATOR
    ========================================================================== */
 
@@ -514,7 +515,7 @@
 .cal-left { color: var(--terracotta); font-weight: 700; }
 .cal-left.over { color: var(--rust); }
 
-/* ========================================================================== 
+/* ==========================================================================
    RESPONSIVE — VIEW ADJUSTMENTS
    ========================================================================== */
 
