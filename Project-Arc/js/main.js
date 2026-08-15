@@ -9,6 +9,43 @@
 (function init() {
 
   /* ================================================================
+     OPTIONAL FEATURE BOUNDARY — SALAH
+     prayer.js is the actual Salah feature module. Core Timeline/Arc code was
+     written before optional modules existed, so provide safe empty globals
+     when that file is absent. This keeps the app operational if prayer.js is
+     later deleted and its single <script> line is removed.
+
+     With prayer.js absent:
+     - no prayer names are injected into Timeline or Arc
+     - prayerTimesToday stays null
+     - Prayer Times card hides itself
+     - periodic prayer rendering/fetch calls become harmless no-ops
+     ================================================================ */
+
+  const salahFeaturePresent =
+    typeof PRAYER_NAMES !== 'undefined' &&
+    typeof ensurePrayerTimes === 'function' &&
+    typeof renderPrayerCard === 'function';
+
+  window.SalahFeature = {
+    enabled: salahFeaturePresent,
+    removableModule: 'js/prayer.js',
+  };
+
+  if (!salahFeaturePresent) {
+    window.PRAYER_NAMES = [];
+    window.prayerTimesToday = null;
+
+    const hideSalahCard = () => {
+      const card = document.querySelector('#view-today .prayer-card');
+      if (card) card.hidden = true;
+    };
+
+    window.ensurePrayerTimes = hideSalahCard;
+    window.renderPrayerCard = hideSalahCard;
+  }
+
+  /* ================================================================
      PASS 2 — INTERACTION IMPROVEMENTS KEPT AFTER LAYOUT ROLLBACK
      No DOM reordering: Today keeps its original single-column structure and
      Prayer Times remains in its original position/card.
