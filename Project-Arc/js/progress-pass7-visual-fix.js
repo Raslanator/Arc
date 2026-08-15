@@ -3,12 +3,14 @@
  * Pass 7 visual correction for value-accurate daily/weekly Progress graphics.
  *
  * Uses SVG geometry instead of inline CSS widths/heights so CSP cannot flatten
- * percentage meters or calorie columns.
+ * percentage meters or calorie columns. Also integrates the current 7-day
+ * window into a read-only Weekly Consistency summary.
  */
 
 (function initProgressPass7VisualFix() {
   const TARGET_LOW_RATIO = 0.90;
   const TARGET_HIGH_RATIO = 1.05;
+  const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
   function ensureStylesheet() {
     if (document.querySelector('link[data-progress-pass7-visual-fix]')) return;
@@ -22,6 +24,11 @@
   function dateFromKey(key) {
     const [year, month, day] = String(key || '').split('-').map(Number);
     return new Date(year, (month || 1) - 1, day || 1, 12, 0, 0, 0);
+  }
+
+  function dateKeyLocal(date) {
+    const pad2 = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
   }
 
   function shortDay(key) {
@@ -96,24 +103,144 @@
       </div>`;
   }
 
-  function renderAdherenceSchedule() {
+  function scheduleDayScore(key) {
+    const events = window.ArcSchedule && typeof window.ArcSchedule.getEvents === 'function'
+      ? window.ArcSchedule.getEvents()
+      : (Array.isArray(appState.timelineEvents) ? appState.timelineEvents : []);
+    const eventIds = events.map(event => event.id).filter(Boolean);
+    const bucket = appState.timelineStatus && appState.timelineStatus[key];
+    if (!bucket || !Object.keys(bucket).length || !eventIds.length) return null;
+    const done = eventIds.filter(id => bucket[id] && bucket[id].done !== false).length;
+    return Math.round((done / eventIds.length) * 100);
+  }
+
+  function salahDayScore(key) {
+    const bucket = appState.prayerStatus && appState.prayerStatus[key];
+    if (!bucket || !Object.keys(bucket).length) return null;
+    const done = PRAYERS.filter(name => !!bucket[name]).length;
+    return { score: Math.round((done / PRAYERS.length) * 100), done };
+  }
+
+  function recoveryDayInfo(key) {
+    const date = dateFromKey(key);
+    const dayIndex = (date.getDay() + 6) % 7;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - dayIndex);
+    const week = appState.gymTracker && appState.gymTracker[dateKeyLocal(monday)];
+    const day = week && week.days && week.days[dayIndex];
+    const cardio = !!(day && day.cardio);
+    const swim = !!(day && day.swim);
+    if (!cardio && !swim) return null;
+    return { cardio, swim, score: cardio && swim ? 100 : 75 };
+  }
+
+  function calorieConsistencyScore(record, target) {
+    if (!record || !record.hasData || !target) return null;
+    const deviation = Math.abs(record.total - target) / target;
+    return Math.max(0, Math.round(100 - deviation * 200));
+  }
+
+  function consistencyStatus(score) {
+    if (score === null) return 'no-data';
+    if (score >= 80) return 'strong';
+    if (score >= 55) return 'mixed';
+    return 'low';
+  }
+
+  function dayConsistency(record, target) {
+    const components = [];
+    const calorieScore = calorieConsistencyScore(record, target);
+    const timelineScore = scheduleDayScore(record.key);
+    const salah = salahDayScore(record.key);
+    const recovery = recoveryDayInfo(record.key);
+
+    if (calorieScore !== null) components.push({ name: 'Calories', score: calorieScore });
+    if (timelineScore !== null) components.push({ name: 'Timeline', score: timelineScore });
+    if (salah) components.push({ name: 'Salah', score: salah.score });
+    if (recovery) components.push({ name: 'Recovery', score: recovery.score });
+
+    const score = components.length
+      ? Math.round(components.reduce((sum, item) => sum + item.score, 0) / components.length)
+      : null;
+
+    return {
+      key: record.key,
+      day: shortDay(record.key),
+      score,
+      status: consistencyStatus(score),
+      calorieStatus: statusFor(record, target),
+      timelineScore,
+      salah,
+      recovery,
+      componentCount: components.length,
+    };
+  }
+
+  function dayReason(day) {
+    const parts = [];
+    if (day.calorieStatus !== 'no-data') {
+      parts.push(day.calorieStatus === 'on' ? 'calories on target' : day.calorieStatus === 'under' ? 'calories below target' : 'calories above target');
+    }
+    if (day.timelineScore !== null) parts.push(`Timeline ${day.timelineScore}%`);
+    if (day.salah) parts.push(`Salah ${day.salah.done}/5`);
+    if (day.recovery) {
+      if (day.recovery.cardio && day.recovery.swim) parts.push('cardio + swim recorded');
+      else if (day.recovery.cardio) parts.push('cardio recorded');
+      else if (day.recovery.swim) parts.push('swim recorded');
+    }
+    return parts.join(', ');
+  }
+
+  function renderWeeklyConsistency() {
     const el = document.getElementById('progressCalorieBreakdown');
     if (!el || !window.ArcProgress || typeof window.ArcProgress.getCalorieWindow !== 'function') return;
 
+    const panel = el.closest('.progress-panel');
+    if (panel) {
+      const title = panel.querySelector('h4');
+      const subtitle = panel.querySelector('.progress-panel-sub');
+      if (title) title.textContent = 'Weekly Consistency';
+      if (subtitle) subtitle.textContent = 'Last 7 days · available data only';
+    }
+
     const records = window.ArcProgress.getCalorieWindow(7);
     const target = Number(appState.settings && appState.settings.calorieTarget) || 2200;
+    const days = records.map(record => dayConsistency(record, target));
+    const scored = days.filter(day => day.score !== null);
+
+    const counts = {
+      strong: days.filter(day => day.status === 'strong').length,
+      mixed: days.filter(day => day.status === 'mixed').length,
+      low: days.filter(day => day.status === 'low').length,
+      noData: days.filter(day => day.status === 'no-data').length,
+    };
+
+    let interpretation = 'Not enough tracked information yet to interpret this week.';
+    if (scored.length) {
+      const ranked = [...scored].sort((a, b) => b.score - a.score);
+      const best = ranked[0];
+      const weakest = ranked[ranked.length - 1];
+      const overview = `${counts.strong} strong day${counts.strong === 1 ? '' : 's'} · ${counts.mixed} mixed · ${counts.low} need${counts.low === 1 ? 's' : ''} attention${counts.noData ? ` · ${counts.noData} unscored` : ''}.`;
+      const bestText = dayReason(best);
+      const weakText = dayReason(weakest);
+      interpretation = `${overview} ${best.day} was strongest${bestText ? `: ${bestText}` : ''}.`;
+      if (weakest.key !== best.key) interpretation += ` ${weakest.day} was weakest${weakText ? `: ${weakText}` : ''}.`;
+    }
 
     el.innerHTML = `
-      <div class="progress-adherence-week" role="list" aria-label="Calorie adherence for the last seven days">
-        ${records.map(record => {
-          const status = statusFor(record, target);
-          const day = shortDay(record.key);
-          return `
-            <div class="progress-adherence-day ${status}" role="listitem" title="${escapeHtml(day)}: ${escapeHtml(statusLabel(status))}" aria-label="${escapeHtml(day)}: ${escapeHtml(statusLabel(status))}">
-              <span>${escapeHtml(day)}</span>
-            </div>`;
-        }).join('')}
-      </div>`;
+      <div class="progress-consistency-week" role="list" aria-label="Weekly consistency across calories, Timeline, Salah, and recorded recovery">
+        ${days.map(day => `
+          <div class="progress-consistency-day ${day.status}" role="listitem" title="${escapeHtml(day.day)}: ${day.status === 'no-data' ? 'Not enough data' : day.status === 'strong' ? 'Strong day' : day.status === 'mixed' ? 'Mixed day' : 'Needs attention'}">
+            <span>${escapeHtml(day.day)}</span>
+          </div>`).join('')}
+      </div>
+      <div class="progress-consistency-legend" aria-hidden="true">
+        <span class="strong"><i></i>Strong</span>
+        <span class="mixed"><i></i>Mixed</span>
+        <span class="low"><i></i>Needs attention</span>
+        <span class="no-data"><i></i>Unscored</span>
+      </div>
+      <p class="progress-consistency-interpretation"><strong>Interpretation</strong>${escapeHtml(interpretation)}</p>`;
   }
 
   function renderCompletionMeters() {
@@ -137,7 +264,7 @@
 
   function applyVisualFixes() {
     renderSevenDaySvg();
-    renderAdherenceSchedule();
+    renderWeeklyConsistency();
     renderCompletionMeters();
   }
 
