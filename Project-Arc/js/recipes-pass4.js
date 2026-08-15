@@ -162,3 +162,14 @@
   script.addEventListener('load', loadDailyBriefAlternation, { once: true });
   document.head.appendChild(script);
 })();
+
+// ARC.04 / Pass 10 principle layer. It waits for DOMContentLoaded before
+// wrapping the final renderers, so it remains independent of the legacy script
+// ordering while preserving the frozen behavior underneath.
+(function loadPass10Principles() {
+  if (document.querySelector('script[data-pass10-principles]')) return;
+  const script = document.createElement('script');
+  script.src = 'js/principles-pass10.js';
+  script.dataset.pass10Principles = 'true';
+  document.head.appendChild(script);
+})();
