@@ -150,3 +150,14 @@
     try { localStorage.setItem(MARKER, '1'); } catch (e) { /* non-fatal */ }
   };
 })();
+
+/* Load the permanent Progress visual correction in the edit preview.
+   When temporary seed wiring is removed, this module must remain wired. */
+(function loadProgressPass7VisualFix() {
+  if (document.querySelector('script[data-progress-pass7-visual-fix]')) return;
+  const script = document.createElement('script');
+  script.src = 'js/progress-pass7-visual-fix.js';
+  script.async = false;
+  script.dataset.progressPass7VisualFix = 'true';
+  document.head.appendChild(script);
+})();
