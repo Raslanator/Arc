@@ -37,6 +37,21 @@
   opacity: 0.68;
 }
 
+/* Daily Brief — dedicated visual slot beside the rotating brief copy. */
+#view-today .daily-brief-shell.arc-media-daily-brief-shell {
+  grid-template-columns: auto minmax(0, 1fr) clamp(150px, 18vw, 190px);
+  align-items: stretch;
+}
+
+#view-today .arc-media-daily-brief-slot {
+  width: clamp(150px, 18vw, 190px);
+  min-height: 104px;
+  aspect-ratio: 4 / 3;
+  flex: 0 0 clamp(150px, 18vw, 190px);
+  align-self: stretch;
+  border-radius: 14px;
+}
+
 /* Recipes — large photography-led card space. */
 #view-recipes .recipe-card-pass4.arc-media-recipe-card {
   min-height: 0;
@@ -127,6 +142,16 @@
 }
 
 @media (max-width: 720px) {
+  #view-today .daily-brief-shell.arc-media-daily-brief-shell {
+    grid-template-columns: auto minmax(0, 1fr) 138px;
+  }
+
+  #view-today .arc-media-daily-brief-slot {
+    width: 138px;
+    min-height: 92px;
+    flex-basis: 138px;
+  }
+
   #view-plan .pass5-meal-row.arc-media-meal-row {
     grid-template-columns: 64px minmax(0, 1fr) auto;
     column-gap: 10px;
@@ -147,6 +172,23 @@
 
   #view-gym .arc-media-gym-slot {
     aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 560px) {
+  #view-today .daily-brief-shell.arc-media-daily-brief-shell {
+    grid-template-columns: 1fr;
+    flex-wrap: wrap;
+  }
+
+  #view-today .arc-media-daily-brief-slot {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-height: 150px;
+    min-height: 110px;
+    aspect-ratio: 16 / 7;
+    flex: 1 0 100%;
+    order: 3;
   }
 }
 
