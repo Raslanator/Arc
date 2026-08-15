@@ -194,6 +194,198 @@
     linear-gradient(var(--terracotta), var(--terracotta)) 60px 0 / 9px 2px no-repeat;
 }
 
+/* ========================================================================== 
+   PASS 3 — CALORIES
+   Stronger Today-first hierarchy, compact logging workspace, and corrected
+   custom-kcal stepper styling. Historical data is preserved in appState.
+   ========================================================================== */
+
+#view-calories .cal-summary {
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr);
+  align-items: stretch;
+  gap: 16px;
+}
+
+#view-calories .cal-card-today {
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  background:
+    linear-gradient(135deg, var(--terracotta-dim), transparent 66%),
+    var(--paper);
+}
+
+#view-calories .cal-card-today::after {
+  content: "";
+  position: absolute;
+  inset: auto -56px -68px auto;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  filter: blur(4px);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+#view-calories .cal-card-today h5,
+#view-calories .cal-card-today .cal-bar,
+#view-calories .cal-card-today .cal-nums {
+  position: relative;
+  z-index: 1;
+}
+
+#view-calories .cal-card-today .cal-bar {
+  height: 12px;
+  margin: 6px 0 18px;
+}
+
+#view-calories .cal-card-today .cal-nums {
+  align-items: flex-end;
+}
+
+#view-calories .cal-card-today .cal-nums > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+#view-calories .cal-card-today .cal-nums b {
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+#view-calories .cal-card-today .cal-left {
+  font-size: var(--fs-md);
+}
+
+#view-calories .cal-card-week {
+  padding: 24px;
+  background: color-mix(in srgb, var(--paper) 86%, var(--sage-dim));
+}
+
+#view-calories .cal-card-week .cal-nums {
+  font-size: var(--fs-xs);
+}
+
+#view-calories .cal-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+#view-calories .cal-entry-grid > .day-block {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+#view-calories .cal-entry-grid .quickadd-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#view-calories .cal-entry-grid .qa-btn {
+  min-width: 0;
+}
+
+#view-calories .custom-add-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 158px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+#view-calories .custom-add-form input[type="text"] {
+  min-width: 0;
+}
+
+#view-calories .custom-add-form .stepper-field-inline {
+  width: 158px;
+}
+
+/* components.css historically styles every custom-form button as the orange
+   submit pill. Explicitly restore the nested stepper controls here. */
+#view-calories .custom-add-form .stepper-btn {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  filter: none;
+  font-size: 16px;
+  letter-spacing: 0;
+  transform: none;
+}
+
+#view-calories .custom-add-form .stepper-btn.dec {
+  border-right: 1px solid var(--glass-border);
+}
+
+#view-calories .custom-add-form .stepper-btn.inc {
+  border-left: 1px solid var(--glass-border);
+}
+
+#view-calories .custom-add-form .stepper-btn:hover {
+  background: var(--terracotta-dim);
+  color: var(--terracotta);
+  filter: none;
+  transform: none;
+}
+
+#view-calories .custom-add-form .stepper-btn:active {
+  transform: scale(0.86);
+}
+
+#view-calories .custom-add-form > button[type="submit"] {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding-inline: 24px;
+}
+
+#view-calories .cal-today-log {
+  border-color: color-mix(in srgb, var(--terracotta) 34%, var(--glass-border));
+}
+
+#view-calories .cal-today-log h4 {
+  font-size: 20px;
+}
+
+#view-calories .cal-today-log .log-entry {
+  padding-block: 15px;
+}
+
+@media (max-width: 860px) {
+  #view-calories .cal-summary,
+  #view-calories .cal-entry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #view-calories .cal-card-today .cal-nums b {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  #view-calories .cal-entry-grid .quickadd-row,
+  #view-calories .custom-add-form {
+    grid-template-columns: 1fr;
+  }
+
+  #view-calories .custom-add-form .stepper-field-inline {
+    width: 100%;
+  }
+
+  #view-calories .custom-add-form > button[type="submit"] {
+    width: 100%;
+    justify-self: stretch;
+  }
+}
+
 @media (max-width: 768px) {
   #view-today .schedule-toolbar {
     align-items: flex-start;
