@@ -14,22 +14,90 @@
      Prayer Times remains in its original position/card.
      ================================================================ */
 
-  // Keep the arc's path visually present while zooming/panning. The original
-  // clamp still handles hard SVG bounds; this tighter vertical band prevents
-  // zooming around a pointer from pushing the flattened arc out of view.
-  const baseClampArcPan = clampArcPan;
+  /* ----------------------------------------------------------------
+     ARC VERTICAL CENTERING
+     Vertical panning is intentionally disabled. At every zoom level the
+     viewport is centered around the complete visible Arc content band:
+     curve + event markers + scaled time labels + current-time marker.
+     Horizontal panning remains fully available.
+     ---------------------------------------------------------------- */
+
+  function arcYAtZoom(t, zoom) {
+    const frac = Math.max(0, Math.min(1, (t - ARC_MINT) / (ARC_MAXT - ARC_MINT)));
+    const curveFactor = computeCurveFactor(zoom);
+    return ARC_BOTTOM - Math.sin(frac * Math.PI) * (ARC_BOTTOM - ARC_TOP) * curveFactor;
+  }
+
+  function centeredArcPanY(zoom) {
+    const viewH = ARC_H / zoom;
+    if (zoom <= 1.001) return 0;
+
+    const dotScale = dotScaleFor(zoom);
+    const arcTop = ARC_BOTTOM - (ARC_BOTTOM - ARC_TOP) * computeCurveFactor(zoom);
+    let minY = arcTop;
+    let maxY = ARC_BOTTOM;
+
+    const svg = document.getElementById('arcSvg');
+    if (svg) {
+      svg.querySelectorAll('.arc-scale-dot').forEach(group => {
+        const t = parseFloat(group.dataset.t);
+        if (!Number.isFinite(t)) return;
+
+        const cy = arcYAtZoom(t, zoom);
+        const rung = parseFloat(group.dataset.rung || '0');
+        const above = group.dataset.above === '1';
+
+        // Always include the visible marker itself.
+        const markerRadius = group.classList.contains('arc-prayer-dot') ? 5 : 6;
+        minY = Math.min(minY, cy - markerRadius * dotScale);
+        maxY = Math.max(maxY, cy + markerRadius * dotScale);
+
+        // Event time labels are transformed around their dot together with the
+        // marker group, so their vertical offset shrinks with dotScaleFor().
+        if (group.classList.contains('arc-dot')) {
+          const labelDist = (above ? -16 : 24) + (above ? -rung * 13 : rung * 13);
+          const labelBaseline = cy + labelDist * dotScale;
+          const labelTop = labelBaseline - 9 * dotScale;
+          const labelBottom = labelBaseline + 4 * dotScale;
+          minY = Math.min(minY, labelTop);
+          maxY = Math.max(maxY, labelBottom);
+        }
+      });
+    }
+
+    // Include the live NOW marker/chip when it is inside today's Arc range.
+    const nowT = nowMinutes();
+    if (nowT >= ARC_MINT && nowT <= ARC_MAXT) {
+      const cy = arcYAtZoom(nowT, zoom);
+      const markerScale = nowMarkerScaleFor(zoom);
+      minY = Math.min(minY, cy - 35 * markerScale);
+      maxY = Math.max(maxY, cy + 13 * markerScale);
+    }
+
+    // A small safety margin prevents glyphs from touching the clipped edge.
+    const margin = 5;
+    minY -= margin;
+    maxY += margin;
+
+    const contentCenter = (minY + maxY) / 2;
+    const maxPanY = Math.max(0, ARC_H - viewH);
+    return Math.max(0, Math.min(maxPanY, contentCenter - viewH / 2));
+  }
+
+  // Clamp X normally, but make Y a derived center value. This means vertical
+  // mouse/touch movement can never decentralize the Arc.
   clampArcPan = function pass2ClampArcPan() {
-    baseClampArcPan();
-    if (arcZoom <= 1.001) return;
+    const vw = ARC_W / arcZoom;
+    arcPanX = Math.max(0, Math.min(ARC_W - vw, arcPanX));
+    arcPanY = centeredArcPanY(arcZoom);
+  };
 
-    const viewH = ARC_H / arcZoom;
-    const curveFactor = computeCurveFactor(arcZoom);
-    const arcTop = ARC_BOTTOM - (ARC_BOTTOM - ARC_TOP) * curveFactor;
-    const arcCenter = (arcTop + ARC_BOTTOM) / 2;
-
-    const minPanY = Math.max(0, arcCenter - viewH * 0.72);
-    const maxPanY = Math.min(ARC_H - viewH, arcCenter - viewH * 0.28);
-    arcPanY = Math.max(minPanY, Math.min(maxPanY, arcPanY));
+  // Recenter the displayed viewport on every animation frame too, so the Arc
+  // remains centered throughout a smooth zoom rather than only at its endpoint.
+  const baseRenderArcViewBox = renderArcViewBox;
+  renderArcViewBox = function pass2RenderArcViewBox() {
+    arcPanYDisp = centeredArcPanY(arcZoomDisp);
+    baseRenderArcViewBox();
   };
 
   // Add invisible 32px SVG hit targets. Visible markers keep their old size.
