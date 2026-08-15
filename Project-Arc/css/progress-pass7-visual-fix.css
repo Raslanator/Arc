@@ -4,6 +4,14 @@
    and CSP-safe completion meters.
    ========================================================================== */
 
+/* Daily History height lock ---------------------------------------------- */
+#view-progress .progress-daily-date-block:has(.progress-daily-today-marker[hidden])::after {
+  content: '';
+  display: block;
+  height: calc(var(--fs-xs) * 1.45);
+  margin-top: 6px;
+}
+
 /* Last 7 Days ------------------------------------------------------------- */
 #view-progress .progress-seven-svg-wrap {
   min-height: 230px;
