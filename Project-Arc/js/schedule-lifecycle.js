@@ -71,6 +71,148 @@
     applyScheduleEditMode(document.getElementById('timelineList'));
   };
 
+  /* ================================================================
+     CONTEXTUAL DAILY BRIEF
+     Five stable cards driven from live app data. This keeps the existing
+     carousel layout/motion but makes the content useful across the whole app.
+     ================================================================ */
+
+  function scheduleEventsForBrief() {
+    return (window.ArcSchedule && typeof window.ArcSchedule.getEvents === 'function')
+      ? window.ArcSchedule.getEvents()
+      : [];
+  }
+
+  function scheduleEventForBrief(id) {
+    return scheduleEventsForBrief().find(ev => ev.id === id) || null;
+  }
+
+  function groceryProgressForWeek(weekIdx) {
+    const ids = weekRecipeIds(weekIdx);
+    let total = 0;
+    let checked = 0;
+
+    ids.forEach(id => {
+      const recipe = getRecipe(id);
+      if (!recipe) return;
+      recipe.ingredients.forEach((_, i) => {
+        total++;
+        if (appState.grocery[`w${weekIdx}-${id}-${i}`]) checked++;
+      });
+    });
+
+    return { total, checked, remaining: Math.max(0, total - checked) };
+  }
+
+  function nextPrayerForBrief() {
+    if (!prayerTimesToday) return null;
+    const now = nowMinutes();
+    let next = null;
+
+    PRAYER_NAMES.forEach(name => {
+      const time = parsePrayerTimeToMin(prayerTimesToday[name]);
+      if (!Number.isFinite(time) || time <= now) return;
+      if (!next || time < next.time) next = { type: 'prayer', name, time };
+    });
+
+    return next;
+  }
+
+  function nextCheckpointForBrief() {
+    const nextEvent = (window.ArcSchedule && typeof window.ArcSchedule.getNext === 'function')
+      ? window.ArcSchedule.getNext()
+      : null;
+    const nextPrayer = nextPrayerForBrief();
+
+    if (nextPrayer && (!nextEvent || nextPrayer.time < nextEvent.effectiveTime)) {
+      return {
+        type: 'prayer',
+        title: `${nextPrayer.name} Salah`,
+        time: nextPrayer.time,
+        body: '',
+      };
+    }
+
+    if (nextEvent) {
+      return {
+        type: 'event',
+        title: nextEvent.title,
+        time: nextEvent.effectiveTime,
+        body: nextEvent.body || '',
+      };
+    }
+
+    return null;
+  }
+
+  function timeUntilLabel(targetTime) {
+    const diff = Math.max(0, Math.round(targetTime - nowMinutes()));
+    if (diff < 1) return 'now';
+    if (diff < 60) return `in ${diff} min`;
+    const hours = Math.floor(diff / 60);
+    const mins = diff % 60;
+    return mins ? `in ${hours}h ${mins}m` : `in ${hours}h`;
+  }
+
+  function buildUpNextDetail() {
+    const next = nextCheckpointForBrief();
+    if (!next) return 'No more scheduled checkpoints today.';
+
+    const body = next.body
+      ? ` · ${escapeHtml(next.body.length > 95 ? next.body.slice(0, 92) + '…' : next.body)}`
+      : '';
+    return `<span class="brief-time-accent">${escapeHtml(minToLabel12(next.time))}</span> · ${escapeHtml(next.title)} · ${escapeHtml(timeUntilLabel(next.time))}${body}`;
+  }
+
+  function renderContextualBriefSource(el) {
+    const plan = getTodayPlan();
+    const lunchEvent = scheduleEventForBrief('lunch');
+    const dinnerEvent = scheduleEventForBrief('dinner');
+    const gymEvent = scheduleEventForBrief('gym');
+
+    const lunchPrefix = lunchEvent ? `${minToLabel12(lunchEvent.effectiveTime)} · ` : '';
+    const dinnerPrefix = dinnerEvent ? `${minToLabel12(dinnerEvent.effectiveTime)} · ` : '';
+    const gymPrefix = gymEvent ? `${minToLabel12(gymEvent.effectiveTime)} · ` : '';
+
+    let mealsText = 'No meal block scheduled today.';
+    if (plan.meals) {
+      const lunch = plan.meals.lunch;
+      const dinner = plan.meals.dinner;
+      mealsText = `Lunch ${escapeHtml(lunchPrefix)}${lunch ? escapeHtml(lunch.name) : '—'} · Dinner ${escapeHtml(dinnerPrefix)}${dinner ? escapeHtml(dinner.name) : '—'} <span class="text-accent">(${escapeHtml(String(plan.meals.total))} kcal)</span>`;
+    }
+
+    let workoutText = 'No workout set.';
+    if (plan.workout && plan.workout.exercises && plan.workout.exercises.length) {
+      const count = plan.workout.exercises.length;
+      workoutText = `${escapeHtml(gymPrefix)}${escapeHtml(plan.workout.name)} — ${escapeHtml(plan.workout.sub)} · ${count} exercise${count === 1 ? '' : 's'}`;
+    } else if (plan.workout) {
+      workoutText = `${escapeHtml(gymPrefix)}${escapeHtml(plan.workout.name)} · rest / recovery`;
+    }
+
+    const target = appState.settings.calorieTarget;
+    const logged = plan.calorieTotal;
+    const remaining = target - logged;
+    const calorieText = remaining >= 0
+      ? `${escapeHtml(String(remaining))} kcal remaining · ${escapeHtml(String(logged))} / ${escapeHtml(String(target))} logged`
+      : `${escapeHtml(String(Math.abs(remaining)))} kcal over target · ${escapeHtml(String(logged))} / ${escapeHtml(String(target))} logged`;
+
+    const grocery = groceryProgressForWeek(appState.currentWeek);
+    let groceryText = 'No grocery items for the current meal-plan week.';
+    if (grocery.total > 0 && grocery.remaining > 0) {
+      groceryText = `${grocery.remaining} item${grocery.remaining === 1 ? '' : 's'} left · ${grocery.checked} / ${grocery.total} checked`;
+    } else if (grocery.total > 0) {
+      groceryText = `All ${grocery.total} grocery items checked off.`;
+    }
+
+    el.innerHTML = `
+      <div class="prep-item" data-brief-key="meals"><b>Meals</b>${mealsText}</div>
+      <div class="prep-item" data-brief-key="workout"><b>Workout</b>${workoutText}</div>
+      <div class="prep-item" data-brief-key="calories"><b>Calories Logged</b>${calorieText}</div>
+      <div class="prep-item" data-brief-key="groceries"><b>Groceries</b>${escapeHtml(groceryText)}</div>
+      <div class="prep-item" data-brief-key="up-next"><b>Up Next</b>${buildUpNextDetail()}</div>
+    `;
+  }
+
   const scheduleRenderTodaySummary = renderTodaySummary;
   renderTodaySummary = function renderTodaySummaryPreservingCarousel() {
     const el = document.getElementById('todaySummary');
@@ -79,7 +221,7 @@
     const shell = el.querySelector('.daily-brief-shell');
     const stage = shell && shell.querySelector('.daily-brief-stage');
     if (!shell || !stage) {
-      scheduleRenderTodaySummary();
+      renderContextualBriefSource(el);
       return;
     }
 
@@ -87,10 +229,9 @@
     let activeIndex = previousItems.findIndex(item => item.getAttribute('aria-hidden') === 'false');
     if (activeIndex < 0) activeIndex = 0;
 
-    // Let the schedule-aware renderer produce fresh source items, then move
-    // those items into the existing carousel shell so its arrow listeners and
-    // motion/indicator structure remain alive.
-    scheduleRenderTodaySummary();
+    // Produce fresh source items, then move them into the existing carousel
+    // shell so its arrow listeners and smooth-motion structure remain alive.
+    renderContextualBriefSource(el);
     const freshItems = Array.from(el.querySelectorAll(':scope > .prep-item'));
     stage.replaceChildren(...freshItems);
 
@@ -102,10 +243,28 @@
       item.setAttribute('aria-hidden', index === activeIndex ? 'false' : 'true');
     });
 
-    const plan = getTodayPlan();
     const dayStrong = shell.querySelector('.daily-brief-day strong');
-    if (dayStrong) dayStrong.textContent = `Today / ${plan.dayName}`;
+    if (dayStrong) dayStrong.textContent = `Today / ${planDayName()}`;
 
     el.replaceChildren(shell);
+  };
+
+  function planDayName() {
+    const plan = getTodayPlan();
+    return plan.dayName;
+  }
+
+  function refreshUpNextBriefOnly() {
+    const item = document.querySelector('#todaySummary [data-brief-key="up-next"]');
+    if (!item) return;
+    item.innerHTML = `<b>Up Next</b>${buildUpNextDetail()}`;
+  }
+
+  // The Timeline's NEXT calculation already runs once per second. Piggyback on
+  // that cheap tick so the Up Next card stays accurate without full re-renders.
+  const scheduleUpdateNextEventHighlight = updateNextEventHighlight;
+  updateNextEventHighlight = function updateNextEventHighlightWithBrief() {
+    scheduleUpdateNextEventHighlight();
+    refreshUpNextBriefOnly();
   };
 })();
