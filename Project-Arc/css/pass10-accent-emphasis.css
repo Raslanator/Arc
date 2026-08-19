@@ -1,0 +1,243 @@
+/* ========================================================================== 
+   PASS 10 — SECONDARY EMPHASIS ACCENT
+   Trial 2 refinement: add a related ocean-blue accent for important
+   information while keeping teal/mint as Arc's primary action family.
+   ========================================================================== */
+
+:root {
+  --arc-info: #3A7CA5;
+  --arc-info-text: #2D6688;
+  --arc-info-dim: rgba(58, 124, 165, 0.14);
+  --arc-info-border: rgba(58, 124, 165, 0.34);
+  --arc-info-shadow: rgba(45, 102, 136, 0.24);
+
+  /* Salah and focus now use the related blue family instead of purple. */
+  --plum: var(--arc-info);
+  --plum-dim: var(--arc-info-dim);
+  --blue: var(--arc-info);
+}
+
+html[data-theme="dark"] {
+  --arc-info: #62B7D7;
+  --arc-info-text: #78C7E3;
+  --arc-info-dim: rgba(98, 183, 215, 0.15);
+  --arc-info-border: rgba(98, 183, 215, 0.34);
+  --arc-info-shadow: rgba(98, 183, 215, 0.20);
+
+  --plum: var(--arc-info);
+  --plum-dim: var(--arc-info-dim);
+  --blue: var(--arc-info);
+}
+
+/* --------------------------------------------------------------------------
+   SALAH — explicitly replace the old hard-coded purple next-prayer treatment.
+   -------------------------------------------------------------------------- */
+.prayer-card {
+  border-color: color-mix(in srgb, var(--arc-info) 28%, var(--glass-border));
+}
+
+.prayer-card-title,
+.prayer-countdown,
+.prayer-tag,
+.arc-prayer-label,
+.tl-row.prayer-tl-row .tl-time {
+  color: var(--arc-info-text);
+}
+
+html[data-theme="dark"] .prayer-card-title,
+html[data-theme="dark"] .prayer-countdown,
+html[data-theme="dark"] .prayer-tag,
+html[data-theme="dark"] .arc-prayer-label,
+html[data-theme="dark"] .tl-row.prayer-tl-row .tl-time {
+  color: var(--arc-info);
+}
+
+.prayer-countdown {
+  border-left-color: var(--arc-info);
+}
+
+.prayer-tag,
+.tl-row.prayer-tl-row {
+  background: var(--arc-info-dim);
+}
+
+.prayer-item.next {
+  background: linear-gradient(135deg, var(--arc-info-text), var(--arc-info));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 24px var(--arc-info-shadow);
+}
+
+.prayer-item.next .prayer-name,
+.prayer-item.next .prayer-time {
+  color: #fff;
+}
+
+.arc-prayer-dot:hover rect {
+  stroke: var(--arc-info);
+}
+
+/* --------------------------------------------------------------------------
+   GLOBAL IMPORTANT-INFORMATION LANGUAGE
+   Green = primary actions/success. Blue = key information/emphasis.
+   Surfaces remain clear glass; blue appears only on text, marks and borders.
+   -------------------------------------------------------------------------- */
+
+/* TODAY */
+#view-today .now-readout b,
+#view-today .daily-brief-day,
+#view-today .brief-time-accent {
+  color: var(--arc-info-text);
+}
+
+html[data-theme="dark"] #view-today .now-readout b,
+html[data-theme="dark"] #view-today .daily-brief-day,
+html[data-theme="dark"] #view-today .brief-time-accent {
+  color: var(--arc-info);
+}
+
+/* CALORIES */
+#view-calories .cal-card-today .cal-nums b,
+#view-calories .cal-card-today .cal-left,
+#view-calories .cal-today-log h4,
+#view-calories .qa-btn .qkcal {
+  color: var(--arc-info-text);
+}
+
+#view-calories .cal-today-log {
+  border-color: var(--arc-info-border);
+}
+
+html[data-theme="dark"] #view-calories .cal-card-today .cal-nums b,
+html[data-theme="dark"] #view-calories .cal-card-today .cal-left,
+html[data-theme="dark"] #view-calories .cal-today-log h4,
+html[data-theme="dark"] #view-calories .qa-btn .qkcal {
+  color: var(--arc-info);
+}
+
+/* MEAL PLAN */
+#view-plan .pass5-batch-heading,
+#view-plan .meal-kcal,
+#view-plan .pass5-total-line b {
+  color: var(--arc-info-text) !important;
+}
+
+#view-plan .meal-add-btn:hover,
+#view-plan .swap-btn:hover {
+  color: var(--arc-info-text);
+  border-color: var(--arc-info-border);
+}
+
+html[data-theme="dark"] #view-plan .pass5-batch-heading,
+html[data-theme="dark"] #view-plan .meal-kcal,
+html[data-theme="dark"] #view-plan .pass5-total-line b {
+  color: var(--arc-info) !important;
+}
+
+/* RECIPES */
+#view-recipes .recipe-card-pass4:focus-visible {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 4px var(--arc-info-dim), var(--shadow-md);
+}
+
+#view-recipes .recipe-card-badges .badge.kcal {
+  color: var(--arc-info-text);
+  background: var(--arc-info-dim);
+  border-color: transparent;
+}
+
+html[data-theme="dark"] #view-recipes .recipe-card-badges .badge.kcal {
+  color: var(--arc-info);
+}
+
+/* GROCERY */
+#view-grocery .grocery-section-header,
+#view-grocery #grocProgress {
+  color: var(--arc-info-text) !important;
+}
+
+#view-grocery .grocery-progress-fill {
+  background: linear-gradient(90deg, var(--arc-info), var(--palette-teal));
+}
+
+html[data-theme="dark"] #view-grocery .grocery-section-header,
+html[data-theme="dark"] #view-grocery #grocProgress {
+  color: var(--arc-info) !important;
+}
+
+/* GYM */
+#view-gym .pass6-day-kicker,
+#view-gym .pass6-gym-overline,
+#view-gym .pass6-cardio-plan > span,
+#view-gym .pass6-exercise-row .sets {
+  color: var(--arc-info-text);
+}
+
+#view-gym .gym-day-select button.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 1px var(--arc-info-dim), var(--shadow);
+}
+
+html[data-theme="dark"] #view-gym .pass6-day-kicker,
+html[data-theme="dark"] #view-gym .pass6-gym-overline,
+html[data-theme="dark"] #view-gym .pass6-cardio-plan > span,
+html[data-theme="dark"] #view-gym .pass6-exercise-row .sets {
+  color: var(--arc-info);
+}
+
+/* PROGRESS */
+#view-progress .progress-daily-kicker,
+#view-progress .progress-completion-head strong,
+#view-progress .progress-recovery-copy strong {
+  color: var(--arc-info-text);
+}
+
+#view-progress .progress-line-path {
+  stroke: var(--arc-info);
+}
+
+#view-progress .progress-line-dot {
+  stroke: var(--arc-info);
+}
+
+#view-progress .progress-completion-svg-fill.salah,
+#view-progress .progress-completion-block:nth-child(2) .progress-completion-track span {
+  fill: var(--arc-info);
+  background: var(--arc-info);
+}
+
+html[data-theme="dark"] #view-progress .progress-daily-kicker,
+html[data-theme="dark"] #view-progress .progress-completion-head strong,
+html[data-theme="dark"] #view-progress .progress-recovery-copy strong {
+  color: var(--arc-info);
+}
+
+/* SETTINGS */
+#view-goals .goal-card .field label,
+#view-goals .pass6-settings-section h4 {
+  color: var(--arc-info-text);
+}
+
+#view-goals .pass6-appearance-section #themeToggle button.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 1px var(--arc-info-dim);
+}
+
+html[data-theme="dark"] #view-goals .goal-card .field label,
+html[data-theme="dark"] #view-goals .pass6-settings-section h4 {
+  color: var(--arc-info);
+}
+
+/* Shared focus states use the same information accent for consistency. */
+:focus-visible {
+  outline-color: var(--arc-info);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.stepper-field:focus-within,
+.time-trigger.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 4px var(--arc-info-dim);
+}
