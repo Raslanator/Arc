@@ -59,7 +59,6 @@
   --shadow-lg: 0 34px 90px rgba(18, 72, 61, 0.24), inset 0 1px 0 var(--glass-highlight);
 
   --pass10-on-primary: #10362F;
-  --pass10-primary-bright: #6FCF97;
   --pass10-primary-shadow: rgba(31, 111, 95, 0.26);
   --pass10-primary-shadow-strong: rgba(31, 111, 95, 0.36);
   --pass10-focus-glow: rgba(47, 160, 132, 0.18);
@@ -93,7 +92,6 @@ html[data-theme="dark"] {
   --shadow-lg: 0 36px 90px rgba(0, 0, 0, 0.58), inset 0 1px 0 var(--glass-highlight);
 
   --pass10-on-primary: #0B2C26;
-  --pass10-primary-bright: #76D7A0;
   --pass10-primary-shadow: rgba(47, 160, 132, 0.25);
   --pass10-primary-shadow-strong: rgba(111, 207, 151, 0.30);
   --pass10-focus-glow: rgba(111, 207, 151, 0.18);
@@ -206,27 +204,27 @@ html[data-theme="dark"] .time-trigger::before {
 /* Primary actions --------------------------------------------------------- */
 .btn-primary,
 .custom-add-form > button[type="submit"] {
-  background: linear-gradient(135deg, var(--palette-teal), var(--palette-mint));
-  color: var(--pass10-on-primary);
+  background: linear-gradient(135deg, var(--palette-deep), var(--palette-teal));
+  color: #F3FBF7;
   border-color: transparent;
   box-shadow:
     0 8px 20px var(--pass10-primary-shadow),
-    0 1px 0 rgba(255, 255, 255, 0.38) inset;
+    0 1px 0 rgba(255, 255, 255, 0.28) inset;
 }
 
 .btn-primary:hover,
 .custom-add-form > button[type="submit"]:hover {
-  filter: brightness(1.04) saturate(1.05);
+  filter: brightness(1.06) saturate(1.05);
   box-shadow:
     0 12px 28px var(--pass10-primary-shadow-strong),
-    0 1px 0 rgba(255, 255, 255, 0.42) inset;
+    0 1px 0 rgba(255, 255, 255, 0.34) inset;
 }
 
 .btn-primary:active,
 .custom-add-form > button[type="submit"]:active {
   box-shadow:
     0 4px 12px var(--pass10-primary-shadow),
-    0 1px 0 rgba(255, 255, 255, 0.28) inset;
+    0 1px 0 rgba(255, 255, 255, 0.22) inset;
 }
 
 .btn-done {
@@ -237,14 +235,14 @@ html[data-theme="dark"] .time-trigger::before {
 
 /* Desktop navigation ------------------------------------------------------ */
 nav.tabs button.active {
-  color: var(--pass10-on-primary);
+  color: #F3FBF7;
 }
 
 .nav-indicator {
-  background: linear-gradient(135deg, var(--palette-teal), var(--palette-mint));
+  background: linear-gradient(135deg, var(--palette-deep), var(--palette-teal));
   box-shadow:
     0 6px 18px var(--pass10-primary-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 /* Selectors / time controls ---------------------------------------------- */
@@ -256,8 +254,8 @@ nav.tabs button.active {
 }
 
 .time-opt.active {
-  background: linear-gradient(135deg, var(--palette-teal), var(--palette-mint));
-  color: var(--pass10-on-primary);
+  background: var(--palette-teal);
+  color: #F4FBF7;
   box-shadow: 0 4px 12px var(--pass10-primary-shadow);
 }
 
