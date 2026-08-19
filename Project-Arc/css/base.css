@@ -27,7 +27,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #EDEFF7;
+  background: #F7F4ED;
   transition: background-color 0.3s ease, color 0.3s ease;
   position: relative;
   isolation: isolate;
@@ -39,34 +39,34 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(38vw 38vw at 8% 6%,   #7DD3FC 0%, transparent 62%),
-    radial-gradient(42vw 42vw at 92% 4%,  #C4B5FD 0%, transparent 60%),
-    radial-gradient(46vw 46vw at 100% 92%, #FDA4AF 0%, transparent 58%),
-    radial-gradient(40vw 40vw at 4% 96%,  #FDE68A 0%, transparent 58%),
-    radial-gradient(60vw 60vw at 50% 45%, #A7F3D0 0%, transparent 65%),
-    linear-gradient(180deg, #EEF2FB 0%, #E7ECF9 100%);
-  filter: saturate(1.15);
+    radial-gradient(40vw 40vw at 8% 7%, rgba(143, 162, 138, 0.34) 0%, transparent 64%),
+    radial-gradient(42vw 42vw at 92% 5%, rgba(200, 169, 107, 0.23) 0%, transparent 62%),
+    radial-gradient(48vw 48vw at 100% 94%, rgba(199, 211, 192, 0.42) 0%, transparent 62%),
+    radial-gradient(42vw 42vw at 4% 96%, rgba(200, 169, 107, 0.16) 0%, transparent 60%),
+    radial-gradient(62vw 62vw at 50% 46%, rgba(247, 244, 237, 0.82) 0%, transparent 68%),
+    linear-gradient(180deg, #F7F4ED 0%, #EEF1E9 100%);
+  filter: saturate(0.96);
 }
 
 html[data-theme="dark"] body {
-  background: #0B0B10;
+  background: #111510;
 }
 
 html[data-theme="dark"] body::before {
   background:
-    radial-gradient(38vw 38vw at 8% 6%,   #0B3E66 0%, transparent 62%),
-    radial-gradient(42vw 42vw at 92% 4%,  #3B2A66 0%, transparent 60%),
-    radial-gradient(46vw 46vw at 100% 92%, #5C1F35 0%, transparent 58%),
-    radial-gradient(40vw 40vw at 4% 96%,  #4A3A12 0%, transparent 58%),
-    radial-gradient(60vw 60vw at 50% 45%, #123A2E 0%, transparent 65%),
-    linear-gradient(180deg, #0B0B10 0%, #0A0A0E 100%);
-  filter: saturate(1.3) brightness(0.9);
+    radial-gradient(40vw 40vw at 8% 7%, rgba(78, 95, 74, 0.42) 0%, transparent 64%),
+    radial-gradient(42vw 42vw at 92% 5%, rgba(116, 92, 47, 0.30) 0%, transparent 62%),
+    radial-gradient(48vw 48vw at 100% 94%, rgba(73, 87, 69, 0.36) 0%, transparent 62%),
+    radial-gradient(42vw 42vw at 4% 96%, rgba(92, 73, 36, 0.22) 0%, transparent 60%),
+    radial-gradient(62vw 62vw at 50% 46%, rgba(17, 21, 16, 0.66) 0%, transparent 68%),
+    linear-gradient(180deg, #111510 0%, #0D110D 100%);
+  filter: saturate(0.92) brightness(0.94);
 }
 
 /* ---- Global selection color ---- */
 ::selection {
   background: var(--terracotta);
-  color: #fff;
+  color: var(--palette-cream);
 }
 
 /* ---- User-select: disabled globally, re-enabled for inputs ---- */
@@ -194,7 +194,7 @@ input, textarea {
   border-radius: inherit;
   background: radial-gradient(
     360px circle at var(--mx, 50%) var(--my, 20%),
-    rgba(255, 255, 255, 0.78),
+    rgba(255, 255, 255, 0.72),
     transparent 66%
   );
   opacity: 0;
@@ -220,7 +220,7 @@ input, textarea {
   border-radius: inherit;
   background: radial-gradient(
     140px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.68),
     transparent 70%
   );
   opacity: 0;
@@ -254,7 +254,7 @@ html[data-theme="dark"] .stepper-btn::before,
 html[data-theme="dark"] .time-trigger::before {
   background: radial-gradient(
     360px circle at var(--mx, 50%) var(--my, 20%),
-    rgba(255, 255, 255, 0.16),
+    rgba(247, 244, 237, 0.14),
     transparent 68%
   );
   mix-blend-mode: soft-light;
