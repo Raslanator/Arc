@@ -8,6 +8,17 @@
    ========================================================================== */
 
 (function seedPass10VisualTestData() {
+  /* Trial 2 refinement: load the secondary ocean-blue emphasis layer after
+     the main palette stylesheet so it can replace the legacy Salah purple and
+     carry important-information accents consistently across every tab. */
+  if (!document.querySelector('link[data-pass10-accent-emphasis]')) {
+    const accentLink = document.createElement('link');
+    accentLink.rel = 'stylesheet';
+    accentLink.href = 'css/pass10-accent-emphasis.css';
+    accentLink.dataset.pass10AccentEmphasis = 'true';
+    document.head.appendChild(accentLink);
+  }
+
   const MAX_ATTEMPTS = 80;
   let attempts = 0;
 
