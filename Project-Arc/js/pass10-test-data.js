@@ -29,6 +29,16 @@
     document.head.appendChild(dotFixLink);
   }
 
+  /* Trial 2D: latest visual-review corrections. Versioned query keeps the
+     stable Vercel branch preview refresh-safe during palette iteration. */
+  if (!document.querySelector('link[data-pass10-refinement-2d]')) {
+    const refinementLink = document.createElement('link');
+    refinementLink.rel = 'stylesheet';
+    refinementLink.href = 'css/pass10-refinement-2d.css?v=2d-1';
+    refinementLink.dataset.pass10Refinement2d = 'true';
+    document.head.appendChild(refinementLink);
+  }
+
   const MAX_ATTEMPTS = 80;
   let attempts = 0;
 
