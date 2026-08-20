@@ -1,0 +1,20 @@
+/* ========================================================================== 
+   PASS 10 — DOT STYLE CORRECTION
+   Keep the existing Arc dot design exactly as before; only their fill colors
+   are made vibrant. No new rings, outlines, halos, or drop shadows.
+   ========================================================================== */
+
+#view-today .arc-dot circle {
+  stroke: none !important;
+  stroke-width: 0 !important;
+  filter: none !important;
+}
+
+#view-today .arc-dot:hover circle {
+  filter: none !important;
+}
+
+/* Remove the extra shadow introduced during the same color-only iteration. */
+#view-today .arc-prayer-dot rect {
+  filter: none !important;
+}
