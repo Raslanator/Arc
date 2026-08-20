@@ -19,6 +19,16 @@
     document.head.appendChild(accentLink);
   }
 
+  /* Color-only correction: preserve the original Arc dot design. This layer
+     removes the unrequested ring/shadow while keeping the vibrant fills. */
+  if (!document.querySelector('link[data-pass10-dot-style-correction]')) {
+    const dotFixLink = document.createElement('link');
+    dotFixLink.rel = 'stylesheet';
+    dotFixLink.href = 'css/pass10-dot-style-correction.css';
+    dotFixLink.dataset.pass10DotStyleCorrection = 'true';
+    document.head.appendChild(dotFixLink);
+  }
+
   const MAX_ATTEMPTS = 80;
   let attempts = 0;
 
