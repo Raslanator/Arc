@@ -1,9 +1,74 @@
 /* ========================================================================== 
-   PASS 10 — DOT STYLE CORRECTION
-   Keep the existing Arc dot design exactly as before; only their fill colors
-   are made vibrant. No new rings, outlines, halos, or drop shadows.
+   PASS 10 — COLOR-ONLY LIVELINESS REFINEMENT
+   Keep the existing Arc design exactly as before. This layer only enriches
+   the palette: vibrant event-dot fills plus restrained related accent colors
+   across key information. No new rings, outlines, halos, shadows, shapes,
+   spacing, or stained card surfaces.
    ========================================================================== */
 
+:root {
+  /* Related lively accents: warm/cool companions to the teal + ocean-blue base. */
+  --arc-life-coral: #F2645A;
+  --arc-life-tangerine: #FF8A3D;
+  --arc-life-sun: #F4C542;
+  --arc-life-lime: #8BCB57;
+  --arc-life-emerald: #22C55E;
+  --arc-life-aqua: #18B8B0;
+  --arc-life-sky: #4D9ED1;
+  --arc-life-blue: #3A7CA5;
+
+  --arc-life-coral-dim: rgba(242, 100, 90, 0.13);
+  --arc-life-sun-dim: rgba(244, 197, 66, 0.16);
+  --arc-life-lime-dim: rgba(139, 203, 87, 0.14);
+  --arc-life-sky-dim: rgba(77, 158, 209, 0.13);
+}
+
+html[data-theme="dark"] {
+  --arc-life-coral: #FF746B;
+  --arc-life-tangerine: #FFA05E;
+  --arc-life-sun: #FFD84D;
+  --arc-life-lime: #A6E06E;
+  --arc-life-emerald: #4ADE80;
+  --arc-life-aqua: #2FD2C9;
+  --arc-life-sky: #68B7E5;
+  --arc-life-blue: #62B7D7;
+
+  --arc-life-coral-dim: rgba(255, 116, 107, 0.14);
+  --arc-life-sun-dim: rgba(255, 216, 77, 0.14);
+  --arc-life-lime-dim: rgba(166, 224, 110, 0.12);
+  --arc-life-sky-dim: rgba(104, 183, 229, 0.13);
+}
+
+/* --------------------------------------------------------------------------
+   BACKGROUND — add restrained warm/cool notes while keeping the supplied
+   green family dominant. Cards themselves remain clear neutral glass.
+   -------------------------------------------------------------------------- */
+body::before {
+  background:
+    radial-gradient(42vw 42vw at 7% 6%, rgba(111, 207, 151, 0.52) 0%, transparent 62%),
+    radial-gradient(34vw 34vw at 94% 8%, rgba(242, 100, 90, 0.15) 0%, transparent 64%),
+    radial-gradient(46vw 46vw at 93% 4%, rgba(47, 160, 132, 0.34) 0%, transparent 60%),
+    radial-gradient(46vw 46vw at 100% 91%, rgba(77, 158, 209, 0.16) 0%, transparent 62%),
+    radial-gradient(36vw 36vw at 5% 95%, rgba(244, 197, 66, 0.14) 0%, transparent 61%),
+    radial-gradient(58vw 58vw at 52% 46%, rgba(238, 238, 238, 0.72) 0%, transparent 66%),
+    linear-gradient(180deg, #EEEEEE 0%, #E4F2EB 100%);
+}
+
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(42vw 42vw at 7% 6%, rgba(47, 160, 132, 0.34) 0%, transparent 62%),
+    radial-gradient(34vw 34vw at 94% 8%, rgba(255, 116, 107, 0.09) 0%, transparent 64%),
+    radial-gradient(46vw 46vw at 93% 4%, rgba(31, 111, 95, 0.48) 0%, transparent 60%),
+    radial-gradient(46vw 46vw at 100% 91%, rgba(98, 183, 215, 0.11) 0%, transparent 62%),
+    radial-gradient(36vw 36vw at 5% 95%, rgba(255, 216, 77, 0.07) 0%, transparent 61%),
+    radial-gradient(58vw 58vw at 52% 46%, rgba(13, 33, 28, 0.62) 0%, transparent 66%),
+    linear-gradient(180deg, #0D211C 0%, #091813 100%);
+}
+
+/* --------------------------------------------------------------------------
+   DAILY ARC — original dot design, more distinct vibrant fill colors only.
+   Eight-color cycle prevents adjacent checkpoints from looking repetitive.
+   -------------------------------------------------------------------------- */
 #view-today .arc-dot circle {
   stroke: none !important;
   stroke-width: 0 !important;
@@ -14,7 +79,153 @@
   filter: none !important;
 }
 
-/* Remove the extra shadow introduced during the same color-only iteration. */
+#view-today .arc-dot[data-idx="0"] circle,
+#view-today .arc-dot[data-idx="8"] circle,
+#view-today .arc-dot[data-idx="16"] circle,
+#view-today .arc-dot[data-idx="24"] circle { fill: var(--arc-life-coral) !important; }
+
+#view-today .arc-dot[data-idx="1"] circle,
+#view-today .arc-dot[data-idx="9"] circle,
+#view-today .arc-dot[data-idx="17"] circle,
+#view-today .arc-dot[data-idx="25"] circle { fill: var(--arc-life-tangerine) !important; }
+
+#view-today .arc-dot[data-idx="2"] circle,
+#view-today .arc-dot[data-idx="10"] circle,
+#view-today .arc-dot[data-idx="18"] circle,
+#view-today .arc-dot[data-idx="26"] circle { fill: var(--arc-life-sun) !important; }
+
+#view-today .arc-dot[data-idx="3"] circle,
+#view-today .arc-dot[data-idx="11"] circle,
+#view-today .arc-dot[data-idx="19"] circle,
+#view-today .arc-dot[data-idx="27"] circle { fill: var(--arc-life-lime) !important; }
+
+#view-today .arc-dot[data-idx="4"] circle,
+#view-today .arc-dot[data-idx="12"] circle,
+#view-today .arc-dot[data-idx="20"] circle,
+#view-today .arc-dot[data-idx="28"] circle { fill: var(--arc-life-emerald) !important; }
+
+#view-today .arc-dot[data-idx="5"] circle,
+#view-today .arc-dot[data-idx="13"] circle,
+#view-today .arc-dot[data-idx="21"] circle,
+#view-today .arc-dot[data-idx="29"] circle { fill: var(--arc-life-aqua) !important; }
+
+#view-today .arc-dot[data-idx="6"] circle,
+#view-today .arc-dot[data-idx="14"] circle,
+#view-today .arc-dot[data-idx="22"] circle,
+#view-today .arc-dot[data-idx="30"] circle { fill: var(--arc-life-sky) !important; }
+
+#view-today .arc-dot[data-idx="7"] circle,
+#view-today .arc-dot[data-idx="15"] circle,
+#view-today .arc-dot[data-idx="23"] circle,
+#view-today .arc-dot[data-idx="31"] circle { fill: var(--arc-life-blue) !important; }
+
+/* Salah keeps its separate ocean-blue diamond identity, with no new effect. */
 #view-today .arc-prayer-dot rect {
   filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   SMALL COLOR ACCENTS — life without changing component design.
+   Primary actions remain teal/green; these colors only differentiate content.
+   -------------------------------------------------------------------------- */
+
+/* Today: warm attention marker, blue information remains intact. */
+#view-today .next-badge {
+  background: var(--arc-life-coral);
+  color: #fff;
+}
+
+/* Calories: warm food-energy accent, while totals/important data keep blue. */
+#view-calories .badge.kcal,
+#view-calories .qa-btn .qkcal {
+  color: #9A6900;
+  background: var(--arc-life-sun-dim);
+}
+
+html[data-theme="dark"] #view-calories .badge.kcal,
+html[data-theme="dark"] #view-calories .qa-btn .qkcal {
+  color: var(--arc-life-sun);
+}
+
+/* Meal plan: calories get a warm accent; structural headings stay related blue. */
+#view-plan .meal-kcal,
+#view-plan .pass5-total-line b {
+  color: #A66D08 !important;
+}
+
+html[data-theme="dark"] #view-plan .meal-kcal,
+html[data-theme="dark"] #view-plan .pass5-total-line b {
+  color: var(--arc-life-sun) !important;
+}
+
+/* Recipes: distinguish calorie and time metadata without coloring the cards. */
+#view-recipes .recipe-card-badges .badge.kcal {
+  color: #B84E46;
+  background: var(--arc-life-coral-dim);
+}
+
+#view-recipes .recipe-time-badge {
+  color: var(--arc-info-text);
+  background: var(--arc-life-sky-dim);
+}
+
+html[data-theme="dark"] #view-recipes .recipe-card-badges .badge.kcal {
+  color: var(--arc-life-coral);
+}
+
+html[data-theme="dark"] #view-recipes .recipe-time-badge {
+  color: var(--arc-life-sky);
+}
+
+/* Grocery: fresh lime -> teal -> blue progress, still within the nature/cool family. */
+#view-grocery #grocProgress {
+  color: #5D8F32 !important;
+}
+
+#view-grocery .grocery-progress-fill {
+  background: linear-gradient(90deg, var(--arc-life-lime), var(--palette-teal), var(--arc-life-sky));
+}
+
+html[data-theme="dark"] #view-grocery #grocProgress {
+  color: var(--arc-life-lime) !important;
+}
+
+/* Gym: separate exercise-set information from cardio/recovery information. */
+#view-gym .pass6-exercise-row .sets {
+  color: #B84E46;
+}
+
+#view-gym .pass6-cardio-plan > span {
+  color: #138D87;
+}
+
+#view-gym .pass6-day-kicker {
+  color: #A66D08;
+}
+
+html[data-theme="dark"] #view-gym .pass6-exercise-row .sets {
+  color: var(--arc-life-coral);
+}
+
+html[data-theme="dark"] #view-gym .pass6-cardio-plan > span {
+  color: var(--arc-life-aqua);
+}
+
+html[data-theme="dark"] #view-gym .pass6-day-kicker {
+  color: var(--arc-life-sun);
+}
+
+/* Settings: retain blue information hierarchy, add a quiet aqua emphasis. */
+#view-goals .pass6-settings-section h4 {
+  color: #138D87;
+}
+
+html[data-theme="dark"] #view-goals .pass6-settings-section h4 {
+  color: var(--arc-life-aqua);
+}
+
+/* Navigation remains recognizably Arc, but the active marker gets a subtle
+   ocean-blue finish instead of being green-only. */
+.nav-indicator {
+  background: linear-gradient(135deg, var(--palette-deep), var(--palette-teal) 62%, var(--arc-info));
 }
