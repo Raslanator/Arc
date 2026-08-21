@@ -104,13 +104,13 @@
   }
 
   function scheduleDayScore(key) {
-    const events = window.ArcSchedule && typeof window.ArcSchedule.getEvents === 'function'
-      ? window.ArcSchedule.getEvents()
-      : (Array.isArray(appState.timelineEvents) ? appState.timelineEvents : []);
-    const eventIds = events.map(event => event.id).filter(Boolean);
+    const history = window.ArcTimelineHistory && typeof window.ArcTimelineHistory.getDay === 'function'
+      ? window.ArcTimelineHistory.getDay(key)
+      : { tracked: false, eventIds: [] };
+    const eventIds = history.eventIds;
     const bucket = appState.timelineStatus && appState.timelineStatus[key];
-    if (!bucket || !Object.keys(bucket).length || !eventIds.length) return null;
-    const done = eventIds.filter(id => bucket[id] && bucket[id].done !== false).length;
+    if (!history.tracked || !eventIds.length) return null;
+    const done = eventIds.filter(id => bucket && bucket[id] && bucket[id].done !== false).length;
     return Math.round((done / eventIds.length) * 100);
   }
 

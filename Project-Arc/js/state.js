@@ -40,7 +40,7 @@ const DEFAULT_APPSTATE = {
   activeTab: 'today',     // restored on refresh
   theme: 'light',         // 'light' | 'dark'
 
-  timelineStatus: {},     // { "YYYY-MM-DD": { [eventIdx]: { done, mode, time } } }
+  timelineStatus: {},     // { "YYYY-MM-DD": { __history: { eventIds: [] }, [eventId]: { done, mode, time } } }
   prayerStatus: {},       // { "YYYY-MM-DD": { Fajr: true, ... } }
 
   changeLog: { plan: [], calories: [] },

@@ -98,30 +98,34 @@
     return Math.round((done / total) * 100);
   }
 
-  function currentScheduleIds() {
+  function timelineHistoryForDate(key) {
+    if (window.ArcTimelineHistory && typeof window.ArcTimelineHistory.getDay === 'function') {
+      return window.ArcTimelineHistory.getDay(key);
+    }
     const events = window.ArcSchedule && typeof window.ArcSchedule.getEvents === 'function'
       ? window.ArcSchedule.getEvents()
       : (Array.isArray(appState.timelineEvents) ? appState.timelineEvents : []);
-    return new Set(events.map(event => event.id).filter(Boolean));
+    const bucket = appState.timelineStatus && appState.timelineStatus[key];
+    const eventIds = events.map(event => event.id).filter(Boolean);
+    return { tracked: !!(bucket && Object.keys(bucket).length), eventIds };
   }
 
   function scheduleCompletion(keys) {
-    const eventIds = currentScheduleIds();
-    if (!eventIds.size) return { percent: null, done: 0, possible: 0, trackedDays: 0 };
-
     let trackedDays = 0;
     let done = 0;
+    let possible = 0;
     keys.forEach(key => {
+      const history = timelineHistoryForDate(key);
+      if (!history.tracked) return;
       const bucket = appState.timelineStatus && appState.timelineStatus[key];
-      if (!bucket || !Object.keys(bucket).length) return;
       trackedDays++;
-      eventIds.forEach(id => {
-        const status = bucket[id];
+      possible += history.eventIds.length;
+      history.eventIds.forEach(id => {
+        const status = bucket && bucket[id];
         if (status && status.done !== false) done++;
       });
     });
 
-    const possible = trackedDays * eventIds.size;
     return { percent: percent(done, possible), done, possible, trackedDays };
   }
 

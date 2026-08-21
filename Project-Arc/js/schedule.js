@@ -9,6 +9,9 @@
  */
 
 (function initEditableSchedule() {
+  // Keep the immutable ID snapshot inside its date bucket so the existing
+  // whole-bucket retention wrapper applies without any ARC-16 changes.
+  const TIMELINE_HISTORY_KEY = '__history';
   const DEFAULT_EVENT_IDS = [
     'wake',
     'pre-workout-fuel',
@@ -59,6 +62,80 @@
     }));
   }
 
+  function uniqueEventIds(ids) {
+    return [...new Set((Array.isArray(ids) ? ids : [])
+      .map(id => String(id || '').trim())
+      .filter(id => id && id !== TIMELINE_HISTORY_KEY))]
+      .sort((a, b) => a.localeCompare(b));
+  }
+
+  function timelineStatusBucket(dateKey_, create = false) {
+    if (!appState.timelineStatus || typeof appState.timelineStatus !== 'object' || Array.isArray(appState.timelineStatus)) {
+      appState.timelineStatus = {};
+    }
+    const existing = appState.timelineStatus[dateKey_];
+    if (existing && typeof existing === 'object' && !Array.isArray(existing)) return existing;
+    if (!create) return null;
+    appState.timelineStatus[dateKey_] = {};
+    return appState.timelineStatus[dateKey_];
+  }
+
+  function statusEventIds(bucket) {
+    if (!bucket || typeof bucket !== 'object' || Array.isArray(bucket)) return [];
+    return uniqueEventIds(Object.keys(bucket).filter(eventId => eventId !== TIMELINE_HISTORY_KEY));
+  }
+
+  function storedHistoryEventIds(bucket) {
+    if (!bucket || !Object.prototype.hasOwnProperty.call(bucket, TIMELINE_HISTORY_KEY)) return null;
+    const meta = bucket[TIMELINE_HISTORY_KEY];
+    return meta && Array.isArray(meta.eventIds) ? uniqueEventIds(meta.eventIds) : null;
+  }
+
+  function currentScheduleEventIds() {
+    return uniqueEventIds(getScheduleEvents().map(event => event.id));
+  }
+
+  function normalizeTimelineHistory() {
+    Object.keys(appState.timelineStatus || {}).forEach(dateKey_ => {
+      const bucket = timelineStatusBucket(dateKey_);
+      if (!bucket || !Object.prototype.hasOwnProperty.call(bucket, TIMELINE_HISTORY_KEY)) return;
+      const eventIds = storedHistoryEventIds(bucket);
+      if (eventIds === null) {
+        delete bucket[TIMELINE_HISTORY_KEY];
+        return;
+      }
+      bucket[TIMELINE_HISTORY_KEY] = { eventIds };
+    });
+  }
+
+  function timelineHistoryForDate(dateKey_) {
+    const bucket = timelineStatusBucket(dateKey_);
+    const historicalEventIds = storedHistoryEventIds(bucket);
+    if (historicalEventIds !== null) {
+      return { tracked: true, eventIds: historicalEventIds, source: 'snapshot' };
+    }
+
+    const legacyEventIds = statusEventIds(bucket);
+    if (legacyEventIds.length) {
+      // Legacy ARC.05 buckets prove only the IDs that have stored statuses;
+      // do not invent missing historical expectations from today's schedule.
+      return { tracked: true, eventIds: legacyEventIds, source: 'legacy-status' };
+    }
+
+    return { tracked: false, eventIds: currentScheduleEventIds(), source: 'current-schedule' };
+  }
+
+  function ensureTimelineHistorySnapshot(dateKey_, eventId) {
+    const bucket = timelineStatusBucket(dateKey_, true);
+    if (storedHistoryEventIds(bucket) !== null) return false;
+
+    const legacyEventIds = statusEventIds(bucket);
+    const eventIds = legacyEventIds.length ? legacyEventIds : currentScheduleEventIds();
+    if (legacyEventIds.length && eventId) eventIds.push(eventId);
+    bucket[TIMELINE_HISTORY_KEY] = { eventIds: uniqueEventIds(eventIds) };
+    return true;
+  }
+
   function normalizeScheduleEvents(events) {
     const source = Array.isArray(events) && events.length ? events : defaultScheduleEvents();
     const seen = new Set();
@@ -85,7 +162,7 @@
   }
 
   function migrateTimelineStatusToIds() {
-    if (!appState.timelineStatus || typeof appState.timelineStatus !== 'object') {
+    if (!appState.timelineStatus || typeof appState.timelineStatus !== 'object' || Array.isArray(appState.timelineStatus)) {
       appState.timelineStatus = {};
       return;
     }
@@ -95,6 +172,10 @@
       const nextBucket = {};
 
       Object.keys(oldBucket).forEach(rawKey => {
+        if (rawKey === TIMELINE_HISTORY_KEY) {
+          nextBucket[rawKey] = oldBucket[rawKey];
+          return;
+        }
         let eventId = rawKey;
         if (/^\d+$/.test(rawKey)) {
           const legacyIndex = parseInt(rawKey, 10);
@@ -110,6 +191,7 @@
   function ensureScheduleState() {
     appState.timelineEvents = normalizeScheduleEvents(appState.timelineEvents);
     migrateTimelineStatusToIds();
+    normalizeTimelineHistory();
   }
 
   const baseLoadState = loadState;
@@ -147,20 +229,7 @@
     return next || null;
   }
 
-  function cleanupDeletedEventStatus(eventId) {
-    Object.keys(appState.timelineStatus || {}).forEach(dateKey_ => {
-      if (appState.timelineStatus[dateKey_]) delete appState.timelineStatus[dateKey_][eventId];
-    });
-  }
-
   function resetScheduleToDefaults() {
-    const keepIds = new Set(DEFAULT_EVENT_IDS);
-    Object.keys(appState.timelineStatus || {}).forEach(dateKey_ => {
-      const bucket = appState.timelineStatus[dateKey_] || {};
-      Object.keys(bucket).forEach(eventId => {
-        if (!keepIds.has(eventId)) delete bucket[eventId];
-      });
-    });
     appState.timelineEvents = defaultScheduleEvents();
     saveState();
     render();
@@ -255,7 +324,6 @@
       const ok = confirm(`Delete "${existing.title}" from your daily timeline?`);
       if (!ok) return;
       appState.timelineEvents = getScheduleEvents().filter(ev => ev.id !== existing.id);
-      cleanupDeletedEventStatus(existing.id);
       saveState();
       closeModal();
       render();
@@ -407,8 +475,9 @@
     const eventId = resolveEventId(eventRef);
     if (!eventId) return;
     const key = todayKeyStr();
-    if (!appState.timelineStatus[key]) appState.timelineStatus[key] = {};
-    appState.timelineStatus[key][eventId] = {
+    ensureTimelineHistorySnapshot(key, eventId);
+    const bucket = timelineStatusBucket(key, true);
+    bucket[eventId] = {
       done: true,
       mode,
       time: time || minToLabel12(nowMinutes()),
@@ -420,7 +489,11 @@
   clearTimelineDone = function clearScheduleEventDone(eventRef) {
     const eventId = resolveEventId(eventRef);
     const key = todayKeyStr();
-    if (appState.timelineStatus[key]) delete appState.timelineStatus[key][eventId];
+    const bucket = timelineStatusBucket(key);
+    if (bucket && Object.prototype.hasOwnProperty.call(bucket, eventId)) {
+      ensureTimelineHistorySnapshot(key, eventId);
+      delete bucket[eventId];
+    }
     saveState();
     render();
   };
@@ -650,6 +723,13 @@
     getNext: () => {
       const item = getNextScheduleEvent();
       return item ? { ...item.ev, effectiveTime: item.time } : null;
+    },
+  };
+
+  window.ArcTimelineHistory = {
+    getDay(dateKey_) {
+      const history = timelineHistoryForDate(dateKey_);
+      return { ...history, eventIds: [...history.eventIds] };
     },
   };
 })();
