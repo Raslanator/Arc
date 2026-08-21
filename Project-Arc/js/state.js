@@ -363,10 +363,8 @@ function normalizeTimelineEvents(value) {
 function normalizeStatusRecord(value) {
   if (value === true) return true;
   if (!isPlainObject(value)) return null;
+  if (typeof value.done !== 'boolean') return null;
   const result = { ...value };
-  if (Object.prototype.hasOwnProperty.call(result, 'done') && typeof result.done !== 'boolean') {
-    result.done = true;
-  }
   if (Object.prototype.hasOwnProperty.call(result, 'mode') && typeof result.mode !== 'string') {
     delete result.mode;
   }
