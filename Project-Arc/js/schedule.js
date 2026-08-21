@@ -196,9 +196,10 @@
 
   const baseLoadState = loadState;
   loadState = function loadStateWithSchedule() {
-    baseLoadState();
+    const loadResult = baseLoadState();
     ensureScheduleState();
-    saveState();
+    const saveResult = saveState();
+    return { ...loadResult, saveResult };
   };
 
   function getScheduleEvents() {

@@ -14,7 +14,10 @@ const DEFAULT_SETTINGS = {
   sleepMin: 1320, // 10:00 PM
 };
 
+const APP_STATE_SCHEMA_VERSION = 1;
+
 const DEFAULT_APPSTATE = {
+  schemaVersion: APP_STATE_SCHEMA_VERSION,
   settings: { ...DEFAULT_SETTINGS },
 
   customRecipes: [],      // user-added recipes
@@ -64,34 +67,64 @@ let appState = {};
    ========================================================================== */
 
 const Storage = {
-  /** Read and JSON-parse a value. Returns null if missing or unparseable. */
-  get(key) {
+  /** Read and parse a value while preserving failure details for callers. */
+  read(key) {
+    let raw;
     try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : null;
-    } catch (e) { return null; }
+      raw = localStorage.getItem(key);
+    } catch (error) {
+      return { ok: false, error, stage: 'read', found: false, raw: null };
+    }
+
+    if (raw === null) return { ok: true, found: false, value: null, raw: null };
+
+    try {
+      return { ok: true, found: true, value: JSON.parse(raw), raw };
+    } catch (error) {
+      return { ok: false, error, stage: 'parse', found: true, raw };
+    }
   },
 
-  /** JSON-stringify and write a value. Silently ignores storage errors. */
+  /** Compatibility value reader used by non-appState caches. */
+  get(key) {
+    const result = this.read(key);
+    return result.ok && result.found ? result.value : null;
+  },
+
+  /** JSON-stringify and write a value with an explicit success result. */
   set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); }
-    catch (e) { /* storage unavailable — non-fatal */ }
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
   },
 
-  /** Remove a single key. */
+  /** Remove a single key with an explicit success result. */
   remove(key) {
-    localStorage.removeItem(key);
+    try {
+      localStorage.removeItem(key);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
   },
 
   /** Return all current storage keys as an array. */
   keys() {
-    return Object.keys(localStorage);
+    try {
+      return Object.keys(localStorage);
+    } catch (error) {
+      return [];
+    }
   },
 
   /** Remove all app data and reload. Used by the Reset App action. */
   clearAll() {
-    localStorage.removeItem('appState');
-    location.reload();
+    const result = this.remove('appState');
+    if (result.ok) location.reload();
+    return result;
   },
 };
 
@@ -99,20 +132,387 @@ const Storage = {
    PERSISTENCE
    ========================================================================== */
 
+let activePersistenceFailure = null;
+let persistenceWriteBlock = null;
+let lastStateLoadResult = null;
+
+function syncPersistenceWarning() {
+  const warning = document.getElementById('persistenceWarning');
+  if (!warning) return;
+  warning.hidden = !activePersistenceFailure;
+}
+
+function applyPersistenceResult(result) {
+  activePersistenceFailure = result && !result.ok ? result : null;
+  syncPersistenceWarning();
+  return result;
+}
+
 /**
  * Persist appState via the Storage adapter.
  * weekPlan is a derived view — never persisted to avoid drift.
  */
 function saveState() {
-  const toSave = { ...appState };
+  if (persistenceWriteBlock) {
+    return applyPersistenceResult({
+      ok: false,
+      blocked: true,
+      reason: persistenceWriteBlock.reason,
+      error: persistenceWriteBlock.error,
+    });
+  }
+
+  const toSave = { ...appState, schemaVersion: APP_STATE_SCHEMA_VERSION };
   delete toSave.weekPlan;
-  Storage.set('appState', toSave);
+  return applyPersistenceResult(Storage.set('appState', toSave));
 }
 
-/** Normalize one persisted/view index without introducing full schema handling. */
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isSafeMapKey(key) {
+  return key !== '__proto__' && key !== 'prototype' && key !== 'constructor';
+}
+
+function safeString(value, fallback = '') {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function safeFiniteInteger(value, min, max, fallback) {
+  return Number.isInteger(value) && value >= min && value <= max ? value : fallback;
+}
+
+function uniqueStringList(value) {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter(item => typeof item === 'string' && item.trim()))];
+}
+
+function stringList(value) {
+  return Array.isArray(value) ? value.filter(item => typeof item === 'string') : [];
+}
+
+function normalizeStringMap(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([key, item]) => {
+    if (isSafeMapKey(key) && typeof item === 'string') result[key] = item;
+  });
+  return result;
+}
+
+function normalizeBooleanMap(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([key, item]) => {
+    if (isSafeMapKey(key) && typeof item === 'boolean') result[key] = item;
+  });
+  return result;
+}
+
+function normalizeSettings(value) {
+  const source = isPlainObject(value) ? value : {};
+  const wakeMin = safeFiniteInteger(source.wakeMin, 0, 1439, DEFAULT_SETTINGS.wakeMin);
+  let sleepMin = safeFiniteInteger(source.sleepMin, 0, 2879, DEFAULT_SETTINGS.sleepMin);
+  if (sleepMin <= wakeMin) sleepMin += 1440;
+  return {
+    ...source,
+    calorieTarget: safeFiniteInteger(source.calorieTarget, 1000, 6000, DEFAULT_SETTINGS.calorieTarget),
+    wakeMin,
+    sleepMin,
+  };
+}
+
+function normalizeRecipeRecord(value) {
+  if (!isPlainObject(value) || typeof value.id !== 'string' || !value.id.trim()) return null;
+  const result = {
+    ...value,
+    id: value.id,
+    name: safeString(value.name, 'Untitled recipe'),
+    kcalNum: Number.isFinite(value.kcalNum) && value.kcalNum >= 0 ? value.kcalNum : 0,
+    kcalUnit: safeString(value.kcalUnit, 'portion'),
+    portions: safeString(value.portions, '\u2014'),
+    macros: safeString(value.macros, '\u2014'),
+    time: safeString(value.time, '\u2014'),
+    cost: safeString(value.cost, '\u2014'),
+    ingredients: stringList(value.ingredients),
+    steps: stringList(value.steps),
+    storage: safeString(value.storage, '\u2014'),
+    isCustom: value.isCustom !== false,
+  };
+  if (typeof value.youtubeLink !== 'string') delete result.youtubeLink;
+  return result;
+}
+
+const RECIPE_OVERRIDE_STRING_FIELDS = [
+  'name', 'kcalUnit', 'portions', 'macros', 'time', 'cost', 'storage', 'youtubeLink',
+];
+
+function normalizeRecipeOverride(value) {
+  if (!isPlainObject(value)) return null;
+  const result = { ...value };
+  RECIPE_OVERRIDE_STRING_FIELDS.forEach(field => {
+    if (Object.prototype.hasOwnProperty.call(result, field) && typeof result[field] !== 'string') {
+      delete result[field];
+    }
+  });
+  if (Object.prototype.hasOwnProperty.call(result, 'kcalNum') &&
+      (!Number.isFinite(result.kcalNum) || result.kcalNum < 0)) {
+    delete result.kcalNum;
+  }
+  ['ingredients', 'steps'].forEach(field => {
+    if (!Object.prototype.hasOwnProperty.call(result, field)) return;
+    if (Array.isArray(result[field])) result[field] = stringList(result[field]);
+    else delete result[field];
+  });
+  return result;
+}
+
+function normalizeRecipeOverrides(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([id, override]) => {
+    const normalized = normalizeRecipeOverride(override);
+    if (isSafeMapKey(id) && normalized) result[id] = normalized;
+  });
+  return result;
+}
+
+function normalizeExerciseList(value) {
+  if (!Array.isArray(value)) return null;
+  return value
+    .filter(item => Array.isArray(item) && typeof item[0] === 'string')
+    .map(item => [item[0], safeString(item[1])]);
+}
+
+function normalizeGymOverrides(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([key, override]) => {
+    const dayIndex = Number(key);
+    if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex >= BASE_GYM_DAYS.length || !isPlainObject(override)) return;
+    const normalized = { ...override };
+    ['sub', 'cardio'].forEach(field => {
+      if (Object.prototype.hasOwnProperty.call(normalized, field) && typeof normalized[field] !== 'string') {
+        delete normalized[field];
+      }
+    });
+    if (Object.prototype.hasOwnProperty.call(normalized, 'exercises')) {
+      const exercises = normalizeExerciseList(normalized.exercises);
+      if (exercises) normalized.exercises = exercises;
+      else delete normalized.exercises;
+    }
+    result[dayIndex] = normalized;
+  });
+  return result;
+}
+
+function normalizeCalories(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([dateKey_, entries]) => {
+    if (!isSafeMapKey(dateKey_) || !Array.isArray(entries)) return;
+    result[dateKey_] = entries.flatMap((entry, index) => {
+      if (!isPlainObject(entry) || typeof entry.label !== 'string' ||
+          !Number.isFinite(entry.kcal) || entry.kcal < 0) return [];
+      return [{
+        ...entry,
+        id: typeof entry.id === 'string' && entry.id ? entry.id : `legacy-${dateKey_}-${index}`,
+        label: entry.label,
+        kcal: entry.kcal,
+      }];
+    });
+  });
+  return result;
+}
+
+function normalizeTracker(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([weekKey, week]) => {
+    if (!isSafeMapKey(weekKey) || !isPlainObject(week)) return;
+    const days = {};
+    const sourceDays = isPlainObject(week.days) || Array.isArray(week.days) ? week.days : {};
+    for (let index = 0; index < BASE_GYM_DAYS.length; index++) {
+      const day = sourceDays[index];
+      if (!isPlainObject(day)) continue;
+      days[index] = { cardio: day.cardio === true, swim: day.swim === true };
+    }
+    const counter = item => Number.isFinite(item) && item >= 0 ? Math.round(item) : 0;
+    result[weekKey] = { ...week, days, sauna: counter(week.sauna), steam: counter(week.steam) };
+  });
+  return result;
+}
+
+function normalizeTimelineEvents(value) {
+  if (!Array.isArray(value)) return null;
+  return value.flatMap(event => {
+    if (!isPlainObject(event) || typeof event.id !== 'string' || !event.id.trim()) return [];
+    return [{
+      ...event,
+      id: event.id,
+      t: Number.isFinite(event.t) ? Math.max(0, Math.min(2879, Math.round(event.t))) : 0,
+      timeMode: event.timeMode === 'scaled' ? 'scaled' : 'fixed',
+      title: safeString(event.title, 'Untitled Event'),
+      body: safeString(event.body),
+      why: safeString(event.why),
+    }];
+  });
+}
+
+function normalizeStatusRecord(value) {
+  if (value === true) return true;
+  if (!isPlainObject(value)) return null;
+  const result = { ...value };
+  if (Object.prototype.hasOwnProperty.call(result, 'done') && typeof result.done !== 'boolean') {
+    result.done = true;
+  }
+  if (Object.prototype.hasOwnProperty.call(result, 'mode') && typeof result.mode !== 'string') {
+    delete result.mode;
+  }
+  if (Object.prototype.hasOwnProperty.call(result, 'time') && typeof result.time !== 'string') {
+    delete result.time;
+  }
+  return result;
+}
+
+function normalizeTimelineStatus(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([dateKey_, bucket]) => {
+    if (!isSafeMapKey(dateKey_) || !isPlainObject(bucket)) return;
+    const normalizedBucket = {};
+    Object.entries(bucket).forEach(([eventId, status]) => {
+      if (!isSafeMapKey(eventId)) return;
+      if (eventId === '__history') {
+        if (isPlainObject(status) && Array.isArray(status.eventIds)) {
+          normalizedBucket.__history = { eventIds: uniqueStringList(status.eventIds) };
+        }
+        return;
+      }
+      const normalizedStatus = normalizeStatusRecord(status);
+      if (normalizedStatus !== null) normalizedBucket[eventId] = normalizedStatus;
+    });
+    result[dateKey_] = normalizedBucket;
+  });
+  return result;
+}
+
+function normalizePrayerStatus(value) {
+  const result = {};
+  if (!isPlainObject(value)) return result;
+  Object.entries(value).forEach(([dateKey_, bucket]) => {
+    if (!isSafeMapKey(dateKey_) || !isPlainObject(bucket)) return;
+    const normalizedBucket = {};
+    Object.entries(bucket).forEach(([name, status]) => {
+      const normalizedStatus = normalizeStatusRecord(status);
+      if (isSafeMapKey(name) && normalizedStatus !== null) normalizedBucket[name] = normalizedStatus;
+    });
+    result[dateKey_] = normalizedBucket;
+  });
+  return result;
+}
+
+function normalizeChangeLogSection(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isPlainObject).map(entry => ({
+    ...entry,
+    id: safeString(entry.id),
+    text: safeString(entry.text),
+    ts: safeString(entry.ts),
+    revert: entry.revert === null || isPlainObject(entry.revert) ? entry.revert : null,
+  })).slice(0, 30);
+}
+
+function normalizeChangeLog(value) {
+  const source = isPlainObject(value) ? value : {};
+  return {
+    ...source,
+    plan: normalizeChangeLogSection(source.plan),
+    calories: normalizeChangeLogSection(source.calories),
+  };
+}
+
+function normalizePersistedState(value) {
+  const source = isPlainObject(value) ? value : {};
+  const currentWeek = normalizeStateIndex(source.currentWeek, BASE_WEEKS.length, 0);
+  const normalized = {
+    ...source,
+    schemaVersion: APP_STATE_SCHEMA_VERSION,
+    settings: normalizeSettings(source.settings),
+    customRecipes: Array.isArray(source.customRecipes)
+      ? source.customRecipes.map(normalizeRecipeRecord).filter(Boolean)
+      : [],
+    recipeOverrides: normalizeRecipeOverrides(source.recipeOverrides),
+    deletedRecipes: uniqueStringList(source.deletedRecipes),
+    archivedRecipes: uniqueStringList(source.archivedRecipes),
+    recipeShowArchived: source.recipeShowArchived === true,
+    weekOverrides: normalizeStringMap(source.weekOverrides),
+    gymOverrides: normalizeGymOverrides(source.gymOverrides),
+    grocery: normalizeBooleanMap(source.grocery),
+    calories: normalizeCalories(source.calories),
+    gymTracker: normalizeTracker(source.gymTracker),
+    currentWeek,
+    activeMealPlanWeek: normalizeStateIndex(
+      Object.prototype.hasOwnProperty.call(source, 'activeMealPlanWeek')
+        ? source.activeMealPlanWeek
+        : source.currentWeek,
+      BASE_WEEKS.length,
+      currentWeek
+    ),
+    grocWeek: normalizeStateIndex(source.grocWeek, BASE_WEEKS.length, 0),
+    gymDay: normalizeStateIndex(source.gymDay, BASE_GYM_DAYS.length, 0),
+    qaWeekIdx: normalizeStateIndex(source.qaWeekIdx, BASE_WEEKS.length, 0),
+    qaDayIdx: normalizeStateIndex(source.qaDayIdx, 3, 0),
+    activeTab: ['today', 'calories', 'plan', 'recipes', 'grocery', 'progress', 'gym', 'goals']
+      .includes(source.activeTab) ? source.activeTab : 'today',
+    theme: source.theme === 'dark' ? 'dark' : 'light',
+    timelineStatus: normalizeTimelineStatus(source.timelineStatus),
+    prayerStatus: normalizePrayerStatus(source.prayerStatus),
+    changeLog: normalizeChangeLog(source.changeLog),
+  };
+
+  const timelineEvents = normalizeTimelineEvents(source.timelineEvents);
+  if (timelineEvents !== null) normalized.timelineEvents = timelineEvents;
+  else delete normalized.timelineEvents;
+  delete normalized.weekPlan;
+  return normalized;
+}
+
+function persistedSchemaVersion(value) {
+  return isPlainObject(value) && Number.isInteger(value.schemaVersion) && value.schemaVersion >= 0
+    ? value.schemaVersion
+    : 0;
+}
+
+function migrateV0ToV1(value) {
+  const source = isPlainObject(value) ? value : {};
+  const migrated = { ...source, schemaVersion: 1 };
+  if (!Object.prototype.hasOwnProperty.call(source, 'activeMealPlanWeek')) {
+    migrated.activeMealPlanWeek = source.currentWeek;
+  }
+  return migrated;
+}
+
+const APP_STATE_MIGRATIONS = {
+  0: migrateV0ToV1,
+};
+
+function migratePersistedState(value, fromVersion) {
+  let version = fromVersion;
+  let migrated = isPlainObject(value) ? { ...value } : {};
+  while (version < APP_STATE_SCHEMA_VERSION) {
+    const migrate = APP_STATE_MIGRATIONS[version];
+    if (typeof migrate !== 'function') throw new Error(`Missing appState migration from schema ${version}`);
+    migrated = migrate(migrated);
+    version++;
+  }
+  return migrated;
+}
+
+/** Normalize one persisted/view index. */
 function normalizeStateIndex(value, length, fallback = 0) {
-  const index = Number(value);
-  return Number.isInteger(index) && index >= 0 && index < length ? index : fallback;
+  return Number.isInteger(value) && value >= 0 && value < length ? value : fallback;
 }
 
 /** Make one Meal Plan week authoritative for Today without changing view state. */
@@ -131,33 +531,76 @@ function activateMealPlanWeek(weekIdx) {
 }
 
 /**
- * Load appState via the Storage adapter, backfilling any keys missing
- * from older saves (first run or new fields added since last save).
+ * Load appState through the versioned migration and validation lifecycle.
  */
 function loadState() {
-  const parsed = Storage.get('appState') || {};
-  const hasActiveMealPlanWeek = Object.prototype.hasOwnProperty.call(parsed, 'activeMealPlanWeek');
+  persistenceWriteBlock = null;
+  const readResult = Storage.read('appState');
+  let source = {};
+  let recoveredFromMalformedJson = false;
 
-  appState = { ...DEFAULT_APPSTATE, ...parsed };
-  appState.settings   = { ...DEFAULT_SETTINGS, ...(appState.settings || {}) };
-  appState.changeLog  = {
-    plan:     (appState.changeLog && appState.changeLog.plan)     || [],
-    calories: (appState.changeLog && appState.changeLog.calories) || [],
-  };
+  if (!readResult.ok && readResult.stage === 'read') {
+    persistenceWriteBlock = {
+      reason: 'storage-read-failed',
+      error: readResult.error,
+    };
+    appState = normalizePersistedState(DEFAULT_APPSTATE);
+    refreshWeekPlan();
+    lastStateLoadResult = {
+      ok: false,
+      recovered: true,
+      writeBlocked: true,
+      reason: persistenceWriteBlock.reason,
+      error: readResult.error,
+    };
+    return lastStateLoadResult;
+  }
 
-  // Chunk 1 compatibility: legacy currentWeek/gymDay values remain valid as
-  // navigation state. A legacy currentWeek also seeds the new active week once
-  // so Today's meal plan does not unexpectedly change during the upgrade.
-  appState.currentWeek = normalizeStateIndex(appState.currentWeek, BASE_WEEKS.length, 0);
-  appState.activeMealPlanWeek = normalizeStateIndex(
-    hasActiveMealPlanWeek ? parsed.activeMealPlanWeek : parsed.currentWeek,
-    BASE_WEEKS.length,
-    appState.currentWeek
-  );
-  appState.gymDay = normalizeStateIndex(appState.gymDay, BASE_GYM_DAYS.length, 0);
+  if (!readResult.ok && readResult.stage === 'parse') {
+    recoveredFromMalformedJson = true;
+  } else if (readResult.ok && readResult.found) {
+    source = readResult.value;
+  }
 
+  const sourceVersion = persistedSchemaVersion(source);
+  if (sourceVersion > APP_STATE_SCHEMA_VERSION) {
+    persistenceWriteBlock = {
+      reason: 'future-schema',
+      error: new Error(`Stored schema ${sourceVersion} is newer than supported schema ${APP_STATE_SCHEMA_VERSION}`),
+    };
+    appState = normalizePersistedState(DEFAULT_APPSTATE);
+    refreshWeekPlan();
+    lastStateLoadResult = {
+      ok: false,
+      recovered: true,
+      writeBlocked: true,
+      reason: persistenceWriteBlock.reason,
+      sourceVersion,
+      error: persistenceWriteBlock.error,
+    };
+    return lastStateLoadResult;
+  }
+
+  let migrated;
+  try {
+    migrated = migratePersistedState(source, sourceVersion);
+  } catch (error) {
+    migrated = migrateV0ToV1({});
+    recoveredFromMalformedJson = true;
+  }
+
+  appState = normalizePersistedState(migrated);
   refreshWeekPlan();
   pruneOldCalorieLogs();
+  lastStateLoadResult = {
+    ok: true,
+    found: !!(readResult.ok && readResult.found),
+    sourceVersion,
+    schemaVersion: APP_STATE_SCHEMA_VERSION,
+    migrated: sourceVersion < APP_STATE_SCHEMA_VERSION,
+    recoveredFromMalformedJson,
+  };
+  return lastStateLoadResult;
 }
 
 /* ==========================================================================

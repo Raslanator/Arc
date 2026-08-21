@@ -329,12 +329,16 @@
     if (sleepMin <= wakeMin) sleepMin += 1440;
     if (!dailyTarget || dailyTarget < 1000) return;
     appState.settings = { calorieTarget: dailyTarget, wakeMin, sleepMin };
-    saveState();
+    const saveResult = saveState();
     render();
     showTodayBriefItem(false);
     const banner = document.getElementById('goalsSavedBanner');
-    banner.classList.add('show');
-    setTimeout(() => banner.classList.remove('show'), 3200);
+    if (saveResult.ok) {
+      banner.classList.add('show');
+      setTimeout(() => banner.classList.remove('show'), 3200);
+    } else {
+      banner.classList.remove('show');
+    }
   });
 
   document.getElementById('goalsResetBtn').addEventListener('click', () => {

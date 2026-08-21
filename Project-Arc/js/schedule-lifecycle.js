@@ -94,11 +94,13 @@
   loadState = function loadStateWithEmptyScheduleSupport() {
     const stored = Storage.get('appState');
     const preserveEmpty = !!(stored && Array.isArray(stored.timelineEvents) && stored.timelineEvents.length === 0);
-    scheduleLoadState();
+    const loadResult = scheduleLoadState();
     if (preserveEmpty) {
       appState.timelineEvents = [];
-      saveState();
+      const saveResult = saveState();
+      return { ...loadResult, saveResult };
     }
+    return loadResult;
   };
 
   /* ================================================================

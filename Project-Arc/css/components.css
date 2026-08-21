@@ -1179,6 +1179,25 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .save-banner.show { display: block; animation: fadeIn var(--dur) var(--ease); }
 
+.persistence-warning {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 12px 16px;
+  margin-bottom: var(--sp-6);
+  color: var(--rust);
+  background: var(--rust-dim);
+  border: 1px solid var(--rust);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: var(--shadow);
+}
+
+.persistence-warning[hidden] { display: none; }
+
 /* ==========================================================================
    RESPONSIVE — COMPONENT ADJUSTMENTS
    ========================================================================== */
