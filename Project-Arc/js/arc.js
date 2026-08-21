@@ -137,6 +137,12 @@ function recalcArcRange() {
   ARC_MAXT = maxT;
 }
 
+function arcNowMinutes() {
+  return window.ArcSchedule && typeof window.ArcSchedule.getNowMinutes === 'function'
+    ? window.ArcSchedule.getNowMinutes()
+    : nowMinutes();
+}
+
 /* ==========================================================================
    ARC PATH & SHAPE UPDATE
    ========================================================================== */
@@ -202,7 +208,7 @@ function updateArcShape(scale) {
 
   const marker = document.getElementById('nowMarker');
   if (marker && marker.style.display !== 'none') {
-    const t = nowMinutes();
+    const t = arcNowMinutes();
     if (t >= ARC_MINT && t <= ARC_MAXT) {
       const ms = nowMarkerScaleFor(arcZoomDisp);
       marker.setAttribute('transform', `translate(${arcX(t)}, ${arcY(t)}) scale(${ms})`);
@@ -457,10 +463,10 @@ function updateNowMarker() {
   const marker  = document.getElementById('nowMarker');
   const readout = document.getElementById('nowReadout');
   const status  = document.getElementById('nowStatusReadout');
-  if (readout) readout.textContent = minToLabel12(nowMinutes());
+  if (readout) readout.textContent = minToLabel12(arcNowMinutes());
   if (!marker) return;
 
-  const t = nowMinutes();
+  const t = arcNowMinutes();
   if (t < ARC_MINT || t > ARC_MAXT) {
     marker.style.display = 'none';
     if (status) status.textContent = t < ARC_MINT ? '(before wake-up)' : '(after lights out)';

@@ -210,11 +210,32 @@
     return getScheduleEvents().find(ev => ev.id === id) || null;
   }
 
+  function scheduleDateOrNow(value) {
+    return value instanceof Date && !Number.isNaN(value.getTime()) ? value : new Date();
+  }
+
+  function scheduleClockMinutes(date) {
+    const value = scheduleDateOrNow(date);
+    return value.getHours() * 60 + value.getMinutes() + value.getSeconds() / 60;
+  }
+
+  // The configured wake time anchors one logical routine. Clock times earlier
+  // than wake therefore belong to that routine's post-midnight tail. Values
+  // already above 1440 are explicit schedule-relative times and stay intact.
+  function normalizeScheduleEventTime(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return Infinity;
+    const time = Math.max(0, Math.min(2879, numeric));
+    const wakeClock = clampScheduleTime(appState.settings.wakeMin) % 1440;
+    return time < 1440 && time < wakeClock ? time + 1440 : time;
+  }
+
   function scheduleEventTime(ev) {
     if (!ev) return Infinity;
-    return ev.timeMode === 'fixed'
+    const time = ev.timeMode === 'fixed'
       ? clampScheduleTime(ev.t)
       : effectiveT(ev.t, appState.settings);
+    return normalizeScheduleEventTime(time);
   }
 
   function getScheduleEventsChronological() {
@@ -223,8 +244,44 @@
       .sort((a, b) => (a.time - b.time) || (a.order - b.order));
   }
 
-  function getNextScheduleEvent() {
-    const now = nowMinutes();
+  function getScheduleDayBoundaryMinutes() {
+    const times = getScheduleEvents()
+      .map(scheduleEventTime)
+      .filter(Number.isFinite);
+    return times.length ? Math.max(...times) : null;
+  }
+
+  function getScheduleNowMinutes(date) {
+    const clock = scheduleClockMinutes(date);
+    const boundary = getScheduleDayBoundaryMinutes();
+    const overnightEndClock = boundary !== null && boundary > 1440
+      ? boundary - 1440
+      : null;
+    return overnightEndClock !== null && clock < overnightEndClock
+      ? clock + 1440
+      : clock;
+  }
+
+  function getScheduleDayKey(date) {
+    const value = scheduleDateOrNow(date);
+    if (getScheduleNowMinutes(value) < 1440) return dateKey(value);
+    const previous = new Date(value);
+    previous.setDate(value.getDate() - 1);
+    return dateKey(previous);
+  }
+
+  // Project a calendar-clock time (for example, today's prayer time) onto the
+  // active logical schedule axis without changing that subsystem's date key.
+  function toScheduleRelativeMinutes(value, date) {
+    const time = Number(value);
+    if (!Number.isFinite(time)) return Infinity;
+    return getScheduleNowMinutes(date) >= 1440 && time < 1440
+      ? time + 1440
+      : time;
+  }
+
+  function getNextScheduleEvent(date) {
+    const now = getScheduleNowMinutes(date);
     const next = getScheduleEventsChronological().find(item => item.time > now);
     return next || null;
   }
@@ -362,11 +419,11 @@
   }
 
   function mergeScheduleWithPrayers() {
-    const items = getScheduleEvents().map((ev, order) => ({
+    const items = getScheduleEventsChronological().map(({ ev, order, time }) => ({
       type: 'event',
       event: ev,
       order,
-      time: scheduleEventTime(ev),
+      time,
     }));
 
     if (!prayerTimesToday) return items;
@@ -390,7 +447,7 @@
     const list = document.getElementById('timelineList');
     if (!list) return;
 
-    const todayStatus = appState.timelineStatus[todayKeyStr()] || {};
+    const todayStatus = appState.timelineStatus[getScheduleDayKey()] || {};
     const prayerDone = (appState.prayerStatus && appState.prayerStatus[todayKeyStr()]) || {};
     const scheduleEvents = getScheduleEvents();
     const items = mergeScheduleWithPrayers();
@@ -474,7 +531,7 @@
   markTimelineDone = function markScheduleEventDone(eventRef, mode, time) {
     const eventId = resolveEventId(eventRef);
     if (!eventId) return;
-    const key = todayKeyStr();
+    const key = getScheduleDayKey();
     ensureTimelineHistorySnapshot(key, eventId);
     const bucket = timelineStatusBucket(key, true);
     bucket[eventId] = {
@@ -488,7 +545,7 @@
 
   clearTimelineDone = function clearScheduleEventDone(eventRef) {
     const eventId = resolveEventId(eventRef);
-    const key = todayKeyStr();
+    const key = getScheduleDayKey();
     const bucket = timelineStatusBucket(key);
     if (bucket && Object.prototype.hasOwnProperty.call(bucket, eventId)) {
       ensureTimelineHistorySnapshot(key, eventId);
@@ -503,7 +560,7 @@
     const ev = getScheduleEventById(eventId);
     if (!ev) return;
 
-    const key = todayKeyStr();
+    const key = getScheduleDayKey();
     const existing = (appState.timelineStatus[key] || {})[eventId];
 
     openModal(`
@@ -550,7 +607,7 @@
   };
 
   updateNextEventHighlight = function updateScheduleNextHighlight() {
-    const t = nowMinutes();
+    const t = getScheduleNowMinutes();
     const rows = Array.from(document.querySelectorAll('#timelineList .tl-row'));
     let nextRow = null;
     let nextTime = Infinity;
@@ -558,7 +615,9 @@
     rows.forEach(row => {
       let rowTime = Infinity;
       if (row.dataset.type === 'prayer') {
-        rowTime = prayerTimesToday ? parsePrayerTimeToMin(prayerTimesToday[row.dataset.name]) : Infinity;
+        rowTime = prayerTimesToday
+          ? toScheduleRelativeMinutes(parsePrayerTimeToMin(prayerTimesToday[row.dataset.name]))
+          : Infinity;
       } else if (row.dataset.type === 'event') {
         rowTime = scheduleEventTime(getScheduleEventById(row.dataset.eventId));
       }
@@ -720,10 +779,14 @@
 
   window.ArcSchedule = {
     getEvents: () => getScheduleEvents().map(ev => ({ ...ev, effectiveTime: scheduleEventTime(ev) })),
-    getNext: () => {
-      const item = getNextScheduleEvent();
+    getNext: date => {
+      const item = getNextScheduleEvent(date);
       return item ? { ...item.ev, effectiveTime: item.time } : null;
     },
+    getNowMinutes: date => getScheduleNowMinutes(date),
+    getDayKey: date => getScheduleDayKey(date),
+    getDayBoundaryMinutes: () => getScheduleDayBoundaryMinutes(),
+    toRelativeMinutes: (time, date) => toScheduleRelativeMinutes(time, date),
   };
 
   window.ArcTimelineHistory = {

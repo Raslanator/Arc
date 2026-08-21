@@ -456,7 +456,14 @@
      and prayer countdown. Triggers a full re-render on day rollover.
      ================================================================ */
 
+  function currentLogicalScheduleDayKey() {
+    return window.ArcSchedule && typeof window.ArcSchedule.getDayKey === 'function'
+      ? window.ArcSchedule.getDayKey()
+      : todayKeyStr();
+  }
+
   let lastDateKey = todayKeyStr();
+  let lastScheduleDayKey = currentLogicalScheduleDayKey();
 
   function tick() {
     // Update live clock in the header
@@ -466,14 +473,26 @@
     updateNextEventHighlight();
     renderPrayerCard(); // cheap re-render for the countdown, no network call
 
-    // Day rollover: prune old logs and fetch fresh prayer times
+    // Calendar rollover refreshes calendar-owned data such as Prayer. A
+    // logical schedule-day rollover can happen later, at the final overnight
+    // event, and refreshes Timeline/Arc state without shifting other domains.
     const currentDateKey = todayKeyStr();
-    if (currentDateKey !== lastDateKey) {
+    const currentScheduleDayKey = currentLogicalScheduleDayKey();
+    const calendarDayChanged = currentDateKey !== lastDateKey;
+    const scheduleDayChanged = currentScheduleDayKey !== lastScheduleDayKey;
+
+    if (calendarDayChanged) {
       lastDateKey = currentDateKey;
       pruneOldCalorieLogs();
       saveState();
+    }
+    if (scheduleDayChanged) lastScheduleDayKey = currentScheduleDayKey;
+
+    if (calendarDayChanged || scheduleDayChanged) {
       render();
       showTodayBriefItem(false);
+    }
+    if (calendarDayChanged) {
       ensurePrayerTimes();
     }
   }

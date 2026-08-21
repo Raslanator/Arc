@@ -187,13 +187,25 @@
     return { total, checked, remaining: Math.max(0, total - checked) };
   }
 
+  function scheduleNowForBrief() {
+    return window.ArcSchedule && typeof window.ArcSchedule.getNowMinutes === 'function'
+      ? window.ArcSchedule.getNowMinutes()
+      : nowMinutes();
+  }
+
+  function scheduleRelativeTimeForBrief(time) {
+    return window.ArcSchedule && typeof window.ArcSchedule.toRelativeMinutes === 'function'
+      ? window.ArcSchedule.toRelativeMinutes(time)
+      : time;
+  }
+
   function nextPrayerForBrief() {
     if (!prayerTimesToday) return null;
-    const now = nowMinutes();
+    const now = scheduleNowForBrief();
     let next = null;
 
     PRAYER_NAMES.forEach(name => {
-      const time = parsePrayerTimeToMin(prayerTimesToday[name]);
+      const time = scheduleRelativeTimeForBrief(parsePrayerTimeToMin(prayerTimesToday[name]));
       if (!Number.isFinite(time) || time <= now) return;
       if (!next || time < next.time) next = { type: 'prayer', name, time };
     });
@@ -229,7 +241,7 @@
   }
 
   function timeUntilLabel(targetTime) {
-    const diff = Math.max(0, Math.round(targetTime - nowMinutes()));
+    const diff = Math.max(0, Math.round(targetTime - scheduleNowForBrief()));
     if (diff < 1) return 'now';
     if (diff < 60) return `in ${diff} min`;
     const hours = Math.floor(diff / 60);
