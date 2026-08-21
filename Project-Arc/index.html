@@ -35,7 +35,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Styles (order matters: tokens → base → layout → components → views) -->
+  <!-- Styles (order matters: foundations → feature layers → permanent theme) -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -48,6 +48,14 @@
   <link rel="stylesheet" href="css/gym-settings-pass6.css">
   <link rel="stylesheet" href="css/progress-pass7.css">
   <link rel="stylesheet" href="css/progress-pass7-daily.css">
+  <link rel="stylesheet" href="css/progress-pass7-visual-fix.css" data-progress-pass7-visual-fix="true">
+  <link rel="stylesheet" href="css/nav-mobile-pass8.css" data-pass8-mobile-nav="true">
+  <link rel="stylesheet" href="css/media-pass9.css" data-arc-media-pass9="true">
+  <link rel="stylesheet" href="css/daily-brief-media-pass9.css" data-daily-brief-media-pass9="true">
+  <link rel="stylesheet" href="css/theme-palette.css">
+  <link rel="stylesheet" href="css/theme-emphasis.css">
+  <link rel="stylesheet" href="css/theme-liveliness.css">
+  <link rel="stylesheet" href="css/theme-refinements.css">
 </head>
 <body>
 
@@ -411,7 +419,7 @@
 
 <!-- ================================================================
      JAVASCRIPT
-     Load order: data → utils → state → ui → prayer → arc → nav → modals → render → schedule → schedule lifecycle → recipe pass → meal-plan pass → meal-plan refinement → gym/settings pass → progress pass → progress daily history → progress visual fix → one-time test cleanup → main
+     Load order: data → utils → state → ui → prayer → arc → nav → modals → render → schedule → schedule lifecycle → recipe pass → meal-plan pass → meal-plan refinement → gym/settings pass → progress pass → progress daily history → progress visual fix → Pass 7 cleanup → Pass 10 cleanup → main
      ================================================================ -->
 
 <!-- Static data -->
@@ -448,6 +456,7 @@
 <script src="js/progress-pass7-daily.js"></script>
 <script src="js/progress-pass7-visual-fix.js"></script>
 <script src="js/progress-pass7-test-cleanup.js"></script>
+<script src="js/pass10-test-cleanup.js"></script>
 
 <!-- Entry point -->
 <script src="js/main.js"></script>
