@@ -162,3 +162,23 @@
   script.addEventListener('load', loadDailyBriefAlternation, { once: true });
   document.head.appendChild(script);
 })();
+
+// Pass 10 palette review layer. Kept dynamic so the frozen index load order is
+// untouched. Both files are temporary to edit/ARC.04 and must be removed before
+// Pass 10 is merged/frozen.
+(function loadPass10PaletteReview() {
+  if (!document.querySelector('link[data-pass10-palette-enforcement]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'css/pass10-palette-enforcement.css';
+    link.dataset.pass10PaletteEnforcement = 'true';
+    document.head.appendChild(link);
+  }
+
+  if (!document.querySelector('script[data-pass10-test-data]')) {
+    const script = document.createElement('script');
+    script.src = 'js/pass10-test-data.js';
+    script.dataset.pass10TestData = 'true';
+    document.head.appendChild(script);
+  }
+})();

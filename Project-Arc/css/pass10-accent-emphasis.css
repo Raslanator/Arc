@@ -1,0 +1,403 @@
+/* ========================================================================== 
+   PASS 10 — SECONDARY EMPHASIS ACCENT
+   Trial 2 refinement: add a related ocean-blue accent for important
+   information while keeping teal/mint as Arc's primary action family.
+   ========================================================================== */
+
+:root {
+  --arc-info: #3A7CA5;
+  --arc-info-text: #2D6688;
+  --arc-info-dim: rgba(58, 124, 165, 0.14);
+  --arc-info-border: rgba(58, 124, 165, 0.34);
+  --arc-info-shadow: rgba(45, 102, 136, 0.24);
+
+  /* Salah and focus now use the related blue family instead of purple. */
+  --plum: var(--arc-info);
+  --plum-dim: var(--arc-info-dim);
+  --blue: var(--arc-info);
+
+  /* Vibrant Arc event-dot palette. These are deliberately brighter than the
+     app surfaces so checkpoints remain instantly scannable on the SVG arc. */
+  --arc-event-red: #FF5A5F;
+  --arc-event-orange: #FF8A3D;
+  --arc-event-yellow: #F4C542;
+  --arc-event-green: #22C55E;
+  --arc-event-blue: #3A7CA5;
+  --arc-event-cyan: #00A7B5;
+}
+
+html[data-theme="dark"] {
+  --arc-info: #62B7D7;
+  --arc-info-text: #78C7E3;
+  --arc-info-dim: rgba(98, 183, 215, 0.15);
+  --arc-info-border: rgba(98, 183, 215, 0.34);
+  --arc-info-shadow: rgba(98, 183, 215, 0.20);
+
+  --plum: var(--arc-info);
+  --plum-dim: var(--arc-info-dim);
+  --blue: var(--arc-info);
+
+  --arc-event-red: #FF7075;
+  --arc-event-orange: #FFA05E;
+  --arc-event-yellow: #FFD84D;
+  --arc-event-green: #4ADE80;
+  --arc-event-blue: #62B7D7;
+  --arc-event-cyan: #26C6D1;
+}
+
+/* --------------------------------------------------------------------------
+   SALAH — explicitly replace the old hard-coded purple next-prayer treatment.
+   -------------------------------------------------------------------------- */
+.prayer-card {
+  border-color: color-mix(in srgb, var(--arc-info) 28%, var(--glass-border));
+}
+
+.prayer-card-title,
+.prayer-countdown,
+.prayer-tag,
+.arc-prayer-label,
+.tl-row.prayer-tl-row .tl-time {
+  color: var(--arc-info-text);
+}
+
+html[data-theme="dark"] .prayer-card-title,
+html[data-theme="dark"] .prayer-countdown,
+html[data-theme="dark"] .prayer-tag,
+html[data-theme="dark"] .arc-prayer-label,
+html[data-theme="dark"] .tl-row.prayer-tl-row .tl-time {
+  color: var(--arc-info);
+}
+
+.prayer-countdown {
+  border-left-color: var(--arc-info);
+}
+
+.prayer-tag,
+.tl-row.prayer-tl-row {
+  background: var(--arc-info-dim);
+}
+
+.prayer-item.next {
+  background: linear-gradient(135deg, var(--arc-info-text), var(--arc-info));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 24px var(--arc-info-shadow);
+}
+
+.prayer-item.next .prayer-name,
+.prayer-item.next .prayer-time {
+  color: #fff;
+}
+
+.arc-prayer-dot:hover rect {
+  stroke: var(--arc-info);
+}
+
+/* --------------------------------------------------------------------------
+   GLOBAL IMPORTANT-INFORMATION LANGUAGE
+   Green = primary actions/success. Blue = key information/emphasis.
+   Surfaces remain clear glass; blue appears only on text, marks and borders.
+   -------------------------------------------------------------------------- */
+
+/* TODAY */
+#view-today .now-readout b,
+#view-today .daily-brief-day,
+#view-today .brief-time-accent {
+  color: var(--arc-info-text);
+}
+
+html[data-theme="dark"] #view-today .now-readout b,
+html[data-theme="dark"] #view-today .daily-brief-day,
+html[data-theme="dark"] #view-today .brief-time-accent {
+  color: var(--arc-info);
+}
+
+/* CALORIES */
+#view-calories .cal-card-today .cal-nums b,
+#view-calories .cal-card-today .cal-left,
+#view-calories .cal-today-log h4,
+#view-calories .qa-btn .qkcal {
+  color: var(--arc-info-text);
+}
+
+#view-calories .cal-today-log {
+  border-color: var(--arc-info-border);
+}
+
+html[data-theme="dark"] #view-calories .cal-card-today .cal-nums b,
+html[data-theme="dark"] #view-calories .cal-card-today .cal-left,
+html[data-theme="dark"] #view-calories .cal-today-log h4,
+html[data-theme="dark"] #view-calories .qa-btn .qkcal {
+  color: var(--arc-info);
+}
+
+/* MEAL PLAN */
+#view-plan .pass5-batch-heading,
+#view-plan .meal-kcal,
+#view-plan .pass5-total-line b {
+  color: var(--arc-info-text) !important;
+}
+
+#view-plan .meal-add-btn:hover,
+#view-plan .swap-btn:hover {
+  color: var(--arc-info-text);
+  border-color: var(--arc-info-border);
+}
+
+html[data-theme="dark"] #view-plan .pass5-batch-heading,
+html[data-theme="dark"] #view-plan .meal-kcal,
+html[data-theme="dark"] #view-plan .pass5-total-line b {
+  color: var(--arc-info) !important;
+}
+
+/* RECIPES */
+#view-recipes .recipe-card-pass4:focus-visible {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 4px var(--arc-info-dim), var(--shadow-md);
+}
+
+#view-recipes .recipe-card-badges .badge.kcal {
+  color: var(--arc-info-text);
+  background: var(--arc-info-dim);
+  border-color: transparent;
+}
+
+html[data-theme="dark"] #view-recipes .recipe-card-badges .badge.kcal {
+  color: var(--arc-info);
+}
+
+/* GROCERY */
+#view-grocery .grocery-section-header,
+#view-grocery #grocProgress {
+  color: var(--arc-info-text) !important;
+}
+
+#view-grocery .grocery-progress-fill {
+  background: linear-gradient(90deg, var(--arc-info), var(--palette-teal));
+}
+
+html[data-theme="dark"] #view-grocery .grocery-section-header,
+html[data-theme="dark"] #view-grocery #grocProgress {
+  color: var(--arc-info) !important;
+}
+
+/* GYM */
+#view-gym .pass6-day-kicker,
+#view-gym .pass6-gym-overline,
+#view-gym .pass6-cardio-plan > span,
+#view-gym .pass6-exercise-row .sets {
+  color: var(--arc-info-text);
+}
+
+#view-gym .gym-day-select button.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 1px var(--arc-info-dim), var(--shadow);
+}
+
+html[data-theme="dark"] #view-gym .pass6-day-kicker,
+html[data-theme="dark"] #view-gym .pass6-gym-overline,
+html[data-theme="dark"] #view-gym .pass6-cardio-plan > span,
+html[data-theme="dark"] #view-gym .pass6-exercise-row .sets {
+  color: var(--arc-info);
+}
+
+/* PROGRESS — key informational text remains blue; semantic charts below use
+   their own vivid red/yellow/green status language. */
+#view-progress .progress-daily-kicker,
+#view-progress .progress-completion-head strong,
+#view-progress .progress-recovery-copy strong {
+  color: var(--arc-info-text);
+}
+
+#view-progress .progress-line-path {
+  stroke: var(--arc-info);
+}
+
+#view-progress .progress-line-dot {
+  stroke: var(--arc-info);
+}
+
+#view-progress .progress-completion-svg-fill.salah,
+#view-progress .progress-completion-block:nth-child(2) .progress-completion-track span {
+  fill: var(--arc-info);
+  background: var(--arc-info);
+}
+
+html[data-theme="dark"] #view-progress .progress-daily-kicker,
+html[data-theme="dark"] #view-progress .progress-completion-head strong,
+html[data-theme="dark"] #view-progress .progress-recovery-copy strong {
+  color: var(--arc-info);
+}
+
+/* SETTINGS */
+#view-goals .goal-card .field label,
+#view-goals .pass6-settings-section h4 {
+  color: var(--arc-info-text);
+}
+
+#view-goals .pass6-appearance-section #themeToggle button.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 1px var(--arc-info-dim);
+}
+
+html[data-theme="dark"] #view-goals .goal-card .field label,
+html[data-theme="dark"] #view-goals .pass6-settings-section h4 {
+  color: var(--arc-info);
+}
+
+/* Shared focus states use the same information accent for consistency. */
+:focus-visible {
+  outline-color: var(--arc-info);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.stepper-field:focus-within,
+.time-trigger.active {
+  border-color: var(--arc-info);
+  box-shadow: 0 0 0 4px var(--arc-info-dim);
+}
+
+/* ========================================================================== 
+   VIBRANT PROGRESS STATUS SYSTEM
+   Scope red / yellow / green to Progress only so status charts are lively and
+   instantly readable without recoloring the rest of Arc.
+   ========================================================================== */
+#view-progress {
+  --sage: #22C55E;
+  --sage-dim: rgba(34, 197, 94, 0.20);
+  --gold: #F4B400;
+  --gold-dim: rgba(244, 180, 0, 0.22);
+  --rust: #EF4444;
+  --rust-dim: rgba(239, 68, 68, 0.18);
+}
+
+html[data-theme="dark"] #view-progress {
+  --sage: #4ADE80;
+  --sage-dim: rgba(74, 222, 128, 0.20);
+  --gold: #FFD43B;
+  --gold-dim: rgba(255, 212, 59, 0.20);
+  --rust: #FF6B6B;
+  --rust-dim: rgba(255, 107, 107, 0.18);
+}
+
+/* Make the three status families visibly saturated in every Progress data
+   representation: bars, SVG columns, legends, tiny markers, and labels. */
+#view-progress .progress-seven-day.under .progress-seven-bar,
+#view-progress .progress-breakdown-row.under .progress-breakdown-track b,
+#view-progress .progress-breakdown-row.under .progress-breakdown-label i {
+  background: var(--gold);
+}
+
+#view-progress .progress-seven-day.on .progress-seven-bar,
+#view-progress .progress-breakdown-row.on .progress-breakdown-track b,
+#view-progress .progress-breakdown-row.on .progress-breakdown-label i {
+  background: var(--sage);
+}
+
+#view-progress .progress-seven-day.over .progress-seven-bar,
+#view-progress .progress-breakdown-row.over .progress-breakdown-track b,
+#view-progress .progress-breakdown-row.over .progress-breakdown-label i {
+  background: var(--rust);
+}
+
+#view-progress .progress-seven-day.under::after,
+#view-progress .progress-seven-label.under small {
+  color: var(--gold);
+}
+
+#view-progress .progress-seven-day.on::after,
+#view-progress .progress-seven-label.on small {
+  color: var(--sage);
+}
+
+#view-progress .progress-seven-day.over::after,
+#view-progress .progress-seven-label.over small {
+  color: var(--rust);
+}
+
+#view-progress .progress-seven-svg-bar.under {
+  fill: color-mix(in srgb, var(--gold) 58%, transparent);
+  stroke: var(--gold);
+}
+
+#view-progress .progress-seven-svg-bar.on {
+  fill: color-mix(in srgb, var(--sage) 58%, transparent);
+  stroke: var(--sage);
+}
+
+#view-progress .progress-seven-svg-bar.over {
+  fill: color-mix(in srgb, var(--rust) 56%, transparent);
+  stroke: var(--rust);
+}
+
+#view-progress .progress-consistency-day.strong {
+  background: color-mix(in srgb, var(--sage) 30%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--sage) 72%, var(--glass-border));
+}
+
+#view-progress .progress-consistency-day.mixed {
+  background: color-mix(in srgb, var(--gold) 30%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--gold) 72%, var(--glass-border));
+}
+
+#view-progress .progress-consistency-day.low {
+  background: color-mix(in srgb, var(--rust) 28%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--rust) 70%, var(--glass-border));
+}
+
+#view-progress .progress-consistency-legend .strong i { background: var(--sage); }
+#view-progress .progress-consistency-legend .mixed i { background: var(--gold); }
+#view-progress .progress-consistency-legend .low i { background: var(--rust); }
+
+/* ========================================================================== 
+   VIBRANT DAILY ARC EVENT DOTS
+   Normal events rotate through six vivid colors. Salah retains the separate
+   ocean-blue diamond identity and the live-now marker keeps Arc teal.
+   ========================================================================== */
+#view-today .arc-dot circle {
+  stroke: color-mix(in srgb, var(--paper) 78%, white);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 2px 3px rgba(20, 60, 52, 0.20));
+}
+
+#view-today .arc-dot[data-idx="0"] circle,
+#view-today .arc-dot[data-idx="6"] circle,
+#view-today .arc-dot[data-idx="12"] circle,
+#view-today .arc-dot[data-idx="18"] circle { fill: var(--arc-event-red) !important; }
+
+#view-today .arc-dot[data-idx="1"] circle,
+#view-today .arc-dot[data-idx="7"] circle,
+#view-today .arc-dot[data-idx="13"] circle,
+#view-today .arc-dot[data-idx="19"] circle { fill: var(--arc-event-orange) !important; }
+
+#view-today .arc-dot[data-idx="2"] circle,
+#view-today .arc-dot[data-idx="8"] circle,
+#view-today .arc-dot[data-idx="14"] circle,
+#view-today .arc-dot[data-idx="20"] circle { fill: var(--arc-event-yellow) !important; }
+
+#view-today .arc-dot[data-idx="3"] circle,
+#view-today .arc-dot[data-idx="9"] circle,
+#view-today .arc-dot[data-idx="15"] circle,
+#view-today .arc-dot[data-idx="21"] circle { fill: var(--arc-event-green) !important; }
+
+#view-today .arc-dot[data-idx="4"] circle,
+#view-today .arc-dot[data-idx="10"] circle,
+#view-today .arc-dot[data-idx="16"] circle,
+#view-today .arc-dot[data-idx="22"] circle { fill: var(--arc-event-blue) !important; }
+
+#view-today .arc-dot[data-idx="5"] circle,
+#view-today .arc-dot[data-idx="11"] circle,
+#view-today .arc-dot[data-idx="17"] circle,
+#view-today .arc-dot[data-idx="23"] circle { fill: var(--arc-event-cyan) !important; }
+
+#view-today .arc-dot:hover circle {
+  filter: saturate(1.15) brightness(1.06) drop-shadow(0 3px 5px rgba(20, 60, 52, 0.28));
+}
+
+/* Salah stays unmistakably separate from the circular event palette. */
+#view-today .arc-prayer-dot rect {
+  fill: var(--arc-info) !important;
+  filter: drop-shadow(0 2px 3px var(--arc-info-shadow));
+}

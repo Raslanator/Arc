@@ -1,0 +1,174 @@
+/* ========================================================================== 
+   PASS 10 — TRIAL 2D REFINEMENT
+   Color-only / surface-only corrections requested during visual review.
+   No layout redesign, no new component shapes, and no new dot effects.
+   ========================================================================== */
+
+:root {
+  /* Related companions to the teal / mint / ocean-blue core. */
+  --arc-wake: #FF7657;
+  --arc-preworkout: #F59E0B;
+  --arc-gym: #35B96F;
+  --arc-breakfast: #14B8A6;
+  --arc-snack: #8BC34A;
+  --arc-lunch: #38A9E0;
+  --arc-afternoon: #F2C94C;
+  --arc-dinner: #4E8FD3;
+  --arc-winddown: #7087D9;
+  --arc-sleep: #5667D8;
+}
+
+html[data-theme="dark"] {
+  --arc-wake: #FF866B;
+  --arc-preworkout: #FFB34D;
+  --arc-gym: #55D98B;
+  --arc-breakfast: #35D0C2;
+  --arc-snack: #A6DC65;
+  --arc-lunch: #61C2EC;
+  --arc-afternoon: #FFE06A;
+  --arc-dinner: #75A9E6;
+  --arc-winddown: #899BE8;
+  --arc-sleep: #7486EE;
+}
+
+/* --------------------------------------------------------------------------
+   MAIN NAV — selected tab uses one solid Arc color, never a gradient.
+   -------------------------------------------------------------------------- */
+.nav-indicator {
+  background: var(--palette-deep) !important;
+}
+
+/* --------------------------------------------------------------------------
+   DAILY ARC — keep the original dot design; only make each checkpoint's fill
+   distinct. Wake and Sleep get their own sunrise / dusk colors.
+   -------------------------------------------------------------------------- */
+#view-today .arc-dot circle {
+  stroke: none !important;
+  stroke-width: 0 !important;
+  filter: none !important;
+}
+
+#view-today .arc-dot[data-idx="0"] circle { fill: var(--arc-wake) !important; }
+#view-today .arc-dot[data-idx="1"] circle { fill: var(--arc-preworkout) !important; }
+#view-today .arc-dot[data-idx="2"] circle { fill: var(--arc-gym) !important; }
+#view-today .arc-dot[data-idx="3"] circle { fill: var(--arc-breakfast) !important; }
+#view-today .arc-dot[data-idx="4"] circle { fill: var(--arc-snack) !important; }
+#view-today .arc-dot[data-idx="5"] circle { fill: var(--arc-lunch) !important; }
+#view-today .arc-dot[data-idx="6"] circle { fill: var(--arc-afternoon) !important; }
+#view-today .arc-dot[data-idx="7"] circle { fill: var(--arc-dinner) !important; }
+#view-today .arc-dot[data-idx="8"] circle { fill: var(--arc-winddown) !important; }
+#view-today .arc-dot[data-idx="9"] circle { fill: var(--arc-sleep) !important; }
+
+#view-today .arc-dot:hover circle {
+  filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   SALAH IN DAILY TIMELINE — at rest it behaves structurally like every other
+   timeline event: no permanent glass/tinted box. The blue Salah identity stays
+   in the time and tag. Done / next / pop states continue to behave like the
+   shared timeline states.
+   -------------------------------------------------------------------------- */
+#view-today .tl-row.prayer-tl-row:not(.done):not(.next-event):not(.pop-lit) {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 22px 0 !important;
+}
+
+#view-today .tl-row.prayer-tl-row:not(.done):not(.next-event):not(.pop-lit):last-child {
+  border-bottom: 0 !important;
+}
+
+#view-today .tl-row.prayer-tl-row .tl-time,
+#view-today .tl-row.prayer-tl-row .prayer-tag {
+  color: var(--arc-info-text);
+}
+
+html[data-theme="dark"] #view-today .tl-row.prayer-tl-row .tl-time,
+html[data-theme="dark"] #view-today .tl-row.prayer-tl-row .prayer-tag {
+  color: var(--arc-info);
+}
+
+/* When a Salah row is NEXT, keep the normal next-event behavior/spacing but
+   use the existing related blue identity instead of a glassy gradient. */
+#view-today .tl-row.prayer-tl-row.next-event:not(.done) {
+  background: var(--arc-info-dim) !important;
+  border-color: transparent !important;
+}
+
+#view-today .tl-row.prayer-tl-row.next-event:not(.done) .tl-time,
+#view-today .tl-row.prayer-tl-row.next-event:not(.done) .tl-title {
+  color: var(--arc-info-text) !important;
+}
+
+html[data-theme="dark"] #view-today .tl-row.prayer-tl-row.next-event:not(.done) .tl-time,
+html[data-theme="dark"] #view-today .tl-row.prayer-tl-row.next-event:not(.done) .tl-title {
+  color: var(--arc-info) !important;
+}
+
+/* --------------------------------------------------------------------------
+   MEAL PLAN / DARK MODE — keep yellow, but reserve it for the day total so it
+   means "look here" instead of making every calorie number compete equally.
+   Row calories use related but distinct colors; batch badges stay cool/quiet.
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] #view-plan .meal-kcal {
+  color: var(--arc-info) !important;
+}
+
+html[data-theme="dark"] #view-plan .day-block .meal-row:nth-of-type(1) .meal-kcal {
+  color: var(--arc-wake) !important;
+}
+
+html[data-theme="dark"] #view-plan .day-block .meal-row:nth-of-type(2) .meal-kcal {
+  color: var(--arc-breakfast) !important;
+}
+
+html[data-theme="dark"] #view-plan .day-block .meal-row:nth-of-type(3) .meal-kcal {
+  color: var(--arc-lunch) !important;
+}
+
+html[data-theme="dark"] #view-plan .total-line .meal-line b,
+html[data-theme="dark"] #view-plan .meal-total-line b,
+html[data-theme="dark"] #view-plan .pass5-total-line b {
+  color: var(--arc-life-sun) !important;
+}
+
+html[data-theme="dark"] #view-plan .badge.kcal {
+  color: var(--arc-info) !important;
+  background: var(--arc-info-dim) !important;
+}
+
+html[data-theme="dark"] #view-plan .snack-target {
+  color: var(--arc-life-lime) !important;
+  background: var(--arc-life-lime-dim) !important;
+}
+
+/* --------------------------------------------------------------------------
+   CALORIES — summary cards stay neutral glass. Color belongs in the bar/data,
+   not as a stain across the full Today/Remaining surface.
+   -------------------------------------------------------------------------- */
+#view-calories .cal-summary .cal-card {
+  background: var(--paper) !important;
+  border: 1px solid var(--glass-border) !important;
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%) !important;
+  backdrop-filter: blur(var(--blur)) saturate(180%) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* Quick Add calorie highlight hugs the numeric value with a small cushion,
+   instead of filling the button all the way to the right edge. */
+#view-calories .qa-btn .qkcal {
+  display: block !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  padding: 2px 7px !important;
+  margin-top: 5px !important;
+  border-radius: 999px !important;
+  line-height: 1.45;
+}

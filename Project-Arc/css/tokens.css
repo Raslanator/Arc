@@ -5,23 +5,32 @@
    ========================================================================== */
 
 :root {
-  /* ---- Neutral text colors ---- */
-  --ink: #1D1D1F;
-  --muted: #6E6E73;
-  --line: rgba(0, 0, 0, 0.08);
+  /* ---- Pass 10 palette trial 1B: gold-forward sage / cream ---- */
+  --palette-sage: #8FA28A;
+  --palette-sage-soft: #C7D3C0;
+  --palette-cream: #F7F4ED;
+  --palette-gold: #C8A96B;
 
-  /* ---- Accent palette (Apple system colors) ---- */
-  --sage: #30D158;               /* systemGreen — success / done */
-  --sage-dim: rgba(48, 209, 88, 0.14);
-  --terracotta: #FF6B4A;         /* Primary accent — warm coral */
-  --terracotta-dim: rgba(255, 107, 74, 0.14);
-  --gold: #FFB800;               /* systemYellow — calories */
-  --gold-dim: rgba(255, 184, 0, 0.16);
-  --rust: #FF453A;               /* systemRed — warnings / over budget */
-  --rust-dim: rgba(255, 69, 58, 0.14);
-  --plum: #BF5AF2;               /* systemPurple — prayer times */
-  --plum-dim: rgba(191, 90, 242, 0.14);
-  --blue: #0A84FF;               /* systemBlue — focus rings */
+  /* ---- Neutral text colors ---- */
+  --ink: #2E3028;
+  --muted: #6E7064;
+  --line: rgba(132, 108, 57, 0.16);
+
+  /* ---- Accent palette ----
+     Gold now carries the primary Arc identity. Sage grounds success and calm
+     states while warm derived tones keep warnings and supporting semantics
+     distinct without leaving the supplied palette family. */
+  --sage: #63765E;               /* success / done */
+  --sage-dim: rgba(143, 162, 138, 0.20);
+  --terracotta: #C8A96B;         /* primary Arc identity / active emphasis */
+  --terracotta-dim: rgba(200, 169, 107, 0.25);
+  --gold: #9A7429;               /* calories / readable warm emphasis */
+  --gold-dim: rgba(200, 169, 107, 0.28);
+  --rust: #A05F4A;               /* warnings / destructive states */
+  --rust-dim: rgba(160, 95, 74, 0.16);
+  --plum: #75866F;               /* prayer times */
+  --plum-dim: rgba(143, 162, 138, 0.20);
+  --blue: #657960;               /* focus rings */
 
   /* ---- Semantic aliases (used in components) ---- */
   --amber: var(--gold);
@@ -30,11 +39,11 @@
   --teal-dim: var(--sage-dim);
 
   /* ---- Glass surfaces ---- */
-  --paper: rgba(255, 255, 255, 0.55);
-  --paper-2: rgba(255, 255, 255, 0.38);
-  --glass-strong: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --paper: rgba(247, 244, 237, 0.62);
+  --paper-2: rgba(247, 244, 237, 0.43);
+  --glass-strong: rgba(247, 244, 237, 0.82);
+  --glass-border: rgba(200, 169, 107, 0.23);
+  --glass-highlight: rgba(255, 255, 255, 0.80);
 
   /* Semantic aliases for surface colors */
   --surface: var(--paper);
@@ -54,9 +63,9 @@
   --radius-xl: 34px;
 
   /* ---- Shadows ---- */
-  --shadow: 0 8px 30px rgba(31, 38, 90, 0.10), inset 0 1px 0 var(--glass-highlight);
-  --shadow-md: 0 18px 46px rgba(31, 38, 90, 0.16), inset 0 1px 0 var(--glass-highlight);
-  --shadow-lg: 0 34px 90px rgba(31, 38, 90, 0.30), inset 0 1px 0 var(--glass-highlight);
+  --shadow: 0 8px 30px rgba(96, 78, 39, 0.12), inset 0 1px 0 var(--glass-highlight);
+  --shadow-md: 0 18px 46px rgba(96, 78, 39, 0.18), inset 0 1px 0 var(--glass-highlight);
+  --shadow-lg: 0 34px 90px rgba(80, 65, 34, 0.27), inset 0 1px 0 var(--glass-highlight);
 
   /* ---- Spacing scale ---- */
   --sp-1: 4px;
@@ -97,29 +106,29 @@
    ========================================================================== */
 
 html[data-theme="dark"] {
-  --ink: #F5F5F7;
-  --muted: #98989D;
-  --line: rgba(255, 255, 255, 0.10);
+  --ink: #F7F4ED;
+  --muted: #C0BEAF;
+  --line: rgba(216, 190, 134, 0.15);
 
-  --sage: #32D74B;
-  --sage-dim: rgba(50, 215, 75, 0.18);
-  --terracotta: #FF8A65;
-  --terracotta-dim: rgba(255, 138, 101, 0.18);
-  --gold: #FFD60A;
-  --gold-dim: rgba(255, 214, 10, 0.18);
-  --rust: #FF6961;
-  --rust-dim: rgba(255, 105, 97, 0.18);
-  --plum: #DA8FFF;
-  --plum-dim: rgba(218, 143, 255, 0.20);
-  --blue: #409CFF;
+  --sage: #B8CBAF;
+  --sage-dim: rgba(143, 162, 138, 0.23);
+  --terracotta: #D8BE86;
+  --terracotta-dim: rgba(200, 169, 107, 0.25);
+  --gold: #E0C589;
+  --gold-dim: rgba(200, 169, 107, 0.26);
+  --rust: #D4977C;
+  --rust-dim: rgba(212, 151, 124, 0.19);
+  --plum: #B8C9B1;
+  --plum-dim: rgba(143, 162, 138, 0.22);
+  --blue: #C7D3C0;
 
-  --paper: rgba(30, 30, 36, 0.55);
-  --paper-2: rgba(30, 30, 36, 0.40);
-  --glass-strong: rgba(24, 24, 30, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.10);
+  --paper: rgba(31, 31, 24, 0.62);
+  --paper-2: rgba(31, 31, 24, 0.43);
+  --glass-strong: rgba(27, 27, 21, 0.86);
+  --glass-border: rgba(200, 169, 107, 0.20);
+  --glass-highlight: rgba(247, 244, 237, 0.11);
 
   --shadow: 0 8px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 var(--glass-highlight);
   --shadow-md: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 var(--glass-highlight);
-  --shadow-lg: 0 36px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--glass-highlight);
+  --shadow-lg: 0 36px 90px rgba(0, 0, 0, 0.60), inset 0 1px 0 var(--glass-highlight);
 }
