@@ -1,0 +1,195 @@
+{
+  "about": {
+    "branch": "edit/ARC.05",
+    "behavioralBaselineCommit": "a98d632c02207297cd903490186622e1de079b38",
+    "note": "Synthetic representative fixtures derived from the current ARC.05 state/runtime schema. These are not copied from any user's browser storage."
+  },
+  "freshStorage": {},
+  "representativeExisting": {
+    "appState": {
+      "settings": {
+        "calorieTarget": 2200,
+        "wakeMin": 300,
+        "sleepMin": 1320
+      },
+      "customRecipes": [],
+      "recipeOverrides": {},
+      "deletedRecipes": [],
+      "archivedRecipes": [],
+      "recipeShowArchived": false,
+      "weekOverrides": {
+        "w0-0-lunch": "shawarma-bowl"
+      },
+      "gymOverrides": {},
+      "grocery": {
+        "w0-shawarma-bowl-0": true
+      },
+      "calories": {
+        "2026-08-20": [
+          {
+            "id": "cal-example-1",
+            "label": "Breakfast",
+            "kcal": 600
+          }
+        ],
+        "2026-08-21": [
+          {
+            "id": "cal-example-2",
+            "label": "Lunch",
+            "kcal": 700
+          }
+        ]
+      },
+      "gymTracker": {},
+      "currentWeek": 0,
+      "grocWeek": 0,
+      "gymDay": 3,
+      "qaWeekIdx": 0,
+      "qaDayIdx": 0,
+      "activeTab": "gym",
+      "theme": "dark",
+      "timelineEvents": [
+        {
+          "id": "wake",
+          "t": 300,
+          "timeMode": "scaled",
+          "title": "Wake Up",
+          "body": "Start the day",
+          "why": ""
+        },
+        {
+          "id": "gym",
+          "t": 390,
+          "timeMode": "scaled",
+          "title": "Gym",
+          "body": "Training session",
+          "why": ""
+        },
+        {
+          "id": "sleep",
+          "t": 1320,
+          "timeMode": "scaled",
+          "title": "Sleep",
+          "body": "Lights out",
+          "why": ""
+        }
+      ],
+      "timelineStatus": {
+        "2026-08-21": {
+          "wake": {
+            "done": true,
+            "mode": "on-time",
+            "time": "5:00 AM"
+          }
+        }
+      },
+      "prayerStatus": {
+        "2026-08-21": {
+          "Fajr": {
+            "done": true,
+            "mode": "on-time",
+            "time": "4:30 AM"
+          }
+        }
+      },
+      "changeLog": {
+        "plan": [],
+        "calories": []
+      }
+    }
+  },
+  "intentionalEmptySchedule": {
+    "appState": {
+      "settings": {
+        "calorieTarget": 2200,
+        "wakeMin": 300,
+        "sleepMin": 1320
+      },
+      "timelineEvents": [],
+      "timelineStatus": {},
+      "prayerStatus": {},
+      "calories": {},
+      "customRecipes": [],
+      "recipeOverrides": {},
+      "deletedRecipes": [],
+      "archivedRecipes": [],
+      "weekOverrides": {},
+      "gymOverrides": {},
+      "grocery": {},
+      "gymTracker": {},
+      "changeLog": {
+        "plan": [],
+        "calories": []
+      }
+    }
+  },
+  "historicalScheduleMismatch": {
+    "description": "Historical date was tracked against six event IDs; current active schedule later contains an additional event. Current Progress logic evaluates the old date against the current event set.",
+    "appState": {
+      "timelineEvents": [
+        { "id": "wake", "t": 300, "timeMode": "scaled", "title": "Wake", "body": "", "why": "" },
+        { "id": "breakfast-recovery", "t": 480, "timeMode": "scaled", "title": "Breakfast", "body": "", "why": "" },
+        { "id": "work", "t": 540, "timeMode": "fixed", "title": "Work", "body": "", "why": "" },
+        { "id": "gym", "t": 1020, "timeMode": "scaled", "title": "Gym", "body": "", "why": "" },
+        { "id": "dinner", "t": 1140, "timeMode": "scaled", "title": "Dinner", "body": "", "why": "" },
+        { "id": "sleep", "t": 1320, "timeMode": "scaled", "title": "Sleep", "body": "", "why": "" },
+        { "id": "evening-walk", "t": 1230, "timeMode": "fixed", "title": "Evening Walk", "body": "", "why": "" }
+      ],
+      "timelineStatus": {
+        "2026-08-17": {
+          "wake": { "done": true, "mode": "on-time", "time": "5:00 AM" },
+          "breakfast-recovery": { "done": true, "mode": "on-time", "time": "8:00 AM" },
+          "work": { "done": true, "mode": "on-time", "time": "9:00 AM" },
+          "gym": { "done": true, "mode": "on-time", "time": "5:00 PM" },
+          "dinner": { "done": true, "mode": "on-time", "time": "7:00 PM" }
+        }
+      }
+    },
+    "historicalExpectedEventIds": [
+      "wake",
+      "breakfast-recovery",
+      "work",
+      "gym",
+      "dinner",
+      "sleep"
+    ]
+  },
+  "malformedButValidJson": {
+    "appState": {
+      "settings": "not-an-object",
+      "customRecipes": null,
+      "recipeOverrides": [],
+      "deletedRecipes": "none",
+      "archivedRecipes": 42,
+      "weekOverrides": null,
+      "gymOverrides": "bad",
+      "grocery": [],
+      "calories": "hello",
+      "gymTracker": 42,
+      "timelineStatus": [],
+      "prayerStatus": "bad",
+      "changeLog": {
+        "plan": null,
+        "calories": "bad"
+      }
+    }
+  },
+  "prayerCacheValid": {
+    "prayerTimes_2026-08-21": {
+      "Fajr": "04:31",
+      "Dhuhr": "12:00",
+      "Asr": "15:35",
+      "Maghrib": "18:30",
+      "Isha": "19:50"
+    }
+  },
+  "prayerCacheMalformed": {
+    "prayerTimes_2026-08-21": {
+      "Fajr": "hello",
+      "Dhuhr": "12:99",
+      "Asr": null,
+      "Maghrib": "18:30",
+      "Isha": "19:50"
+    }
+  }
+}
