@@ -216,7 +216,8 @@
 
   function scheduleClockMinutes(date) {
     const value = scheduleDateOrNow(date);
-    return value.getHours() * 60 + value.getMinutes() + value.getSeconds() / 60;
+    return value.getHours() * 60 + value.getMinutes()
+      + value.getSeconds() / 60 + value.getMilliseconds() / 60000;
   }
 
   // The configured wake time anchors one logical routine. Clock times earlier
@@ -257,7 +258,7 @@
     const overnightEndClock = boundary !== null && boundary > 1440
       ? boundary - 1440
       : null;
-    return overnightEndClock !== null && clock < overnightEndClock
+    return overnightEndClock !== null && clock <= overnightEndClock
       ? clock + 1440
       : clock;
   }
