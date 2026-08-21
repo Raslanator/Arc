@@ -245,6 +245,7 @@
     const weekIdx = appState.currentWeek;
     const week = effectiveWeeks()[weekIdx];
     if (!week) return;
+    const isActiveWeek = weekIdx === appState.activeMealPlanWeek;
 
     const usage = {};
     week.days.forEach((day, di) => {
@@ -282,7 +283,14 @@
 
     const dayBlocks = document.getElementById('dayBlocks');
     dayBlocks.innerHTML = `
-      <h2 class="view-title week-block-title">${escapeHtml(week.title)}</h2>
+      <div class="section-head-row meal-plan-active-week-row">
+        <h2 class="view-title week-block-title">${escapeHtml(week.title)}</h2>
+        <button
+          type="button"
+          class="btn btn-sm ${isActiveWeek ? 'btn-done' : 'btn-ghost'} active-week-btn"
+          ${isActiveWeek ? 'disabled aria-current="true"' : ''}
+        >${isActiveWeek ? 'Active Week' : 'Set as Active Week'}</button>
+      </div>
       ${week.days.map((day, di) => {
         const totals = dayTotals(day);
         return `
@@ -300,6 +308,11 @@
             </div>
           </div>`;
       }).join('')}`;
+
+    const activeWeekBtn = dayBlocks.querySelector('.active-week-btn:not(:disabled)');
+    if (activeWeekBtn) {
+      activeWeekBtn.addEventListener('click', () => activateMealPlanWeek(weekIdx));
+    }
 
     prepBanner.querySelectorAll('.batch-remove-btn').forEach(btn => {
       btn.addEventListener('click', () => removeRecipeFromWeek(parseInt(btn.dataset.week, 10), btn.dataset.id));

@@ -115,6 +115,21 @@ function normalizeStateIndex(value, length, fallback = 0) {
   return Number.isInteger(index) && index >= 0 && index < length ? index : fallback;
 }
 
+/** Make one Meal Plan week authoritative for Today without changing view state. */
+function activateMealPlanWeek(weekIdx) {
+  const nextWeek = normalizeStateIndex(
+    weekIdx,
+    BASE_WEEKS.length,
+    appState.activeMealPlanWeek
+  );
+  if (nextWeek === appState.activeMealPlanWeek) return false;
+
+  appState.activeMealPlanWeek = nextWeek;
+  saveState();
+  render();
+  return true;
+}
+
 /**
  * Load appState via the Storage adapter, backfilling any keys missing
  * from older saves (first run or new fields added since last save).

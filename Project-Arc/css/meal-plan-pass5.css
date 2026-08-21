@@ -43,6 +43,26 @@
   margin-top: 0;
 }
 
+#view-plan .meal-plan-active-week-row {
+  align-items: center;
+  margin-bottom: var(--sp-4);
+}
+
+#view-plan .meal-plan-active-week-row .week-block-title {
+  margin-bottom: 0;
+}
+
+#view-plan .active-week-btn {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+#view-plan .active-week-btn:disabled {
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+
 #view-plan .pass5-batch-copy {
   min-width: 0;
   flex: 1;
