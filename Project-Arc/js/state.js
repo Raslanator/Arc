@@ -30,9 +30,10 @@ const DEFAULT_APPSTATE = {
   calories: {},           // { "YYYY-MM-DD": [{ id, label, kcal }, ...] }
   gymTracker: {},         // weekly cardio/swim/sauna/steam tracker
 
-  currentWeek: 0,         // selected week on Meal Plan tab
+  currentWeek: 0,         // Meal Plan view state only; browsing must not change Today
+  activeMealPlanWeek: 0,  // domain state consumed by Today
   grocWeek: 0,            // selected week on Grocery tab
-  gymDay: 0,              // selected day on Gym tab
+  gymDay: 0,              // Gym view state only; Today derives workout from the calendar day
   qaWeekIdx: 0,           // Quick Add week selector (Calories tab)
   qaDayIdx: 0,            // Quick Add day selector (Calories tab)
 
@@ -108,12 +109,19 @@ function saveState() {
   Storage.set('appState', toSave);
 }
 
+/** Normalize one persisted/view index without introducing full schema handling. */
+function normalizeStateIndex(value, length, fallback = 0) {
+  const index = Number(value);
+  return Number.isInteger(index) && index >= 0 && index < length ? index : fallback;
+}
+
 /**
  * Load appState via the Storage adapter, backfilling any keys missing
  * from older saves (first run or new fields added since last save).
  */
 function loadState() {
   const parsed = Storage.get('appState') || {};
+  const hasActiveMealPlanWeek = Object.prototype.hasOwnProperty.call(parsed, 'activeMealPlanWeek');
 
   appState = { ...DEFAULT_APPSTATE, ...parsed };
   appState.settings   = { ...DEFAULT_SETTINGS, ...(appState.settings || {}) };
@@ -121,6 +129,17 @@ function loadState() {
     plan:     (appState.changeLog && appState.changeLog.plan)     || [],
     calories: (appState.changeLog && appState.changeLog.calories) || [],
   };
+
+  // Chunk 1 compatibility: legacy currentWeek/gymDay values remain valid as
+  // navigation state. A legacy currentWeek also seeds the new active week once
+  // so Today's meal plan does not unexpectedly change during the upgrade.
+  appState.currentWeek = normalizeStateIndex(appState.currentWeek, BASE_WEEKS.length, 0);
+  appState.activeMealPlanWeek = normalizeStateIndex(
+    hasActiveMealPlanWeek ? parsed.activeMealPlanWeek : parsed.currentWeek,
+    BASE_WEEKS.length,
+    appState.currentWeek
+  );
+  appState.gymDay = normalizeStateIndex(appState.gymDay, BASE_GYM_DAYS.length, 0);
 
   refreshWeekPlan();
   pruneOldCalorieLogs();
@@ -155,6 +174,19 @@ function effectiveGymDays() {
   return BASE_GYM_DAYS.map((d, i) =>
     appState.gymOverrides[i] ? { ...d, ...appState.gymOverrides[i] } : d
   );
+}
+
+/**
+ * Map a calendar date onto the existing Monday-Sunday seven-day gym cycle.
+ * This mirrors the weekly recovery tracker's Monday-based day indexing.
+ */
+function gymDayIndexForDate(date) {
+  return (date.getDay() + 6) % 7;
+}
+
+/** Return the workout assigned to a calendar date, independent of Gym browsing. */
+function getWorkoutForDate(date) {
+  return effectiveGymDays()[gymDayIndexForDate(date)] || null;
 }
 
 /**
@@ -230,12 +262,11 @@ function getTodayPlan() {
 
   const dayName  = getTodayName();
   const blockIdx = WEEKDAY_TO_MEAL_BLOCK[dayName];
-  const week     = appState.weekPlan[appState.currentWeek] || null;
+  const week     = appState.weekPlan[appState.activeMealPlanWeek] || null;
   const dayBlock = (week && blockIdx !== null) ? week.days[blockIdx] : null;
   const meals    = dayBlock ? dayTotals(dayBlock) : null;
 
-  const gymDays = effectiveGymDays();
-  const workout = gymDays[appState.gymDay] || null;
+  const workout = getWorkoutForDate(new Date());
 
   const dateKey_  = todayKeyStr();
   const kcalEntries  = (appState.calories && appState.calories[dateKey_]) || [];
