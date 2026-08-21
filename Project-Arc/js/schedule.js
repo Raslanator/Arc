@@ -9,8 +9,8 @@
  */
 
 (function initEditableSchedule() {
-  // Keep the immutable ID snapshot inside its date bucket so the existing
-  // whole-bucket retention wrapper applies without any ARC-16 changes.
+  // Keep the immutable ID snapshot inside its date bucket so historical
+  // identity and its Timeline statuses always share one storage lifecycle.
   const TIMELINE_HISTORY_KEY = '__history';
   const DEFAULT_EVENT_IDS = [
     'wake',

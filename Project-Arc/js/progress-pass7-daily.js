@@ -1,9 +1,10 @@
 /**
  * progress-pass7-daily.js
- * Pass 7 refinement — per-day Progress history and 30-day retention.
+ * Pass 7 refinement — per-day Progress history and 30-day display window.
  *
  * Adds a date-addressable daily history card above the existing Progress
- * analytics. Daily history is limited to today + the previous 29 calendar days.
+ * analytics. The UI queries today + the previous 29 calendar days while
+ * persisted history remains available beyond that presentation window.
  */
 
 (function initProgressDailyHistory() {
@@ -40,10 +41,6 @@
     return keys;
   }
 
-  function oldestKey() {
-    return historyKeys()[0];
-  }
-
   function newestKey() {
     const keys = historyKeys();
     return keys[keys.length - 1];
@@ -57,75 +54,9 @@
     return selectedDateKey;
   }
 
-  function pruneDateBuckets(bucket) {
-    if (!bucket || typeof bucket !== 'object') return;
-    const allowed = new Set(historyKeys());
-    Object.keys(bucket).forEach(key => {
-      if (!allowed.has(key)) delete bucket[key];
-    });
-  }
-
-  function pruneGymTracker() {
-    if (!appState.gymTracker || typeof appState.gymTracker !== 'object') return;
-
-    const allowed = new Set(historyKeys());
-    const oldest = dateFromKey(oldestKey());
-    const newest = dateFromKey(newestKey());
-
-    Object.keys(appState.gymTracker).forEach(weekKey => {
-      const monday = dateFromKey(weekKey);
-      if (!monday) {
-        delete appState.gymTracker[weekKey];
-        return;
-      }
-
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      if (sunday < oldest || monday > newest) {
-        delete appState.gymTracker[weekKey];
-        return;
-      }
-
-      const week = appState.gymTracker[weekKey];
-      if (!week || !week.days) return;
-
-      Object.keys(week.days).forEach(rawIndex => {
-        const index = Number(rawIndex);
-        if (!Number.isInteger(index) || index < 0 || index > 6) return;
-        const dayDate = new Date(monday);
-        dayDate.setDate(monday.getDate() + index);
-        if (!allowed.has(dateKeyLocal(dayDate))) {
-          week.days[rawIndex] = { cardio: false, swim: false };
-        }
-      });
-    });
-  }
-
-  function pruneProgressHistory() {
-    if (!appState || typeof appState !== 'object') return;
-    if (!appState.calories || typeof appState.calories !== 'object') appState.calories = {};
-    if (!appState.timelineStatus || typeof appState.timelineStatus !== 'object') appState.timelineStatus = {};
-    if (!appState.prayerStatus || typeof appState.prayerStatus !== 'object') appState.prayerStatus = {};
-    if (!appState.gymTracker || typeof appState.gymTracker !== 'object') appState.gymTracker = {};
-
-    pruneDateBuckets(appState.calories);
-    pruneDateBuckets(appState.timelineStatus);
-    pruneDateBuckets(appState.prayerStatus);
-    pruneGymTracker();
-  }
-
-  // Enforce the 30-day retention window after state load and before every save.
-  const baseLoadState = loadState;
-  loadState = function loadStateWithThirtyDayProgressHistory() {
-    baseLoadState();
-    pruneProgressHistory();
-  };
-
-  const baseSaveState = saveState;
-  saveState = function saveStateWithThirtyDayProgressHistory() {
-    pruneProgressHistory();
-    baseSaveState();
-  };
+  // HISTORY_DAYS limits only the dates this view queries. Persistence keeps
+  // older Calories, Timeline, Salah, and recovery records until the user or a
+  // future explicit lifecycle policy chooses to remove them.
 
   function ensureDailyPanel() {
     const view = document.getElementById('view-progress');
@@ -405,6 +336,5 @@
     render: renderDailyHistory,
     getSelectedDate: () => clampSelectedDate(),
     getHistoryKeys: () => [...historyKeys()],
-    prune: pruneProgressHistory,
   };
 })();
