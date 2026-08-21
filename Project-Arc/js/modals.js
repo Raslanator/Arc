@@ -140,7 +140,7 @@ function openRecipeForm(existing) {
     if (isEdit) {
       appState.recipeOverrides[existing.id] = fields;
     } else {
-      appState.customRecipes.push({ id: slugify(name), isCustom: true, ...fields });
+      appState.customRecipes.push({ id: createRecipeId(name), isCustom: true, ...fields });
     }
     saveState();
     closeModal();

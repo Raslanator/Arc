@@ -1,7 +1,7 @@
 /**
  * utils.js
- * Pure utility functions: time formatting, date helpers, slugify.
- * No side effects. No DOM access. No appState dependency.
+ * Shared utility functions: IDs, time formatting, date helpers, and escaping.
+ * No DOM access. No appState dependency.
  */
 
 /* ==========================================================================
@@ -13,18 +13,113 @@ function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
-/**
- * Generate a URL-safe slug from a string, with a short random suffix
- * to avoid collisions between similarly-named custom recipes.
- */
+/** Generate a URL-safe slug from a string. */
 function slugify(str) {
   return str
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    + '-' + Date.now().toString(36).slice(-4);
+    .replace(/(^-|-$)/g, '');
 }
+
+/**
+ * Collision-resistant IDs for newly created persistent entities.
+ * Existing stored IDs are never passed through this helper or rewritten.
+ */
+const ArcIds = (() => {
+  let fallbackCounter = 0;
+
+  function normalizedPrefix(value) {
+    const normalized = String(value || 'id')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    return normalized.slice(0, 16).replace(/-+$/g, '') || 'id';
+  }
+
+  function uuidFromRandomValues(cryptoApi) {
+    const bytes = new Uint8Array(16);
+    cryptoApi.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    return [
+      hex.slice(0, 8),
+      hex.slice(8, 12),
+      hex.slice(12, 16),
+      hex.slice(16, 20),
+      hex.slice(20),
+    ].join('-');
+  }
+
+  function fallbackToken() {
+    fallbackCounter = (fallbackCounter + 1) % 1679616; // 36^4
+    const time = Date.now().toString(36).slice(-9);
+    const counter = fallbackCounter.toString(36).padStart(4, '0');
+    let random = '';
+    for (let i = 0; i < 4; i++) {
+      random += Math.floor(Math.random() * 0x100000000)
+        .toString(16)
+        .padStart(8, '0');
+    }
+    return `${time}-${counter}-${random}`;
+  }
+
+  function createToken() {
+    let cryptoApi = null;
+    try {
+      cryptoApi = typeof globalThis !== 'undefined' ? globalThis.crypto : null;
+    } catch (error) {
+      // Access to crypto can itself be restricted in embedded browsers.
+    }
+    if (cryptoApi && typeof cryptoApi.randomUUID === 'function') {
+      try {
+        const uuid = cryptoApi.randomUUID();
+        if (typeof uuid === 'string' && uuid) return uuid.toLowerCase();
+      } catch (error) {
+        // Continue to the next available entropy source.
+      }
+    }
+    if (cryptoApi && typeof cryptoApi.getRandomValues === 'function') {
+      try {
+        return uuidFromRandomValues(cryptoApi);
+      } catch (error) {
+        // Very old/restricted environments still receive the fallback below.
+      }
+    }
+    return fallbackToken();
+  }
+
+  function create(prefix) {
+    return `${normalizedPrefix(prefix)}-${createToken()}`;
+  }
+
+  function createUnique(prefix, existingIds) {
+    let occupied;
+    try {
+      occupied = new Set(existingIds || []);
+    } catch (error) {
+      occupied = new Set();
+    }
+
+    for (let attempt = 0; attempt < 32; attempt++) {
+      const candidate = create(prefix);
+      if (!occupied.has(candidate)) return candidate;
+    }
+
+    // A broken UUID implementation may return one constant value. Keep the
+    // result unique without allowing an unbounded retry loop.
+    const root = create(prefix);
+    let suffix = 1;
+    while (true) {
+      const suffixText = `-${suffix++}`;
+      const candidate = root.slice(0, 64 - suffixText.length) + suffixText;
+      if (!occupied.has(candidate)) return candidate;
+    }
+  }
+
+  return Object.freeze({ create, createUnique });
+})();
 
 /* ==========================================================================
    TIME HELPERS

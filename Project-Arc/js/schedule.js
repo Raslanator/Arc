@@ -31,6 +31,23 @@
     return Math.max(0, Math.min(2879, Math.round(n)));
   }
 
+  function scheduleIdentityIds() {
+    const ids = new Set(DEFAULT_EVENT_IDS);
+    const add = value => {
+      if (typeof value === 'string' && value && value !== TIMELINE_HISTORY_KEY) ids.add(value);
+    };
+
+    (Array.isArray(appState.timelineEvents) ? appState.timelineEvents : [])
+      .forEach(event => add(event && event.id));
+    Object.values(appState.timelineStatus || {}).forEach(bucket => {
+      if (!bucket || typeof bucket !== 'object' || Array.isArray(bucket)) return;
+      Object.keys(bucket).forEach(add);
+      const history = bucket[TIMELINE_HISTORY_KEY];
+      (history && Array.isArray(history.eventIds) ? history.eventIds : []).forEach(add);
+    });
+    return ids;
+  }
+
   function makeScheduleId(title) {
     const base = String(title || 'event')
       .toLowerCase()
@@ -38,7 +55,7 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
       .slice(0, 36) || 'event';
-    return `${base}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    return ArcIds.createUnique(base, scheduleIdentityIds());
   }
 
   function safeScheduleId(value, fallbackTitle) {

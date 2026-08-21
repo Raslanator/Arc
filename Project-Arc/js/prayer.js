@@ -18,14 +18,14 @@ let prayerFetchInFlight = false;
    ========================================================================== */
 
 function prayerCacheKey(d) {
-  return 'prayerTimes_' + dateKey(d);
+  return ARC_STORAGE_KEYS.legacyPrayerCachePrefix + dateKey(d);
 }
 
 /** Remove cached prayer times for any day other than today. */
 function cleanOldPrayerCache(d) {
   const todayK = prayerCacheKey(d);
   Storage.keys().forEach(k => {
-    if (k.indexOf('prayerTimes_') === 0 && k !== todayK) Storage.remove(k);
+    if (isLegacyArcPrayerCacheKey(k) && k !== todayK) Storage.remove(k);
   });
 }
 

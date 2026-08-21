@@ -16,6 +16,28 @@ const DEFAULT_SETTINGS = {
 
 const APP_STATE_SCHEMA_VERSION = 1;
 
+const ARC_STORAGE_KEYS = Object.freeze({
+  appState: 'appState',
+  namespace: 'arc:',
+  legacyPrayerCachePrefix: 'prayerTimes_',
+});
+
+const ARC_LEGACY_PRAYER_CACHE_PATTERN = /^prayerTimes_\d{4}-\d{2}-\d{2}$/;
+
+/** Classify one origin-storage key without claiming unrelated keys. */
+function classifyArcStorageKey(key) {
+  if (typeof key !== 'string') return 'external';
+  if (key === ARC_STORAGE_KEYS.appState || key.startsWith(ARC_STORAGE_KEYS.namespace)) {
+    return 'arc-owned';
+  }
+  if (ARC_LEGACY_PRAYER_CACHE_PATTERN.test(key)) return 'legacy-arc-owned';
+  return 'external';
+}
+
+function isLegacyArcPrayerCacheKey(key) {
+  return typeof key === 'string' && ARC_LEGACY_PRAYER_CACHE_PATTERN.test(key);
+}
+
 const DEFAULT_APPSTATE = {
   schemaVersion: APP_STATE_SCHEMA_VERSION,
   settings: { ...DEFAULT_SETTINGS },
@@ -105,25 +127,73 @@ const Storage = {
   remove(key) {
     try {
       localStorage.removeItem(key);
+      if (localStorage.getItem(key) !== null) {
+        throw new Error(`Storage key could not be removed: ${key}`);
+      }
       return { ok: true };
     } catch (error) {
       return { ok: false, error };
     }
   },
 
-  /** Return all current storage keys as an array. */
-  keys() {
+  /** Enumerate origin-local keys without hiding a storage access failure. */
+  listKeys() {
     try {
-      return Object.keys(localStorage);
+      const keys = [];
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
+        if (typeof key === 'string') keys.push(key);
+      }
+      return { ok: true, keys };
     } catch (error) {
-      return [];
+      return { ok: false, error };
     }
   },
 
-  /** Remove all app data and reload. Used by the Reset App action. */
+  /** Compatibility array reader used by auxiliary cache maintenance. */
+  keys() {
+    const result = this.listKeys();
+    return result.ok ? result.keys : [];
+  },
+
+  /** Remove only registered ARC-owned data, then reload on full success. */
   clearAll() {
-    const result = this.remove('appState');
-    if (result.ok) location.reload();
+    const listed = this.listKeys();
+    if (!listed.ok) {
+      return applyPersistenceResult({
+        ok: false,
+        reason: 'storage-reset-failed',
+        stage: 'list',
+        error: listed.error,
+      });
+    }
+
+    const ownedKeys = new Set([ARC_STORAGE_KEYS.appState]);
+    listed.keys.forEach(key => {
+      if (classifyArcStorageKey(key) !== 'external') ownedKeys.add(key);
+    });
+
+    const removedKeys = [];
+    const failures = [];
+    ownedKeys.forEach(key => {
+      const result = this.remove(key);
+      if (result.ok) removedKeys.push(key);
+      else failures.push({ key, error: result.error });
+    });
+
+    if (failures.length) {
+      return applyPersistenceResult({
+        ok: false,
+        reason: 'storage-reset-failed',
+        stage: 'remove',
+        error: failures[0].error,
+        failedKeys: failures.map(item => item.key),
+        removedKeys,
+      });
+    }
+
+    const result = applyPersistenceResult({ ok: true, removedKeys });
+    location.reload();
     return result;
   },
 };
@@ -164,7 +234,7 @@ function saveState() {
 
   const toSave = { ...appState, schemaVersion: APP_STATE_SCHEMA_VERSION };
   delete toSave.weekPlan;
-  return applyPersistenceResult(Storage.set('appState', toSave));
+  return applyPersistenceResult(Storage.set(ARC_STORAGE_KEYS.appState, toSave));
 }
 
 function isPlainObject(value) {
@@ -533,7 +603,7 @@ function activateMealPlanWeek(weekIdx) {
  */
 function loadState() {
   persistenceWriteBlock = null;
-  const readResult = Storage.read('appState');
+  const readResult = Storage.read(ARC_STORAGE_KEYS.appState);
   let source = {};
   let recoveredFromMalformedJson = false;
 
@@ -663,6 +733,40 @@ function dayTotals(day) {
    RECIPE ACCESSORS
    ========================================================================== */
 
+/** Reserve every persisted recipe identity, including orphaned references. */
+function recipeIdentityIds() {
+  const ids = new Set();
+  const add = value => {
+    if (typeof value === 'string' && value) ids.add(value);
+  };
+
+  BASE_RECIPES.forEach(recipe => add(recipe.id));
+  (appState.customRecipes || []).forEach(recipe => add(recipe && recipe.id));
+  (appState.deletedRecipes || []).forEach(add);
+  (appState.archivedRecipes || []).forEach(add);
+  Object.keys(appState.recipeOverrides || {}).forEach(add);
+  Object.values(appState.weekOverrides || {}).forEach(add);
+
+  Object.keys(appState.grocery || {}).forEach(key => {
+    const match = /^w\d+-(.+)-\d+$/.exec(key);
+    if (match) add(match[1]);
+  });
+
+  ((appState.changeLog && appState.changeLog.plan) || []).forEach(entry => {
+    const revert = entry && entry.revert;
+    if (!revert || typeof revert !== 'object') return;
+    add(revert.prevValue);
+    (Array.isArray(revert.entries) ? revert.entries : []).forEach(item => add(item && item.prevValue));
+  });
+
+  return ids;
+}
+
+/** Create one collision-checked ID for a newly added custom recipe. */
+function createRecipeId(name) {
+  return ArcIds.createUnique(slugify(name) || 'recipe', recipeIdentityIds());
+}
+
 /** All recipes (base + custom), with overrides applied, excluding deleted. */
 function allRecipes() {
   return [...BASE_RECIPES, ...appState.customRecipes]
@@ -752,8 +856,9 @@ function getTodayPlan() {
  */
 function logChange(section, text, revert) {
   if (!appState.changeLog[section]) appState.changeLog[section] = [];
+  const existingIds = appState.changeLog[section].map(entry => entry && entry.id).filter(Boolean);
   appState.changeLog[section].unshift({
-    id:     Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    id:     ArcIds.createUnique(`${section}-change`, existingIds),
     text,
     ts:     new Date().toISOString(),
     revert: revert || null,
@@ -808,12 +913,29 @@ function pruneOldCalorieLogs() {
   });
 }
 
+function calorieEntryIdentityIds() {
+  const ids = new Set();
+  const add = value => {
+    if (typeof value === 'string' && value) ids.add(value);
+  };
+  Object.values(appState.calories || {})
+    .flatMap(entries => Array.isArray(entries) ? entries : [])
+    .forEach(entry => add(entry && entry.id));
+  ((appState.changeLog && appState.changeLog.calories) || []).forEach(entry => {
+    const revert = entry && entry.revert;
+    if (!revert || typeof revert !== 'object') return;
+    add(revert.entryId);
+    add(revert.entry && revert.entry.id);
+  });
+  return ids;
+}
+
 /** Add a calorie entry for today and log the change. */
 function addCalEntry(label, kcal) {
   const key = todayKeyStr();
   if (!appState.calories[key]) appState.calories[key] = [];
   const entry = {
-    id:    Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    id:    ArcIds.createUnique('calorie', calorieEntryIdentityIds()),
     label,
     kcal,
   };

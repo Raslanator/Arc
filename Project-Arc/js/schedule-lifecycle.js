@@ -92,7 +92,7 @@
   // means the user deliberately deleted every event.
   const scheduleLoadState = loadState;
   loadState = function loadStateWithEmptyScheduleSupport() {
-    const stored = Storage.get('appState');
+    const stored = Storage.get(ARC_STORAGE_KEYS.appState);
     const loadResult = scheduleLoadState();
     const preserveEmpty = !!(
       loadResult && loadResult.ok === true &&
